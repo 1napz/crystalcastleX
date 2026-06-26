@@ -1,0 +1,28 @@
+# .coderabbit.yaml
+language: "th" # ตั้งค่าให้คอมเมนต์เป็นภาษาไทย
+reviews:
+  profile: "assertive" # ให้ feedback แบบละเอียด
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
+  base_branches:
+    - "main"
+  path_instructions:
+    - path: "api/**"
+      instructions: |
+        โค้ดในส่วนนี้คือ Next.js API Routes (Node.js 18+) ใช้ Supabase เป็น Backend
+        มีการเรียกใช้ AI APIs หลายตัว, ตรวจสอบ Error Handling, Environment Variables และความปลอดภัยของ API Keys ด้วย
+    - path: "*.html"
+      instructions: |
+        ใช้ HTML5 + Tailwind CSS (CDN) + Vanilla JavaScript
+        เน้นความ Responsive และการเข้าถึง DOM ผ่าน Vanilla JS
+    - path: "*.js"
+      instructions: |
+        JavaScript ฝั่ง Client: ใช้ ES Modules, AbortController ในการ Fetch ทุกครั้ง
+        ไม่ใช้ jQuery, ใช้ showToast() แทน alert()
+chat:
+  auto_reply: true
