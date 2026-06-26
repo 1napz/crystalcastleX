@@ -1,0 +1,29 @@
+name: Generate 300 Image-to-Video Prompts → ClickUp
+
+on:
+  workflow_dispatch:      # รันด้วยมือ (แนะนำครั้งแรก)
+  schedule:
+    - cron: '41 04 * * *'
+    # รันทุกวันจันทร์ เวลา 04:00 UTC (ปรับได้)
+
+jobs:
+  generate-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Generate Prompts and Create ClickUp Tasks
+        env:
+          CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+          CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
+        run: python scripts/generate_image_to_video_prompts.py

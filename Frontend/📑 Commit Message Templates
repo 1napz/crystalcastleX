@@ -1,0 +1,33 @@
+📑 Commit Message Templates
+
+- ai-key-performance.json  
+  `
+  chore(data): update ai-key-performance.json with latest KPI metrics
+  `
+
+- license-status.json  
+  `
+  chore(data): refresh license-status.json for compliance validation
+  `
+
+- token-status.json  
+  `
+  chore(data): update token-status.json with new token rules
+  `
+
+- dashboard.js  
+  `
+  feat(dashboard): enhance DashboardCard rendering and event handlers
+  `
+
+- index.html  
+  `
+  feat(ui): update index.html layout for dashboard integration
+  `
+
+- README.md  
+  `
+  docs: update README.md with workflow and reviewer instructions
+  `
+
+---

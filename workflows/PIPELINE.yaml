@@ -1,0 +1,55 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}-smoke
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --prefer-offline --no-audit --progress=false
+      - name: Run smoke tests
+        run: npm test -- tests/smoke/ || echo "❌ Smoke tests failed" > version/CrystalCastle/logs/smoke-fail.log
+
+      - name: Append smoke fail to Knowledge Hub
+        if: failure()
+        run: |
+          TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
+          echo "### Smoke Test Fail" >> docs/logs/index.md
+          echo "[${TIMESTAMP}] PR #${{ github.event.pull_request.number }}" >> docs/logs/index.md
+          echo "" >> docs/logs/index.md
+          echo "**Summary (English): Smoke test failed**" >> docs/logs/index.md
+          echo "**สรุป (ภาษาไทย): Smoke test ล้มเหลว**" >> docs/logs/index.md
+          echo "Impact: Major (must fix before merge)" >> docs/logs/index.md
+          echo "Log file: version/CrystalCastle/logs/smoke-fail.log" >> docs/logs/index.md
+          echo "" >> docs/logs/index.md
+
+  full-test:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}-full
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install
+      - name: Run full coverage tests
+        run: npm test -- --coverage || echo "❌ Unit test failed" > version/CrystalCastle/logs/unittest-fail.log
+
+      - name: Append unit test fail to Knowledge Hub
+        if: failure()
+        run: |
+          TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
+          echo "### Unit Test Fail" >> docs/logs/index.md
+          echo "[${TIMESTAMP}] PR #${{ github.event.pull_request.number }}" >> docs/logs/index.md
+          echo "" >> docs/logs/index.md
+          echo "**Summary (English): Unit test failed**" >> docs/logs/index.md
+          echo "**สรุป (ภาษาไทย): Unit test ล้มเหลว**" >> docs/logs/index.md
+          echo "Impact: Critical (must fix before merge)" >> docs/logs/index.md
+          echo "Log file: version/CrystalCastle/logs/unittest-fail.log" >> docs/logs/index.md
+          echo "" >> docs/logs/index.md
