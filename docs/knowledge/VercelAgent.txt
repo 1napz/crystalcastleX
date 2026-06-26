@@ -1,0 +1,58 @@
+------------
+Knowledge For Repo
+------------
+
+Vercel Agent เป็นระบบ AI สำหรับนักพัฒนา ที่ช่วยตรวจสอบ Pull Request (PR) วิเคราะห์ความผิดปกติ และเสนอวิธีแก้ไขโดยอัตโนมัติ เพื่อให้ทีมพัฒนาโค้ดได้เร็วขึ้นและมีคุณภาพสูงขึ้น โดยไม่ต้องเสียเวลาแก้บั๊กหรือรีวิวโค้ดซ้ำซ้อนเอง.
+
+---
+
+🧠 ภาพรวมของ Vercel Agent
+- ชื่อเต็ม: Vercel Agent  
+- ประเภท: AI layer สำหรับการพัฒนาและดีพลอย (deployment) บนแพลตฟอร์ม Vercel  
+- หน้าที่หลัก:  
+  - ตรวจสอบ PR อัตโนมัติ  
+  - วิเคราะห์ diff ของโค้ดในบริบทของแอปจริง  
+  - ตรวจจับปัญหาด้านความปลอดภัยและประสิทธิภาพ  
+  - เสนอ patch ที่ผ่านการทดสอบแล้วใน sandbox  
+  - วิเคราะห์ root cause ของ incident และเสนอแนวทางแก้ไข  
+
+---
+
+⚙️ ความสามารถหลัก
+| ฟีเจอร์ | รายละเอียด |
+|----------|-------------|
+| AI Code Review | วิเคราะห์ diff ของ PR พร้อมบริบทของแอป เพื่อหาปัญหาด้าน security และ performance |
+| Validated Patches | ทุก patch ที่เสนอจะถูกทดสอบใน sandbox และผ่าน build, test, linter จริงก่อนเสนอ |
+| Incident Investigation | ตรวจสอบ anomaly อัตโนมัติ แยกสัญญาณจริงออกจาก noise ลด alert fatigue |
+| Root-Cause Analysis | วิเคราะห์สาเหตุของปัญหาและเสนอขั้นตอนแก้ไขที่เหมาะกับ stack ของคุณ |
+| Productivity Tracking | บันทึกเวลาที่ประหยัดไปและการปรับปรุงที่เกิดขึ้นจริง เพื่อวัดผล productivity |
+
+---
+
+💰 การใช้งานและราคา
+- ราคา: ประมาณ $0.30 ต่อ review (บวกค่า token ตามจริง ไม่มี markup)  
+- รองรับ Frameworks: Next.js, React, Nuxt, Svelte และอื่น ๆ  
+- แผนที่รองรับ: Pro และ Enterprise  
+- ไม่ต้องใช้ seat license — สามารถรีวิวทุก PR ที่เชื่อมกับโปรเจกต์ที่ได้รับอนุญาต  
+- ความปลอดภัยของข้อมูล:  
+  - ไม่ใช้โค้ดของลูกค้าในการ train model หากตั้งค่า data sharing เป็น “off” หรือใช้ Enterprise plan  
+
+---
+
+📈 ประโยชน์ต่อทีมพัฒนา
+- ลดเวลาการรีวิวโค้ดและการแก้บั๊กซ้ำซ้อน  
+- เพิ่มคุณภาพของโค้ดก่อน deploy  
+- ลด context switching ระหว่างการแก้ incident  
+- เพิ่มความเร็วในการ release โดยมี AI ตรวจสอบคุณภาพให้  
+
+---
+
+🔍 สรุปสำหรับ CrystalCastle Repo
+หากนำ Vercel Agent มาใช้กับ CrystalCastle:
+- จะช่วยให้ reviewer enforcement และ governance automation แข็งแรงขึ้น  
+- สามารถรวมเข้ากับ workflow ที่มีอยู่ เช่น pre-commit hook และ CodeRabbitAI  
+- เหมาะสำหรับทีมที่ต้องการรักษา repo hygiene และ bilingual documentation พร้อมคุณภาพโค้ดสูงสุด  
+
+---
+
+โดยสรุป Vercel Agent คือ AI reviewer อัจฉริยะที่ช่วยให้ทีมพัฒนาโค้ดเร็วขึ้น ปลอดภัยขึ้น และมีมาตรฐานสูงขึ้น — เหมาะกับการเสริมระบบ governance enforcement ของ CrystalCastle อย่างมากครับ.

@@ -1,0 +1,7 @@
+{
+  "github": {
+    "autoJobCancellation": true,
+    "enabled": true,
+    "autoAlias": false
+  }
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CrystalCastle Pricing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Choose Your Plan</h1>
+  <div class="plans">
+    <div class="plan">
+      <h2>Free</h2>
+      <p>• 5 videos/day<br>• Watermark included</p>
+      <button disabled>Current Plan</button>
+    </div>
+    <div class="plan">
+      <h2>Pro</h2>
+      <p>• Unlimited videos<br>• No watermark<br>• Priority support</p>
+      <button onclick="subscribe('pro')">Upgrade</button>
+    </div>
+    <div class="plan">
+      <h2>Enterprise</h2>
+      <p>• Custom branding<br>• Analytics dashboard<br>• Dedicated support</p>
+      <button onclick="subscribe('enterprise')">Contact Sales</button>
+    </div>
+  </div>
+  <script src="pricing.js"></script>
+</body>
+</html>

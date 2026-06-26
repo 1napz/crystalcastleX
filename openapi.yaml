@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: Crystal Castle API
+  version: 1.0.0
+  description: API for Image→Video generation, pipeline status, link monitoring and alerts.
+servers:
+  - url: https://api.example.com
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+  schemas:
+    GenerateRequest:
+      type: object
+      required: [product_id, image_url]
+      properties:
+        product_id:
+          type: string
+        image_url:
+          type: string
+          format: uri
+        platform:
+          type: string
+          enum: [tiktok, shopee, reels, threads]
+        style:
+          type: string
+          description: prompt/profile name (e.g., "streetwear-retro")
+        metadata:
+          type: object
+          additionalProperties: true
+    GenerateResponse:
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+          enum: [queued, processing, completed, failed]
+        artifact_url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+    StatusResponse:
+      type: object
+      properties:
+        uptime:
+          type: number
+        version:
+          type: string
+        queue_length:
+          type: integer
+        healthy:
+          type: boolean
+    LinkMonitorRequest:
+      type: object
+      required: [affiliate_url]
+      properties:
+        affiliate_url:
+          type: string
+          format: uri
+        check_now:
+          type: boolean
+    LinkMonitorResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        reason:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+paths:
+  /v1/generate:
+    post:
+      summary: Start content generation from a product image
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+      responses:
+        '202':
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /v1/generate/{job_id}:
+    get:
+      summary: Get generation job status
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateResponse'
+        '404':
+          description: Not found
+  /v1/status:
+    get:
+      summary: Service health & pipeline metrics
+      responses:
+        '200':
+          description: Service status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+  /v1/monitor/link:
+    post:
+      summary: Validate/monitor affiliate link
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkMonitorRequest'
+      responses:
+        '200':
+          description: Link check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkMonitorResponse'
+        '400':
+          description: Bad request
+  /v1/alerts:
+    post:
+      summary: Send manual alert (Line Notify / webhook)
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [level, message]
+              properties:
+                level:
+                  type: string
+                  enum: [info, warning, critical]
+                message:
+                  type: string
+                meta:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '202':
+          description: Alert accepted
+servers:
+  - url: https://api.example.com
+tags:
+  - name: generation
+    description: Content generation endpoints
+  - name: monitoring
+    description: Status and link monitoring
+  - name: alerts
+    description: Alerting and notifications

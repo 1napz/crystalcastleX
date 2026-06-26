@@ -1,0 +1,62 @@
+name: CrystalCastle Node Matrix CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+  build-test:
+    needs: source
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [16, 18, 20]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Build project
+        run: npm run build
+      - name: Run tests
+        run: npm test -- --coverage
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-${{ matrix.os }}-${{ matrix.node }}
+          path: coverage/
+
+  security:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  deploy:
+    needs: security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Vercel
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: '{"text":"CrystalCastle Node matrix pipeline completed successfully 🚀"}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
