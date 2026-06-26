@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Castle - AI Video Gen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-4">
+  <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-6">
+    
+    <h1 class="text-2xl font-bold mb-6">🎬 Crystal Castle Gen</h1>
+
+    <!-- 1. อัพรูป -->
+    <div class="mb-4">
+      <label class="block font-bold mb-2">1. อัพรูปสินค้า</label>
+      <input type="file" id="fileInput" accept="image/*" class="w-full border rounded p-2">
+      <img id="imagePreview" class="hidden mt-2 rounded-lg w-full" />
+    </div>
+
+    <!-- 2. ตั้งชื่อไฟล์ -->
+    <div class="mb-4">
+      <label class="block font-bold mb-2">2. ตั้งชื่อไฟล์</label>
+      <div class="grid grid-cols-3 gap-2 mb-2">
+        <input id="dateInput" placeholder="วันที่" class="border rounded p-2" readonly>
+        <select id="categorySelect" class="border rounded p-2">
+          <option>Menswear</option>
+          <option>Womenswear</option>
+          <option>Accessories</option>
+          <option>Shoes</option>
+          <option>Bags</option>
+        </select>
+        <input id="brandInput" placeholder="Brand" class="border rounded p-2">
+      </div>
+      <input id="filenameInput" placeholder="20260422-Menswear-Zara" class="w-full border rounded p-2">
+      <p class="text-xs text-gray-500 mt-1">ออโต้ตามวันที่จริง แก้เองได้ถ้าต้องการ</p>
+    </div>
+
+    <!-- 3. Prompt -->
+<div class="mb-4">
+  <label class="block font-bold mb-2">3. Prompt สำหรับเจนคลิป</label>
+  <div class="flex gap-2">
+    <textarea id="promptInput" rows="3" placeholder="ใส่ prompt หรือกด Gen Prompt" class="flex-1 border rounded p-2"></textarea>
+    <div class="flex flex-col gap-2">
+      <button id="genPromptBtn" class="bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold px-4 rounded-lg">
+        ✨ Gen Prompt
+      </button>
+      <button id="copyPromptBtn" class="bg-gray-200 text-gray-800 font-bold px-4 py-2 rounded-lg hover:bg-gray-300">
+        📋 Copy
+      </button>
+    </div>
+  </div>
+</div>
+
+    <!-- 4. ปุ่มเจนวิดีโอ ที่หายไป -->
+    <div class="flex gap-4 mt-6">
+      <button id="genFALBtn" class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 disabled:opacity-50">
+        💎 FAL Kling 1.6 Pro
+      </button>
+      <button id="genHFBtn" class="flex-1 bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 disabled:opacity-50">
+        🆓 Hugging Face
+      </button>
+    </div>
+
+    <p id="statusText" class="hidden text-center mt-4 text-gray-600"></p>
+
+  </div>
+
+  <script src="product.js"></script>
+</body>
+</html>
