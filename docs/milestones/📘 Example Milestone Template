@@ -1,0 +1,45 @@
+📘 Example Milestone Template# Milestone — v0.5.0
+
+## 🎯 Goal
+Build the first AI creator pipeline for automated short-form video generation.
+
+---
+
+## ✨ Features
+
+- AI caption generator
+- cinematic render pipeline
+- media queue
+- creator dashboard
+
+---
+
+## 🧪 Infrastructure
+
+- queue worker optimization
+- deployment stabilization
+- CI/CD validation improvements
+
+---
+
+## 📚 Documentation
+
+- workflow updates
+- reviewer governance alignment
+- architecture refresh
+
+---
+
+## 🔒 Governance
+
+- reviewer checklist expansion
+- audit trail consistency checks
+
+---
+
+## ✅ Success Criteria
+
+- successful render pipeline
+- deployment stability
+- reviewer workflow operational
+- bilingual documentation updated

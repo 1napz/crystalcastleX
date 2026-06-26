@@ -1,0 +1,46 @@
+name: Docs Suite Automation
+
+on:
+push:
+paths:
+- 'docs/.docx'
+- 'docs/.md'
+workflow_dispatch:
+
+jobs:
+docs-suite:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout repo
+uses: actions/checkout@v3
+
+- name: Install pandoc
+run: sudo apt-get install -y pandoc
+
+- name: Convert DOCX to Markdown
+run: |
+for file in docs/*.docx; do
+base=file" .docx)
+pandoc "{base}.md"
+done
+
+- name: Update README-suite.md
+run: |
+echo "# CrystalCastle – Documentation Suite 📚" > docs/README-suite.md
+echo "" >> docs/README-suite.md
+echo "## Core README" >> docs/README-suite.md
+cat docs/Core-README.md >> docs/README-suite.md
+echo "" >> docs/README-suite.md
+echo "## Reviewer Checklist ✅" >> docs/README-suite.md
+cat docs/CheckList.md >> docs/README-suite.md
+echo "" >> docs/README-suite.md
+echo "## Repo Overview Diagram" >> docs/README-suite.md
+cat docs/Mermaid-diagram.md >> docs/README-suite.md
+
+- name: Commit updates
+run: |
+git config --global user.name "github-actions"
+git config --global user.email "actions@github.com"
+git add docs/*.md
+git commit -m "Auto-update README-suite.md with converted docs"
+git push

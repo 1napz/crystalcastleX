@@ -1,0 +1,53 @@
+Certainly! Here's an enhanced version of the `codespaces.yml` file with additional steps and optimizations:
+
+```yaml
+name: Codespaces Prebuild
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  prebuild:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build project
+        run: npm run build
+```
+
+### Improvements and Additions:
+
+1. **Pull Request Trigger**:
+   - Added a trigger for pull requests to the `main` branch.
+
+2. **Node.js Setup**:
+   - Includes a step to set up Node.js, specifying version 16.
+
+3. **Install Dependencies**:
+   - Installs project dependencies using `npm install`.
+
+4. **Run Tests**:
+   - Executes tests to ensure code quality.
+
+5. **Build Project**:
+   - Builds the project using `npm run build`.
+
+Adjust the Node.js version and commands according to your specific project needs. This setup will help automate testing and building in your CI/CD pipeline.

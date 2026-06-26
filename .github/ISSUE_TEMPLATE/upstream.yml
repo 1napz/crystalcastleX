@@ -1,0 +1,22 @@
+name: Upstream Tracking
+description: Track external issues
+
+body:
+  - type: input
+    id: upstream
+    attributes:
+      label: Upstream Issue URL
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - Low
+        - Medium
+        - High
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Analysis

@@ -1,0 +1,50 @@
+<div id="artifactList"></div>
+
+<script>
+  function loadArtifacts() {
+    const artifacts = JSON.parse(localStorage.getItem("artifacts")) || [];
+    const listDiv = document.getElementById("artifactList");
+
+    if (artifacts.length === 0) {
+      listDiv.innerHTML = "<p>ยังไม่มีผลงานที่บันทึกไว้</p>";
+      return;
+    }
+
+    // สร้างรายการแสดงผล
+    let html = "<ul>";
+    artifacts.forEach(item => {
+      html += `<li>${item.name} <small>(สร้างเมื่อ: ${item.createdAt})</small></li>`;
+    });
+    html += "</ul>";
+
+    listDiv.innerHTML = html;
+  }
+
+  // โหลดทันทีเมื่อเปิดหน้า
+  window.onload = loadArtifacts;
+</script>
+
+<input id="nameInput" placeholder="ชื่อผลงาน" style="width:70%">
+<button onclick="addArtifact()">เพิ่ม</button>
+
+<script>
+function addArtifact(){
+  const name = document.getElementById('nameInput').value.trim();
+  if(!name) return alert('ใส่ชื่อก่อนนะ');
+  const artifacts = JSON.parse(localStorage.getItem('artifacts')||'[]');
+  artifacts.unshift({
+    name,
+    createdAt: new Date().toLocaleString('th-TH', {dateStyle:'medium', timeStyle:'short'})
+  });
+  localStorage.setItem('artifacts', JSON.stringify(artifacts));
+  document.getElementById('nameInput').value = '';
+  loadArtifacts(); // ใช้ฟังก์ชันเดิมของคุณ
+}
+
+function clearArtifacts(){
+  if(confirm('ลบทั้งหมด?')) {
+    localStorage.removeItem('artifacts');
+    loadArtifacts();
+  }
+}
+</script>

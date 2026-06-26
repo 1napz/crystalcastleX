@@ -1,0 +1,34 @@
+
+🧩 สิ่งที่เราได้ทำไปแล้ว
+- WeatherAPI Forecast → ทดลองดึงข้อมูลพยากรณ์ 7 วัน, รายชั่วโมง, และ AQI  
+- Interactive Webpage → ทำ Dashboard ด้วย HTML + JS แสดงผลพยากรณ์และ AQI  
+- React Weather Dashboard → ใช้ React + Hooks (useEffect, useState) ดึงข้อมูลมาแสดงผล  
+- React + Chart.js → ทำกราฟเส้นเปรียบเทียบอุณหภูมิสูงสุด/ต่ำสุด  
+- Search Box → เพิ่มช่องค้นหาเมืองให้ผู้ใช้เลือกเอง  
+- Autocomplete Search → ใช้ Material UI หรือ GeoDB API ให้เลือกเมืองจากรายการอัตโนมัติ  
+- Pricing Plans → สรุปแผนฟรีและแผนเสียเงินของ WeatherAPI และ OpenWeatherMap  
+- Combined Dashboard → รวมข้อมูลจากทั้งสอง API มาแสดงในหน้าเดียว  
+- Combined Dashboard + Chart.js → ทำกราฟเปรียบเทียบอุณหภูมิจากทั้งสอง API  
+
+---
+
+📝 สรุปความแตกต่าง WeatherAPI vs OpenWeatherMap
+| WeatherAPI.com | OpenWeatherMap |
+|--------------------|--------------------|
+| ฟรี: ~100K calls/เดือน, พยากรณ์ 3 วัน | ฟรี: 1M calls/เดือน, พยากรณ์ 5 วัน (3 ชม./ครั้ง) |
+| มีภาษาไทย, มี AQI, Astronomy, Marine | มีข้อมูลย้อนหลังหลายปี (One Call API) |
+| ราคาถูกกว่า, ใช้งานง่าย | เหมาะกับข้อมูลละเอียดรายชั่วโมง |
+| Pro+/Business → พยากรณ์ 300–365 วัน | Startup/Professional → พยากรณ์ 16 วัน, ข้อมูลย้อนหลัง 47+ ปี |
+
+---
+
+⚡ จุดต่อยอดที่คุณเลือกได้
+- ทำ Search Box + Chart.js → ให้ผู้ใช้เลือกเมืองแล้วแสดงกราฟอุณหภูมิ  
+- เชื่อม GeoDB Cities API → autocomplete รายชื่อเมืองจริงทั่วโลก  
+- รวม AQI + Forecast ลงในกราฟเดียว  
+- ทำ PWA Weather Dashboard → ใช้งานบนมือถือแบบ offline ได้  
+
+---
+
+✨ ตอนนี้คุณมีภาพรวมครบทั้ง API → Webpage → React → Chart.js → Search → Combined Dashboard แล้ว  
+คุณอยากให้ผมต่อยอดไปที่ Search Box + Chart.js หรือ AQI + Forecast รวมในกราฟเดียว ก่อนดีครับ

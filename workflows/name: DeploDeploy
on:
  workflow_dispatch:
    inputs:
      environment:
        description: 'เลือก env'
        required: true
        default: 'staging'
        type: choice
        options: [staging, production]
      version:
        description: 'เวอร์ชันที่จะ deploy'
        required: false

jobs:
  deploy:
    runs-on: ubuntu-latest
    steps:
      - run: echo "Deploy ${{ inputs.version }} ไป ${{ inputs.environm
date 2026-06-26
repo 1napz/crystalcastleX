@@ -1,0 +1,18 @@
+name: Test Case 001
+on:
+  workflow_dispatch:
+    inputs:
+    
+        required: true
+        default: 'preview'
+        type: choice
+        options: [preview, production]
+      version:
+        description: 'เวอร์ชันที่จะ deploy'
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploy ${{ inputs.version }} ไป ${{ inputs.environment }}"

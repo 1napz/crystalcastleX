@@ -1,0 +1,38 @@
+name: Auto Update Docs on PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate Dynamic Docs
+        run: |
+          echo "# 📖 CrystalCastle Docs" > README.md
+          echo "PR Number: ${{ github.event.pull_request.number }}" >> README.md
+          echo "Title: ${{ github.event.pull_request.title }}" >> README.md
+          echo "Author: ${{ github.event.pull_request.user.login }}" >> README.md
+          echo "Updated: $(date)" >> README.md
+
+          # ตัวอย่างสำหรับ CHANGELOG.md
+          echo "## PR #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}" >> CHANGELOG.md
+          echo "- Status: ${{ github.event.action }}" >> CHANGELOG.md
+          echo "- Updated: $(date)" >> CHANGELOG.md
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add README.md CHANGELOG.md
+          git commit -m "docs: auto-update README & CHANGELOG from PR #${{ github.event.pull_request.number }}"
+          git push

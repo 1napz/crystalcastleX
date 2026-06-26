@@ -1,0 +1,9 @@
+# 1. แทนที่ README.md เดิม
+mv README.txt README.md
+
+# 2. เพิ่ม.env.example
+touch.env.example
+
+# 3. อัปเดต.gitignore ไม่ให้ commit secret
+echo ".env.local" >>.gitignore
+echo "logs/*.xlsx" >>.gitignore
