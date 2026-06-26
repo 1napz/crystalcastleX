@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    "github.copilot",
+    "github.copilot-chat",
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "eamodio.gitlens",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "ritwickdey.liveserver",
+    "mikestead.dotenv",
+    "aaron-bond.better-comments",
+    "rangav.vscode-thunder-client",
+    "davidanson.vscode-markdownlint",
+  "typescript.suggest.paths": false ,
+  "javascript.suggest.paths": false]
+}

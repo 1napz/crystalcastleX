@@ -1,0 +1,93 @@
+{
+  // ---------- Editor ----------
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.wordWrap": "on",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.suggestSelection": "first",
+  "editor.inlineSuggest.enabled": true,
+
+  // สำหรับไฟล์ HTML/JS ใช้ Prettier
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // ---------- Tailwind CSS ----------
+  "tailwindCSS.includeLanguages": {
+    "html": "html",
+    "javascript": "javascript"
+  },
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.validate": true,
+
+  // ---------- ไฟล์และ Search ----------
+  "files.exclude": {
+    "node_modules": true,
+    ".next": true,
+    ".vercel": true,
+    "supabase/.temp": true
+  },
+  "search.exclude": {
+    "package-lock.json": true,
+    "**/node_modules": true,
+    ".next": true,
+    "supabase/.temp": true
+  },
+  "files.associations": {
+    "*.js": "javascript",
+    "*.html": "html",
+    "*.css": "css",
+    "*.json": "jsonc"
+  },
+
+  // ---------- Terminal ----------
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+
+  // ---------- Copilot ----------
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true
+  },
+  "github.copilot.chat.localeOverride": "auto",
+  "github.copilot.editor.enableAutoCompletions": true,
+
+  // ---------- IntelliCode ----------
+  "vsintellicode.features.apiExamples": true,
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+
+  // ---------- Extension Security ----------
+  "extensions.autoUpdate": true,
+  "extensions.verifySignature": true,
+
+  // ---------- Markdown ----------
+  "markdownlint.config": {
+    "MD013": false,
+    "MD033": false
+  },
+  {
+  // ปิดการตรวจสอบ Workspace Trust (ถ้าเราไว้ใจโปรเจกต์ที่เราเปิดเสมอ)
+  // "security.workspace.trust.enabled": false
+}}
+}
