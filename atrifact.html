@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผลงานทั้งหมด - Crystal Castle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                🏰 ผลงานวิดีโอสินค้าทั้งหมด
+            </h1>
+            <a href="/product.html" class="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                + สร้างวิดีโอใหม่
+            </a>
+        </div>
+
+        <!-- Grid แสดงวิดีโอ -->
+        <div id="artifactsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center text-gray-500 py-12">กำลังโหลดข้อมูล...</div>
+        </div>
+    </div>
+
+    <script>
+        function escapeHtmlAttr(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        async function loadArtifacts() {
+            try {
+                const res = await fetch('/api/get-artifacts');
+                const artifacts = await res.json();
+                
+                const grid = document.getElementById('artifactsGrid');
+                if (!artifacts.length) {
+                    grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">ยังไม่มีวิดีโอที่สร้าง ลองสร้างวิดีโอแรกกัน!</div>';
+                    return;
+                }
+                
+                grid.innerHTML = artifacts.map(art => `
+                    <div class="bg-gray-800 rounded-xl overflow-hidden hover:scale-[1.02] transition">
+                        <video src="${art.video_url}" controls class="w-full aspect-video object-cover"></video>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-purple-400">${art.brand || 'สินค้า'} - ${art.category || 'หมวดหมู่'}</h3>
+                                <span class="text-xs text-gray-500">${new Date(art.created_at).toLocaleDateString('th-TH')}</span>
+                            </div>
+                            <p class="text-sm text-gray-400 line-clamp-3 mb-3">${art.prompt.substring(0, 120)}...</p>
+                            <div class="flex gap-2">
+                                <button data-prompt="${escapeHtmlAttr(art.prompt)}" class="copy-prompt-btn text-xs bg-gray-700 px-2 py-1 rounded hover:bg-gray-600">
+                                    📋 คัดลอก Prompt
+                                </button>
+                                <button data-prompt="${escapeHtmlAttr(art.prompt)}" class="use-prompt-btn text-xs bg-purple-700 px-2 py-1 rounded hover:bg-purple-600">
+                                    ✨ ใช้สร้างใหม่
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                grid.querySelectorAll('.copy-prompt-btn').forEach(button => {
+                    button.addEventListener('click', () => copyPrompt(button.dataset.prompt || ''));
+                });
+
+                grid.querySelectorAll('.use-prompt-btn').forEach(button => {
+                    button.addEventListener('click', () => usePrompt(button.dataset.prompt || ''));
+                });
+            } catch (err) {
+                console.error('Load error:', err);
+                document.getElementById('artifactsGrid').innerHTML = '<div class="col-span-full text-center text-red-400 py-12">โหลดข้อมูลไม่สำเร็จ</div>';
+            }
+        }
+        
+        function copyPrompt(prompt) {
+            navigator.clipboard.writeText(prompt);
+            alert('คัดลอก Prompt เรียบร้อย');
+        }
+        
+        function usePrompt(prompt) {
+            localStorage.setItem('reuse_prompt', prompt);
+            window.location.href = '/product.html';
+        }
+        
+        loadArtifacts();
+    </script>
+</body>
+</html>
