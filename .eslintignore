@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+.vercel/
+
+# Public assets
+public/
+*.min.js
+*.min.css
+
+# Environment & config
+.env*
+*.config.js
+!.eslintrc.js
+
+# Test & coverage
+coverage/
+.nyc_output/
+
+# Temp files
+tmp/
+temp/
+*.log
+*.swp
+*.swo
+
+# Mock files
+**/mocks/**/*.js
+**/mock-*.js
+
+# Supabase
+supabase/functions/
+
+**/dist/**

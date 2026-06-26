@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+version: 2
+early_access: true
+
+rules:
+  - id: bilingual-docs
+    description: Require bilingual (ไทย/English) documentation updates
+    severity: error
+    match:
+      files: ["docs/**/*.md"]
+    checks:
+      must_include: ["English:", "ไทย:"]
+
+comment_template: |
+  ### 📝 CodeRabbitAI Feedback (Bilingual)
+  **English:** Missing bilingual docs, changelog, release notes
+  **ไทย:** ไม่มี bilingual docs, changelog, release notes
+
+scopes:
+  - name: crystalcastle-pr-review
+    repos: ["1napz/crystalcastle"]
+    spend_limit: 100
+    connections:
+      - github
+      - jira
+      - notion
