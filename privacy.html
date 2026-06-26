@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>นโยบายความเป็นส่วนตัว - Crystal Castle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans Thai', system-ui, sans-serif; }
+    </style>
+    <script src="/speed-insights.js" defer></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="max-w-3xl mx-auto px-4 py-12">
+        <div class="bg-white rounded-2xl shadow-sm p-8">
+            <h1 class="text-3xl font-bold text-center mb-2">นโยบายความเป็นส่วนตัว</h1>
+            <p class="text-center text-gray-500 text-sm mb-8">Privacy Policy — Crystal Castle</p>
+            <p class="text-center text-sm text-gray-400 mb-8">อัปเดตล่าสุด: 23 เมษายน 2026</p>
+
+            <div class="space-y-6">
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">1. ข้อมูลที่เราเก็บรวบรวม</h2>
+                    <p class="text-gray-600 leading-relaxed">Crystal Castle เก็บรวบรวมข้อมูลดังต่อไปนี้:</p>
+                    <ul class="list-disc pl-6 mt-2 text-gray-600 space-y-1">
+                        <li><strong>ข้อมูลบัญชีผู้ใช้:</strong> อีเมล (สำหรับเข้าสู่ระบบผ่าน Supabase Authentication)</li>
+                        <li><strong>รูปสินค้า:</strong> รูปภาพที่คุณอัปโหลดเพื่อใช้สร้างวิดีโอ (จัดเก็บใน Supabase Storage)</li>
+                        <li><strong>Prompt และวิดีโอที่สร้าง:</strong> ข้อความคำสั่งและวิดีโอที่ระบบ AI สร้างให้ (เก็บไว้ในประวัติการใช้งาน)</li>
+                        <li><strong>ข้อมูลการใช้งาน:</strong> บันทึก Logs (engine, status, timestamp) เพื่อการพัฒนาและปรับปรุงบริการ</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">2. การใช้ข้อมูล</h2>
+                    <p class="text-gray-600 leading-relaxed">เราใช้ข้อมูลของคุณเพื่อ:</p>
+                    <ul class="list-disc pl-6 mt-2 text-gray-600 space-y-1">
+                        <li>ยืนยันตัวตนและจัดการบัญชีผู้ใช้</li>
+                        <li>สร้างวิดีโอจากรูปสินค้าตามที่คุณร้องขอ</li>
+                        <li>ปรับปรุงคุณภาพของ AI (Groq, FAL Kling, Magic Hour)</li>
+                        <li>วิเคราะห์ประสิทธิภาพและการใช้งานระบบ</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">3. การจัดเก็บข้อมูล</h2>
+                    <p class="text-gray-600 leading-relaxed">ข้อมูลทั้งหมดจัดเก็บผ่าน <strong>Supabase</strong> (ผู้ให้บริการคลาวด์) บนเซิร์ฟเวอร์ในสหรัฐอเมริกา โดย:</p>
+                    <ul class="list-disc pl-6 mt-2 text-gray-600 space-y-1">
+                        <li>รูปสินค้าและวิดีโอ: เก็บไว้ใน Storage (สูงสุด 1GB สำหรับบัญชีฟรี)</li>
+                        <li>Logs การใช้งาน: เก็บไว้ในฐานข้อมูล PostgreSQL (เก็บไว้สูงสุด 90 วัน)</li>
+                        <li>ข้อมูลบัญชี: จัดการโดย Supabase Auth (คุณสามารถลบบัญชีได้ตลอดเวลา)</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">4. การแบ่งปันข้อมูล</h2>
+                    <p class="text-gray-600 leading-relaxed">เรา <strong>ไม่ขาย ไม่แลกเปลี่ยน และไม่เปิดเผย</strong> ข้อมูลส่วนตัวของคุณให้บุคคลที่สาม เว้นแต่:</p>
+                    <ul class="list-disc pl-6 mt-2 text-gray-600 space-y-1">
+                        <li>เป็นการร้องขอโดยชอบด้วยกฎหมาย (ศาล, ตำรวจ)</li>
+                        <li>จำเป็นเพื่อดำเนินการตามคำขอของคุณ (เช่น ส่งรูปไปยัง API ของ FAL Kling เพื่อสร้างวิดีโอ)</li>
+                        <li>เพื่อปกป้องสิทธิ์ ความปลอดภัย หรือทรัพย์สินของเรา</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">5. การรักษาความปลอดภัย</h2>
+                    <p class="text-gray-600 leading-relaxed">เรามีมาตรการรักษาความปลอดภัยที่เหมาะสม เช่น:</p>
+                    <ul class="list-disc pl-6 mt-2 text-gray-600 space-y-1">
+                        <li>ใช้ HTTPS สำหรับการสื่อสารทั้งหมด</li>
+                        <li>ใช้ Row Level Security (RLS) ใน Supabase เพื่อควบคุมการเข้าถึงข้อมูล</li>
+                        <li>ไม่เก็บ API Keys หรือ Secrets ไว้ในโค้ดฝั่งไคลเอ็นต์</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">6. สิทธิ์ของคุณ</h2>
+                    <p class="text-gray-600 leading-relaxed">คุณมีสิทธิ์:</p>
+                    <ul class="list-disc pl-6 mt-2 text-gray-600 space-y-1">
+                        <li>เข้าถึง แก้ไข หรือลบข้อมูลส่วนตัวของคุณ</li>
+                        <li>ขอรับสำเนาข้อมูลที่เราจัดเก็บ</li>
+                        <li>ยกเลิกการใช้บริการและลบบัญชีได้ตลอดเวลา (ติดต่อผ่านอีเมล)</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">7. การเปลี���ยนแปลงนโยบาย</h2>
+                    <p class="text-gray-600 leading-relaxed">เราอาจอัปเดตนโยบายนี้เป็นครั้งคราว หากมีการเปลี่ยนแปลงสำคัญ เราจะแจ้งให้ทราบผ่านทางอีเมลหรือประกาศบนเว็บไซต์</p>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">8. ติดต่อเรา</h2>
+                    <p class="text-gray-600 leading-relaxed">หากมีคำถามหรือข้อสงสัยเกี่ยวกับนโยบายความเป็นส่วนตัว กรุณาติดต่อ:</p>
+                    <p class="mt-2"><strong>อีเมล:</strong> <a href="mailto:nobizzmaru@gmail.com" class="text-purple-600 hover:underline">nobizzmaru@gmail.com</a></p>
+                </section>
+            </div>
+
+            <div class="mt-8 pt-6 border-t text-center text-sm text-gray-400">
+                <p>Crystal Castle — AI Video Studio</p>
+                <p class="mt-1"><a href="/" class="text-purple-500 hover:underline">กลับหน้าแรก</a> | <a href="/terms.html" class="text-purple-500 hover:underline">เงื่อนไขการให้บริการ</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
