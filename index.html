@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal Castle — AI Video Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+<div class="max-w-4xl mx-auto p-6">
+<header class="mb-10">
+<h1 class="text-5xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">CRYSTAL CASTLE</h1>
+<p class="text-xl text-gray-400 mt-3">AI Video Studio — อัปรูป → Gen Prompt → สร้างวิดีโอ</p>
+<p class="text-sm text-gray-500 mt-1">อัปเดตล่าสุด: 23 เม.ย. 2026</p>
+</header>
+
+<div class="grid md:grid-cols-2 gap-4 mb-12">
+<a href="/product.html" class="group bg-gradient-to-br from-purple-600 to-pink-600 p-[1px] rounded-2xl">
+<div class="bg-gray-900 rounded-2xl p-6 h-full group-hover:bg-gray-800 transition">
+<div class="text-3xl mb-3">🎬</div>
+<h2 class="text-xl font-bold mb-2">เปิด Studio</h2>
+<p class="text-gray-400 text-sm">อัปรูป → Gen Prompt (Groq) → FAL Kling → Generate Post</p>
+<p class="text-purple-400 text-xs mt-3">เข้าเลย →</p>
+</div>
+</a>
+
+<div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="text-3xl">📊</div>
+<h2 class="text-xl font-bold">สถานะระบบ</h2>
+</div>
+<span id="lastCheck" class="text-xs text-gray-500">กำลังเช็ค...</span>
+</div>
+<ul id="statusList" class="text-sm space-y-2"><li class="text-gray-500">กำลังโหลด...</li></ul>
+</div>
+</div>
+
+<div class="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+<h3 class="text-2xl font-bold mb-6">🧭 วิธีใช้งาน</h3>
+<div class="space-y-4 text-gray-300 text-sm">
+<p><strong class="text-white">1.</strong> เตรียมรูป ตั้งชื่อ <code class="bg-gray-800 px-2 py-1 rounded">YYYYMMDD-Category-Brand</code></p>
+<p><strong class="text-white">2.</strong> เข้า Studio → อัปรูป → กด "✨ Gen Prompt"</p>
+<p><strong class="text-white">3.</strong> เลือก FAL Kling (แนะนำ) วิดีโอจะเก็บใน Supabase อัตโนมัติ</p>
+</div>
+</div>
+</div>
+
+<script>
+const endpoints = [
+  { name: 'Gen Prompt', path: '/api/ai/prompt/groq' },
+  { name: 'Generate Post', path: '/api/ai/post/groq' },
+  { name: 'FAL Kling', path: '/api/generate' },
+  { name: 'Magic Hour', path: '/api/magichour' },
+  { name: 'Upload', path: '/api/upload' }
+];
+async function checkStatus() {
+  const list = document.getElementById('statusList');
+  list.innerHTML = '';
+  for (const ep of endpoints) {
+    const li = document.createElement('li');
+    li.className = 'flex justify-between';
+    li.innerHTML = `<span class="text-gray-400">${ep.name}</span><span>⏳</span>`;
+    list.appendChild(li);
+    try {
+      const res = await fetch(ep.path, { method: 'HEAD', signal: AbortSignal.timeout(3000) });
+      const ok = res.ok || res.status === 405;
+      li.lastElementChild.innerHTML = ok? '<span class="text-green-400">✅ ทำงาน</span>' : '<span class="text-yellow-400">⚠️ '+res.status+'</span>';
+    } catch { li.lastElementChild.innerHTML = '<span class="text-red-400">❌ หลับ</span>'; }
+  }
+  document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString('th-TH');
+}
+checkStatus(); setInterval(checkStatus, 15000);
+</script>
+</body>
+</html>
