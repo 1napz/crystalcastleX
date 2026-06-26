@@ -1,0 +1,42 @@
+# setup-config/privacy.yml
+# Privacy & Telemetry Policy for Crystal Castle
+
+version: 1.0
+owner: crystalcastle
+last_updated: 2026-05-05
+
+telemetry:
+  enabled: true
+  type: first-party
+  description: >
+    Crystal Castle เก็บข้อมูลการใช้งานเฉพาะภายในระบบ
+    เพื่อปรับปรุง workflow, QA, และประสิทธิภาพของ repo
+    โดยไม่แชร์ข้อมูลกับบุคคลที่สาม
+
+data_collection:
+  logs:
+    - workflow_runs
+    - error_reports
+    - contributor_activity
+    - performance_metrics
+  excluded:
+    - personal_identifiable_information
+    - advertising_data
+    - cross-site tracking
+
+third_party_trackers:
+  allowed: false
+  exceptions: []
+  note: >
+    ไม่อนุญาตให้ใช้ third-party trackers เช่น Google Analytics,
+    Facebook Pixel หรือเครือข่ายโฆษณาใน docs หรือ UI ของ Crystal Castle
+
+transparency:
+  docs: docs/privacy.md
+  contributor_notice: Contribute.md
+  audit_trail: true
+
+security:
+  retention_policy: 90d   # เก็บ logs 90 วัน
+  encryption: enabled
+  access: restricted

@@ -1,0 +1,14 @@
+name: Close stale PRs
+on:
+  schedule:
+    - cron: "0 0 * * *"
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 30
+          days-before-close: 7
+          stale-pr-message: "PR นี้ไม่มีการอัปเดตเกิน 30 วัน จะถูกปิดอัตโนมัติ"
+          close-pr-message: "PR ถูกปิดเนื่องจาก inactivity"
