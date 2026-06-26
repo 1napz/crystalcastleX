@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Castle - เครื่องเจียระไน Lite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin 1s linear infinite; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
+  <div class="container max-w-2xl mx-auto p-4 md:p-8">
+
+    <header class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">🎬 เครื่องเจียระไน Lite</h1>
+      <p class="text-gray-600">อัพรูปสินค้า → เจนวิดีโอ AI อัตโนมัติ</p>
+      <a href="/mission-control.html" class="text-sm text-purple-600 hover:underline mt-2 inline-block">← กลับฐานบัญชาการ</a>
+    </header>
+
+    <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8 space-y-6">
+
+      <!-- 1. อัพรูป -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">1. เลือกรูปสินค้า</label>
+        <input
+          type="file"
+          id="fileInput"
+          accept="image/*"
+          class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:bg-purple-100 file:text-purple-700 file:font-medium hover:file:bg-purple-200 cursor-pointer"
+        >
+        <img id="imagePreview" class="hidden w-full mt-3 rounded-lg border-2 border-purple-200">
+      </div>
+
+      <!-- 2. ตั้งชื่อไฟล์ -->
+      <div class="space-y-3">
+        <label class="block text-sm font-semibold text-gray-700">2. ตั้งชื่อไฟล์</label>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="text-xs text-gray-500 mb-1 block">วันที่</label>
+            <input id="dateInput" type="text" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-mono">
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 mb-1 block">Category</label>
+            <select id="categorySelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-sm">
+              <option>Menswear</option>
+              <option>Womenswear</option>
+              <option>Accessories</option>
+              <option>Shoes</option>
+              <option>Bags</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 mb-1 block">Brand</label>
+            <input id="brandInput" type="text" placeholder="Zara" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-sm">
+          </div>
+        </div>
+        <input id="filenameInput" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm bg-gray-50">
+      </div>
+
+      <!-- 3. Prompt -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">3. Prompt สำหรับเจนคลิป</label>
+        <div class="flex gap-2 items-start">
+          <textarea
+            id="promptInput"
+            rows="4"
+            placeholder="กดปุ่มด้านขวาให้ AI ช่วยคิด"
+            class="flex-1 px-3 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 resize-none text-sm leading-relaxed"
+          ></textarea>
+          <button
+            id="genPromptBtn"
+            class="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:opacity-90 transition whitespace-nowrap shadow-md min-w-[110px]"
+          >
+            ✨ Gen AI
+          </button>
+        </div>
+        <div class="flex items-center justify-between text-xs px-1">
+          <span id="promptStatus" class="text-gray-500">พร้อมให้ AI แต่ง prompt</span>
+          <div class="flex gap-3">
+            <button id="copyPromptBtn" class="hidden text-purple-600 font-medium hover:underline">📋 คัดลอก</button>
+            <button id="undoPromptBtn" class="hidden text-gray-500 hover:underline">↶ ใช้ต้นฉบับ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3.5 Generate Post - เพิ่มใหม่ -->
+      <div class="space-y-2 pt-4 border-t border-gray-100">
+        <div class="flex items-center justify-between">
+          <label class="block text-sm font-semibold text-gray-700">3.5 แคปชั่นสำหรับโพสต์</label>
+          <button
+            id="genPostBtn"
+            class="px-3 py-1.5 bg-gray-900 text-white rounded-lg text-xs font-medium hover:bg-black transition"
+          >
+            📝 Generate Post
+          </button>
+        </div>
+        <textarea
+          id="postOutput"
+          rows="4"
+          placeholder="กดปุ่มด้านบนเพื่อสร้างแคปชั่นอัตโนมัติ"
+          class="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-500 leading-relaxed"
+          readonly
+        ></textarea>
+        <div class="flex justify-end">
+          <button id="copyPostBtn" class="hidden text-xs text-purple-600 font-medium hover:underline">📋 คัดลอกแคปชั่น</button>
+        </div>
+      </div>
+
+      <!-- 4. เลือก Engine -->
+      <div class="space-y-3">
+        <label class="block text-sm font-semibold text-gray-700">4. เลือก Engine</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <button id="genFALBtn" class="px-4 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 shadow-lg">
+            <div class="text-base">🚀 FAL Kling</div>
+            <div class="text-xs opacity-90 mt-1">เร็ว 1-2 นาที | 1.8 บาท</div>
+          </button>
+          <button id="genHFBtn" class="px-4 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 shadow-lg">
+            <div class="text-base">🆓 Magic Hour</div>
+            <div class="text-xs opacity-90 mt-1">ฟรี | 3-5 นาที</div>
+          </button>
+        </div>
+        <div id="statusText" class="text-sm text-center hidden p-4 bg-purple-50 border border-purple-200 rounded-xl font-medium"></div>
+      </div>
+
+    </section>
+
+    <footer class="text-center mt-8 text-xs text-gray-500">
+      Crystal Castle Lite v1.2 | Groq + Magic Hour + Auto Post
+    </footer>
+
+  </div>
+  <script src="product.js"></script>
+</body>
+</html>
