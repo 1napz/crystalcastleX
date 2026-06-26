@@ -1,0 +1,25 @@
+name: Delete Dependabot Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_delete:
+        description: 'Type YES to confirm deletion of dependabot-auto-merge.yml'
+        required: true
+        default: 'NO'
+
+jobs:
+  delete-file:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.confirm_delete == 'YES' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Remove dependabot-auto-merge.yml
+        run: |
+          git rm -f .github/workflows/dependabot-auto-merge.yml || true
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: remove dependabot-auto-merge.yml via manual run" || echo "No changes to commit"
+          git push

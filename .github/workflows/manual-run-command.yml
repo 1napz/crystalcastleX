@@ -1,0 +1,19 @@
+name: Manual Run Command
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Enter the command to run'
+        required: true
+        default: 'echo Hello Reviewer'
+
+jobs:
+  run-command:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run user command
+        run: ${{ github.event.inputs.command }}

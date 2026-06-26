@@ -1,0 +1,23 @@
+name: 🤖 AutoMerge
+
+on:
+  pull_request:
+    types: [labeled, opened, edited, synchronize]
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: AutoMerge PRs
+        uses: pascalgn/automerge-action@v0.15.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # ✅ เงื่อนไขที่ต้องผ่านก่อน merge
+          mergeMethod: squash
+          # PR ต้องมี label "automerge" และผ่านทุก checks
+          requiredLabels: "automerge"
+          # ป้องกันการ merge ถ้า CI/CD checks ไม่ผ่าน
+          requiredStatusChecks: "lint,test,build,security"
+          # ลบ branch หลัง merge เพื่อให้ repo สะอาด
+          deleteBranchAfterMerge: true

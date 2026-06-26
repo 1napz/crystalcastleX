@@ -1,0 +1,42 @@
+name: Auto-Fix package-lock.json
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'package-lock.json'
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # ✅ เพิ่มแล้ว
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      
+      - name: Check package-lock.json validity
+        id: check
+        run: |
+          if node -e "JSON.parse(require('fs').readFileSync('package-lock.json','utf8'))" 2>/dev/null; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Regenerate package-lock.json if invalid
+        if: steps.check.outputs.valid == 'false'
+        run: |
+          rm -f package-lock.json
+          npm install
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add package-lock.json
+          git commit -m "fix: regenerate corrupted package-lock.json automatically"
+          git push

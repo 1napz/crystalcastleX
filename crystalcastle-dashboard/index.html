@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="dashboard-section">
+  <h2>AI Dashboard</h2>
+
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-number" id="prompts">0</div>
+      <div class="stat-label">Prompts Used</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number" id="success">0%</div>
+      <div class="stat-label">Success Rate</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number" id="tasks">0</div>
+      <div class="stat-label">Active Tasks</div>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <h3>Usage</h3>
+    <div class="bar-chart" id="chart"></div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
