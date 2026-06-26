@@ -1,0 +1,23 @@
+name: "GistSync"
+on:
+  push:
+    branches: [main, master]  # ทำงานเมื่อมีการ push ไปยัง main หรือ master
+    paths: ['README.md']      # ทำงานเฉพาะเมื่อมีการเปลี่ยนแปลง README.md
+
+jobs:
+  gist-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ใช้ Action สำเร็จรูป (Gist Mirror)
+      - name: Mirror README.md to Gist
+        uses: Shresht7/Gist-Mirror@v1
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }} #  PAT ที่เราสร้างไว้
+        with:
+          gists: |
+            - id: GIST_TOKEN # ใส่ ID ของ Gist เป้าหมาย (ส่วนท้ายของ URL)
+              description: "My synced file"
+              files:
+                - README.md   # ชื่อไฟล์ที่ต้องการ sync

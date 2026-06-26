@@ -1,0 +1,35 @@
+# .github/workflows/privacy-check.yml
+name: Privacy & Deprecation Check
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate-privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Validate privacy.yml exists
+        run: |
+          if [ ! -f setup-config/privacy.yml ]; then
+            echo "❌ Missing setup-config/privacy.yml"
+            exit 1
+          fi
+          echo "✅ privacy.yml found"
+
+      - name: Validate privacy.yml schema
+        run: |
+          pip install yamllint
+          yamllint setup-config/privacy.yml
+
+      - name: Check for deprecated fields
+        run: |
+          if grep -R "code_scanning_upload" .github/workflows; then
+            echo "❌ Deprecated field 'code_scanning_upload' found in workflows"
+            exit 1
+          else
+            echo "✅ No deprecated fields detected"
+          fi

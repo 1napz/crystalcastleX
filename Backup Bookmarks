@@ -1,0 +1,24 @@
+name: Backup Bookmarks
+on: [workflow_dispatch, schedule]
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # ← เพียงแค่นี้
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Configure Git
+      run: |
+        git config --local user.email "${{ github.actor }}@users.noreply.github.com"
+        git config --local user.name "${{ github.actor }}"
+    
+    - name: Update files
+      run: echo "test" > test.txt
+    
+    - name: Commit & Push
+      run: |
+        git add .
+        git commit -m "Auto backup" || echo "No changes"
+        git push

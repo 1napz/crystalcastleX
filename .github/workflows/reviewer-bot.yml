@@ -1,0 +1,45 @@
+name: Reviewer Bot
+
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+jobs:
+  reviewer-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Auto Reviewer Comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ### 📝 Reviewer Feedback (Bilingual)
+
+            **English:**  
+            Thank you for your contribution!  
+            Please ensure the following before approval:  
+            - ✅ CI/CD checks passed (lint, unit tests, integration tests).  
+            - ⚠️ Add quota monitoring logs (e.g., "Quota usage: 4/5 → Approaching limit").  
+            - ⚠️ Include security scan step (`npm audit` or `snyk`).  
+            - ❌ Update bilingual documentation in `docs/release-notes.md` and `docs/changelog.md`.  
+            - ✅ Respect repo folder structure (`src/`, `tests/`, `docs/`).  
+
+            **Action Required:**  
+            Update documentation, add security scan, and improve quota monitoring logs before approval.  
+
+            ---
+
+            **ไทย:**  
+            ขอบคุณสำหรับ contribution!  
+            กรุณาตรวจสอบสิ่งต่อไปนี้ก่อน approval:  
+            - ✅ CI/CD checks ผ่าน (lint, unit tests, integration tests)  
+            - ⚠️ เพิ่ม quota monitoring logs (เช่น "Quota usage: 4/5 → ใกล้ถึง limit")  
+            - ⚠️ เพิ่มขั้นตอน security scan (`npm audit` หรือ `snyk`)  
+            - ❌ อัปเดตเอกสาร bilingual ใน `docs/release-notes.md` และ `docs/changelog.md`  
+            - ✅ เคารพโครงสร้างโฟลเดอร์ (`src/`, `tests/`, `docs/`)  
+
+            **สิ่งที่ต้องแก้ไข:**  
+            กรุณาอัปเดตเอกสาร bilingual, เพิ่ม security scan และปรับปรุง quota monitoring logs ก่อน approval

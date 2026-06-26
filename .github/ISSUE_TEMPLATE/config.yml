@@ -1,0 +1,12 @@
+`yaml
+blankissuesenabled: false
+contact_links:
+  - name: 📖 Documentation Hub
+    url: https://github.com/1napz/crystalcastle/tree/main/doc
+    about: อ่านเอกสารก่อนเปิด Issue
+  - name: 💬 Discussions
+    url: https://github.com/1napz/crystalcastle/discussions
+    about: ใช้สำหรับถามคำถามทั่วไปหรือแลกเปลี่ยนไอเดีย
+`
+
+---
