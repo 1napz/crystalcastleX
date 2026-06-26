@@ -1,0 +1,84 @@
+#.coderabbit.yaml
+reviews:
+  profile: chill
+  high_level_summary: true
+  poem: false
+  review_status: false
+  review_details: false
+  auto_review:
+    enabled: true
+    drafts: false
+  incremental_review:
+    enabled: true
+
+  path_filters:
+    - "!docs/"
+    - "!public/"
+    - "!dist/"
+    - "!.next/"
+    - "!*.lock"
+    - "!pnpm-lock.yaml"
+    - "!yarn.lock"
+    - "!package-lock.json"
+    - "!**/__tests__/**"
+    - "!**/*.test.{js,ts,tsx}"
+    - "!**/*.spec.{js,ts,tsx}"
+    - "!**/__mocks__/**"
+    - "!**/migrations/**"
+    - "!**/*.md"
+
+  path_instructions:
+    - path: "api/**/*.js"
+      instructions: |
+        Priority: Security and correctness
+        - ตรวจสอบ try-catch และ error handling ทุก external call
+        - Validate input ด้วย zod/joi ห้ามใช้ req.body ตรงๆ
+        - ตรวจสอบ auth middleware ทุก route ที่ไม่ใช่ public
+        - ใช้ HTTP status codes: 400 bad input, 401 unauth, 403 forbidden, 404 not found, 500 only for unhandled
+        - ห้าม log service_role key, JWT, หรือ PII
+        - Flag SQL string concatenation. Use parameterized queries only
+        - Check for N+1 queries in loops
+
+    - path: "src/**/*.{js,ts,tsx}"
+      instructions: |
+        - ห้ามใส่ secrets, API keys ใน client-side
+        - ใช้ AbortController สำหรับ fetch ที่ยกเลิกได้
+        - Loading/error/empty states ต้อง handle ครบ
+        - Flag `any` type ใน TypeScript
+        - Flag `console.log` ใน production code
+
+    - path: "product.js"
+      instructions: |
+        - ตรวจสอบการเรียก API ด้วย AbortController
+        - ห้ามใส่ secrets ใน client-side
+        - แสดง loading/error/success state ให้ถูกต้อง
+        - Optimistic updates ต้องมี rollback เมื่อ error
+
+    - path: "CHANGELOG.md"
+      instructions: |
+        - ปฏิบัติตาม Keep a Changelog format
+        - ตรวจสอบ MD022: ต้องมี blank line หลัง heading
+        - ตรวจสอบ MD047: ไฟล์ต้องจบด้วย single newline
+        - [Unreleased] ต้องมี link เทียบ version: [Unreleased]: https://github.com/ORG/REPO/compare/v1.6.0...HEAD
+        - Added/Changed/Deprecated/Removed/Fixed/Security ต้องใช้ตาม spec
+
+knowledge_base:
+  instructions: |
+    - ถ้าเจอ `process.env.SUPABASE_SERVICE_ROLE` ใน route handler ให้เตือนว่าใช้ได้เฉพาะ server-side
+    - Project ใช้ Next.js 14 App Router. `cookies()` `headers()` เป็น dynamic functions
+    - DB client คือ `supabase-js`. ห้ามใช้ `service_role` ใน client components
+
+tools:
+  eslint:
+    enabled: true
+  markdownlint:
+    enabled: true
+  semgrep:
+    enabled: true
+
+exclude_authors:
+  - "dependabot[bot]"
+  - "renovate[bot]"
+
+chat:
+  auto_reply: true

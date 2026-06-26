@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CrystalCastle Dashboard</title>
+  <link rel="stylesheet" href="frontend/style.css">
+</head>
+<body class="bg-gray-100">
+<div class="max-w-4xl mx-auto p-6">
+<header class="mb-10">
+  <div class="flex justify-between items-center mb-4">
+    <a href="./artifacts.html" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm px-4 py-2 rounded-full">📁 ผลงานทั้งหมด</a>
+    <a href="./working-space.html" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-full">📊 PR Dashboard</a>
+    <a href="./login.html" class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-full">🔐 เข้าสู่ระบบ</a>
+  </div>
+  <div class="text-center">
+    <div class="inline-block p-4 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm mb-4">
+      <span class="text-6xl">🏰</span>
+    </div>
+    <h1 class="text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">@snapzreview</h1>
+    <p class="text-xl text-gray-400 mt-3">AI Video Studio — อัปโหลดรูป → Gen Prompt → สร้างวิดีโอ</p>
+  </div>
+</header>
+
+  <div class="grid md:grid-cols-3 gap-5 mb-10">
+    <a href="./product.html" class="group bg-gradient-to-br from-purple-600 to-pink-600 p-[1.5px] rounded-2xl hover:scale-[1.02]">
+      <div class="bg-gray-900 rounded-2xl p-6 h-full">
+        <div class="text-4xl mb-3">🎬</div>
+        <h2 class="text-xl font-bold mb-2">เปิด Studio</h2>
+        <p class="text-gray-400 text-sm">อัปโหลดรูป → Gen Prompt (Groq) → สร้างวิดีโอ</p>
+        <p class="text-purple-400 text-xs mt-4">เข้าเลย →</p>
+      </div>
+    </a>
+    <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="text-3xl">📊</div>
+        <h2 class="text-xl font-bold">สถานะระบบ</h2>
+      </div>
+      <div id="statusList" class="space-y-2.5"></div>
+      <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-800">
+        <span id="lastCheck" class="text-xs text-gray-500"></span>
+        <button id="refreshStatusBtn" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1.5 rounded-full">🔄 รีเฟรช</button>
+      </div>
+    </div>
+    <a href="./artifact.html" class="group bg-gradient-to-br from-emerald-600 to-teal-600 p-[1.5px] rounded-2xl hover:scale-[1.02]">
+      <div class="bg-gray-900 rounded-2xl p-6 h-full">
+        <div class="text-4xl mb-3">📁</div>
+        <h2 class="text-xl font-bold mb-2">ผลงานของฉัน</h2>
+        <p class="text-gray-400 text-sm">ดูวิดีโอที่เคยสร้าง, คัดลอก Prompt</p>
+        <p class="text-emerald-400 text-xs mt-4">ดูเลย →</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="bg-gray-900/50 rounded-2xl p-6 border border-gray-800">
+    <h3 class="text-xl font-bold mb-5">🧭 วิธีใช้งาน</h3>
+    <div class="grid md:grid-cols-3 gap-5 text-sm">
+      <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold">1</div><p>เตรียมรูป ตั้งชื่อ <code class="bg-gray-800 px-1.5 py-0.5 rounded text-xs">YYYYMMDD-Category-Brand</code></p></div>
+      <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold">2</div><p>เข้า <strong>Studio</strong> → อัปโหลดรูป → เลือกเครื่องมือ</p></div>
+      <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold">3</div><p>ดาวน์โหลด หรือแชร์ลง TikTok/Shopee</p></div>
+    </div>
+  </div>
+</div>
+
+  <div class="mt-6 text-center">
+    <button 
+      onclick="redirectToToken()" 
+      class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition">
+      🔑 Generate Token
+    </button>
+  </div>
+ <script>
+    function redirectToToken() {
+      // Redirect to token generation page
+      window.location.href = "token.html"; 
+      // Or if you want to hit an API endpoint directly:
+      // window.location.href = "/api/generate-token";
+    }
+  </script>
+
+</body>
+</html>
