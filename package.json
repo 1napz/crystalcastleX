@@ -1,0 +1,8 @@
+{
+  "name": "crystalcastle",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@imgly/background-removal": "^1.0.0"
+  }
+}
