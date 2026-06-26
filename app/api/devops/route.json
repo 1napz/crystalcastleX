@@ -1,0 +1,14 @@
+{
+  "ci": {
+    "status": "success",
+    "commit": "message",
+    "branch": "main",
+    "successRate": 95,
+    "url": "..."
+  },
+  "vercel": {
+    "status": "READY",
+    "url": "..."
+  },
+  "prs": []
+}

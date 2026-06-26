@@ -1,0 +1,101 @@
+name: License Enforcement
+
+on:
+  pull_request:
+    paths:
+      - '**LICENSE*'
+      - 'docs/license/**'
+      - 'frontend/license/**'
+      - 'notuse/**'
+
+jobs:
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify license placement and generate JSON
+        run: |
+          echo "🔍 Checking license placement..."
+
+          root_status="missing"
+          frontend_status="ok"
+          docs_status="optional"
+          archive_status="none"
+          label="license-compliant"
+
+          if [ ! -f LICENSE ]; then
+            root_status="missing"
+            label="license-violation"
+            echo "❌ Root LICENSE file missing"
+            exit 1
+          fi
+
+          if [ -f frontend/LICENSE ]; then
+            frontend_status="forbidden"
+            label="license-violation"
+            echo "❌ LICENSE must not be inside frontend/"
+            exit 1
+          fi
+
+          if [ -f docs/license/LICENSE ]; then
+            docs_status="present"
+          fi
+
+          if [ -f notuse/LICENSE ]; then
+            archive_status="archived"
+          fi
+
+          mkdir -p frontend
+          cat <<EOF > frontend/license-status.json
+          {
+            "root": { "status": "$root_status" },
+            "frontend": { "status": "$frontend_status" },
+            "docs": { "status": "$docs_status" },
+            "archive": { "status": "$archive_status" }
+          }
+          EOF
+
+          echo "LABEL=$label" >> $GITHUB_ENV
+
+      - name: Commit updated license-status.json
+        run: |
+          git config --global user.name "ci-bot"
+          git config --global user.email "ci-bot@example.com"
+          git add frontend/license-status.json
+          git commit -m "ci: update license-status.json after license check" || echo "No changes to commit"
+          git push origin HEAD:${{ github.head_ref }}
+
+      - name: Apply PR label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = process.env.LABEL;
+            github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [label]
+            });
+
+      - name: Post PR compliance comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const status = JSON.parse(fs.readFileSync('frontend/license-status.json', 'utf8'));
+
+            let comment = "### 📜 License Compliance Report\n";
+            comment += `- Root LICENSE: ${status.root.status === "present" ? "🟢 Present" : "🔴 Missing"}\n`;
+            comment += `- Frontend LICENSE: ${status.frontend.status === "forbidden" ? "🔴 Forbidden" : "🟢 OK"}\n`;
+            comment += `- Docs/license/LICENSE: ${status.docs.status === "present" ? "🟢 Present" : "🟡 Optional"}\n`;
+            comment += `- Notuse/LICENSE: ${status.archive.status === "archived" ? "⚪ Archived" : "🟢 None"}\n`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

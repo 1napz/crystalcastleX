@@ -1,0 +1,43 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+  merge_group:
+    types: [ checks_requested ]
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install production dependencies
+        run: npm ci --production
+
+      - name: Run deploy
+        run: npm run deploy
+
+      - name: Notify Slack (Success)
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: "#crystalcastle-review"
+          slack-message: |
+            :rocket: Deployment succeeded
+            📌 Branch synced with merge queue
+            ✅ Ready in production
+
+      - name: Notify Slack (Failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: "#crystalcastle-review"
+          slack-message: |
+            :x: Deployment failed
+            📌 Branch blocked in merge queue
+            ⚠️ Please fix before retry

@@ -1,0 +1,45 @@
+version: 2
+schema: v2
+
+tools:
+  eslint:
+    enabled: true
+    config: .eslintrc.json
+    ignore_path: .eslintignore
+
+path_filters:
+  - path: "src/**/*.js"
+    tools: [eslint]
+    severity: error
+  - path: "tests/**/*.js"
+    tools: [eslint]
+    severity: warn
+  - path: "docs/**/*.md"
+    tools: []
+    severity: off
+
+instructions:
+  - match: "eslint"
+    message: |
+      🔎 ESLint Precheck Summary (บันทึกผลรวม)
+      ✅ Critical rules must pass:
+        - no-undef
+        - no-eval
+        - no-new-func
+        - consistent-return
+        - curly
+      ⚠️ Major rules flagged as warnings:
+        - eqeqeq
+        - no-unused-vars
+      ℹ️ Minor rules optional:
+        - no-console
+        - camelcase
+        - prefer-arrow-callback
+        - no-else-return
+
+      Reviewer cockpit will only see summary:
+      ESLint Result: {passed} passed, {failed} failed
+      Severity: Critical={critical}, Major={major}, Minor={minor}
+
+      รายละเอียดทั้งหมดถูกบันทึกใน:
+      version/CrystalCastle/logs/eslint-report.log

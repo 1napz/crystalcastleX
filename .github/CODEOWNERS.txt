@@ -1,0 +1,11 @@
+# Reviewer หลักสำหรับทุกไฟล์ใน repo
+* @coderabbitai
+
+# Reviewer สำหรับโฟลเดอร์สำคัญ
+/lib/ @coderabbitai @1napz
+/.github/ @coderabbitai @1napz
+/docs/ @coderabbitai @team-docs
+
+# Reviewer สำหรับไฟล์ CI/CD และ Security
+/.github/workflows/ @coderabbitai @team-ci
+/security/ @coderabbitai @team-security
