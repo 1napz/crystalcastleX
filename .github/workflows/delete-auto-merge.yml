@@ -1,0 +1,30 @@
+name: Delete dependent-bot-auto-merge.json (Manual)
+
+on:
+workflow_dispatch: # ให้กด Run workflow ด้วยมือได้
+
+permissions:
+contents: write # จำเป็นต้องมีเพื่อ push commit กลับ
+
+jobs:
+delete:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout repository
+uses: actions/checkout@v4
+
+- name: Delete dependent-bot-auto-merge.json
+run: |
+if [ -f "dependent-bot-auto-merge.json" ]; then
+rm package-lock.json
+echo "✅ Deleted dependent-bot-auto-merge.json"
+else
+echo "⚠️ File not found, nothing to delete"
+fi
+
+- name: Commit and push if changed
+run: |
+git config user.name "github-actions[bot]"
+git config user.email "github-actions[bot]@users.noreply.github.com"
+git add -A
+git diff --staged --quiet || git commit -m "chore: delete package-lock.json (manual workflow)" && git push
