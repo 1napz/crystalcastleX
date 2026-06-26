@@ -1,0 +1,35 @@
+name: Supabase Backup
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # ✅ เพิ่มแล้ว
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Link Supabase project
+        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      
+      - name: Dump database
+        run: supabase db dump --data-only > backups/backup_$(date +%Y%m%d).sql
+      
+      - name: Commit and push backup
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add backups/
+          git commit -m "backup: daily database dump" || echo "No changes"
+          git push

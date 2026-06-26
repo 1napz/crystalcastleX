@@ -1,0 +1,3 @@
+3.	workflows-crystalcastle-ci.md
+o	อธิบาย workflow สำหรับ project ที่ใช้ pnpm (เช่น crystalcastle)
+o	แยก job lint / test / build, อธิบาย needs, cache, และ policy merge (เช่น ต้องผ่านทุก job ก่อน merge).[31][36]
