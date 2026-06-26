@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Castle - เครื่องเจียระไน Lite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
+  <div class="container max-w-2xl mx-auto p-4 md:p-8">
+    
+    <header class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">🎬 เครื่องเจียระไน Lite</h1>
+      <p class="text-gray-600">อัพรูปสินค้า → เจนวิดีโอ AI อัตโนมัติ</p>
+      <a href="/mission-control.html" class="text-sm text-purple-600 hover:underline mt-2 inline-block">← กลับฐานบัญชาการ</a>
+    </header>
+
+    <section class="bg-white rounded-2xl shadow-xl p-6 md:p-8 space-y-6">
+      
+      <!-- 1. อัพรูป -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">1. เลือกรูปสินค้า</label>
+        <input 
+          type="file" 
+          id="fileInput" 
+          accept="image/*" 
+          class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:bg-purple-100 file:text-purple-700 file:font-medium hover:file:bg-purple-200 cursor-pointer"
+        >
+        <img id="imagePreview" class="hidden w-full mt-3 rounded-lg border-2 border-purple-200">
+      </div>
+
+      <!-- 2. ตั้งชื่อไฟล์ ออโต้ -->
+      <div class="space-y-3">
+        <label class="block text-sm font-semibold text-gray-700">2. ตั้งชื่อไฟล์</label>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="text-xs text-gray-500 mb-1 block">วันที่</label>
+            <input 
+              id="dateInput" 
+              type="text" 
+              readonly 
+              class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-mono"
+            >
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 mb-1 block">Category</label>
+            <select 
+              id="categorySelect" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+            >
+              <option>Menswear</option>
+              <option>Womenswear</option>
+              <option>Accessories</option>
+              <option>Shoes</option>
+              <option>Bags</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 mb-1 block">Brand</label>
+            <input 
+              id="brandInput" 
+              type="text" 
+              placeholder="Zara" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+            >
+          </div>
+        </div>
+        <input 
+          id="filenameInput" 
+          type="text" 
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm bg-gray-50"
+        >
+        <p class="text-xs text-gray-500">ออโต้ตามวันที่จริง แก้เองได้ถ้าต้องการ</p>
+      </div>
+
+      <!-- 3. Prompt -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">3. Prompt สำหรับเจนคลิป</label>
+        <div class="flex gap-2">
+          <textarea 
+            id="promptInput" 
+            rows="3" 
+            placeholder="เช่น A model walking on runway, wearing this outfit, cinematic lighting" 
+            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm"
+          ></textarea>
+          <button 
+            id="genPromptBtn" 
+            class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition whitespace-nowrap h-fit"
+          >
+            ✨ Gen Prompt
+          </button>
+        </div>
+        <p class="text-xs text-gray-500">กดปุ่มให้ AI ช่วยคิด Prompt จากชื่อสินค้า</p>
+      </div>
+
+      <!-- 4. เลือก Engine -->
+      <div class="space-y-3">
+        <label class="block text-sm font-semibold text-gray-700">4. เลือก Engine เจนคลิป</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <button 
+            id="genFALBtn" 
+            class="px-4 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+          >
+            <div class="text-base">🚀 FAL Kling</div>
+            <div class="text-xs opacity-90 mt-1">เร็ว 1-2 นาที | 5 วิ | 1.8 บาท</div>
+          </button>
+          <button 
+            id="genHFBtn" 
+            class="px-4 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+          >
+            <div class="text-base">🆓 Hugging Face</div>
+            <div class="text-xs opacity-90 mt-1">ฟรี 100% | 3-10 นาที | 3 วิ</div>
+          </button>
+        </div>
+        <div id="statusText" class="text-sm text-gray-700 text-center hidden p-4 bg-purple-50 border border-purple-200 rounded-lg font-medium"></div>
+      </div>
+
+    </section>
+
+    <footer class="text-center mt-8 text-xs text-gray-500">
+      Crystal Castle Lite v1.0 | Powered by Vercel + HuggingFace
+    </footer>
+
+  </div>
+  <script src="product.js"></script>
+</body>
+</html>
