@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal Castle — AI Video Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+<div class="max-w-4xl mx-auto p-6">
+<header class="mb-10">
+<h1 class="text-5xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">CRYSTAL CASTLE</h1>
+<p class="text-xl text-gray-400 mt-3">AI Video Studio — อัปรูป → Gen Prompt → สร้างวิดีโอ</p>
+<p class="text-sm text-gray-500 mt-1">อัปเดตล่าสุด: 23 เม.ย. 2026</p>
+</header>
+
+<div class="grid md:grid-cols-2 gap-4 mb-12">
+<a href="/product.html" class="group bg-gradient-to-br from-purple-600 to-pink-600 p-[1px] rounded-2xl">
+<div class="bg-gray-900 rounded-2xl p-6 h-full group-hover:bg-gray-800 transition">
+<div class="text-3xl mb-3">🎬</div>
+<h2 class="text-xl font-bold mb-2">เปิด Studio</h2>
+<p class="text-gray-400 text-sm">อัปรูป → Gen Prompt (Groq) → FAL Kling → Generate Post</p>
+<p class="text-purple-400 text-xs mt-3">เข้าเลย →</p>
+</div>
+</a>
+
+<div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="flex justify-between items-start mb-3">
+    <div class="flex items-center gap-3">
+        <div class="text-3xl">📊</div>
+        <h2 class="text-xl font-bold">สถานะระบบ</h2>
+    </div>
+    <div class="flex items-center gap-2">
+        <a href="/api-check.html" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-full transition flex items-center gap-1">
+            🔍 ตรวจสอบ API
+        </a>
+        <span id="lastCheck" class="text-xs text-gray-500">กำลังเช็ค...</span>
+    </div>
+</div>
+<span id="lastCheck" class="text-xs text-gray-500">กำลังเช็ค...</span>
+</div>
+<ul id="statusList" class="text-sm space-y-2"><li class="text-gray-500">กำลังโหลด...</li></ul>
+</div>
+</div>
+
+<div class="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+<h3 class="text-2xl font-bold mb-6">🧭 วิธีใช้งาน</h3>
+<div class="space-y-4 text-gray-300 text-sm">
+<p><strong class="text-white">1.</strong> เตรียมรูป ตั้งชื่อ <code class="bg-gray-800 px-2 py-1 rounded">YYYYMMDD-Category-Brand</code></p>
+<p><strong class="text-white">2.</strong> เข้า Studio → อัปรูป → กด "✨ Gen Prompt"</p>
+<p><strong class="text-white">3.</strong> เลือก FAL Kling (แนะนำ) วิดีโอจะเก็บใน Supabase อัตโนมัติ</p>
+</div>
+</div>
+</div>
+
+<script>
+const endpoints = [
+  { name: 'Gen Prompt', path: '/api/prompt', method: 'POST', testBody: { user_prompt: 'test', category: 'test' } },
+  { name: 'Generate Post', path: '/api/post', method: 'POST', testBody: { prompt: 'test', brand: 'test', category: 'test' } },
+  { name: 'FAL Kling', path: '/api/video', method: 'POST', testBody: { image_url: 'https://example.com/test.jpg', prompt: 'test' } },
+  { name: 'Magic Hour', path: '/api/magichour', method: 'POST', testBody: { image_url: 'https://example.com/test.jpg', prompt: 'test' } },
+  { name: 'Upload', path: '/api/upload', method: 'POST' }
+];
+
+async function checkStatus() {
+  const list = document.getElementById('statusList');
+  list.innerHTML = '';
+  
+  for (const ep of endpoints) {
+    const li = document.createElement('li');
+    li.className = 'flex justify-between items-start gap-2 mb-2';
+    li.innerHTML = `<span class="text-gray-400 flex-shrink-0">${ep.name}</span><span>⏳</span>`;
+    list.appendChild(li);
+    
+    try {
+      let res;
+      if (ep.method === 'POST' && ep.testBody) {
+        res = await fetch(ep.path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(ep.testBody),
+          signal: AbortSignal.timeout(5000)
+        });
+      } else {
+        res = await fetch(ep.path, { method: 'HEAD', signal: AbortSignal.timeout(3000) });
+      }
+      
+      const ok = res.ok || res.status === 405;
+      if (ok) {
+        li.lastElementChild.innerHTML = '<span class="text-green-400">✅ ทำงาน</span>';
+      } else {
+        let errorDetail = '';
+        try {
+          const errorData = await res.clone().json();
+          errorDetail = errorData.error || errorData.details || '';
+        } catch(e) {}
+        li.lastElementChild.innerHTML = `<span class="text-red-400">❌ ${res.status}</span><span class="text-xs text-gray-500 ml-2">${errorDetail.slice(0, 50)}</span>`;
+      }
+    } catch(err) {
+      li.lastElementChild.innerHTML = `<span class="text-red-400">❌ ${err.name}</span><span class="text-xs text-gray-500 ml-2">${err.message.slice(0, 40)}</span>`;
+    }
+  }
+  document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString('th-TH');
+}
+
+checkStatus();
+setInterval(checkStatus, 30000);
+</script>
+</body>
+</html>
