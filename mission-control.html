@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Castle - Mission Control</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Crystal Castle</h1>
+      <p>ฐานบัญชาการ: เจียระไนสินค้าให้เป็นคลิปทองคำ ติดตะกร้า ทำเงินทุกวัน</p>
+      <a href="/" style="color: #666; font-size: 14px;">← กลับหน้าแรก</a>
+    </header>
+
+    <section class="mission-board">
+      <h2>ลำดับภารกิจ - โฟกัส P1 ก่อนเสมอ</h2>
+      
+      <a href="/generate.html" class="mission-card priority-1">
+        <div class="priority-tag">P1: ทำเงิน</div>
+        <h3>🎬 สร้างวิดีโอปักตะกร้า</h3>
+        <p>เครื่องมือหลัก อัพรูปสินค้า → ใส่พร้อมพ์ → เจนวิดีโอ → โหลดไปลง TikTok</p>
+        <div class="status">สถานะ: <span class="todo">พร้อมเจียระไน</span></div>
+      </a>
+
+      <a href="/log.html" class="mission-card priority-2">
+        <div class="priority-tag">P2: ฉลาดขึ้น</div>
+        <h3>📊 Research & เก็บ Log</h3>
+        <p>บันทึก: รูปไหน+พร้อมพ์อะไร=ยอดวิว/ยอดขายเท่าไหร่ เพื่อหาสไตล์ที่ปัง</p>
+        <div class="status">สถานะ: <span class="todo">รอทำถัดไป</span></div>
+      </a>
+
+      <a href="/health.html" class="mission-card priority-3">
+        <div class="priority-tag">P3: เครื่องมือ</div>
+        <h3>🩺 Health Check ระบบ</h3>
+        <p>เช็ค Supabase, FAL API, เครดิต ห้ามพังตอนปั๊มคลิป</p>
+        <div class="status">สถานะ: <span class="done">พร้อมใช้</span></div>
+      </a>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>📈 บอร์ดสรุปผลงาน 7 วันล่าสุด</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-number" id="total-videos">12</div>
+          <div class="stat-label">คลิปที่เจียระไน</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="total-views">8.4K</div>
+          <div class="stat-label">ยอดวิวรวม</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="total-sales">฿2,340</div>
+          <div class="stat-label">ยอดขายตะกร้า</div>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <h3>กราฟคลิปที่ทำได้รายวัน</h3>
+        <div class="bar-chart">
+          <div class="bar" style="height: 40%;"><span>จ</span></div>
+          <div class="bar" style="height: 60%;"><span>อ</span></div>
+          <div class="bar" style="height: 100%;"><span>พ</span></div>
+          <div class="bar" style="height: 30%;"><span>พฤ</span></div>
+          <div class="bar" style="height: 70%;"><span>ศ</span></div>
+          <div class="bar" style="height: 20%;"><span>ส</span></div>
+          <div class="bar" style="height: 50%;"><span>อา</span></div>
+        </div>
+      </div>
+
+      <div class="log-table-box">
+        <h3>หัวข้อที่ทำ + ผลลัพธ์ล่าสุด</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>สินค้า</th>
+              <th>สไตล์พร้อมพ์</th>
+              <th>ยอดวิว</th>
+              <th>ยอดขาย</th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody">
+            <tr>
+              <td>20 เม.ย.</td>
+              <td>ครีมกันแดด</td>
+              <td>สาวเกาหลีคาเฟ่</td>
+              <td>2.1K</td>
+              <td class="win">฿890</td>
+            </tr>
+            <tr>
+              <td>19 เม.ย.</td>
+              <td>หูฟัง BT</td>
+              <td>หนุ่มเท่ห้องมืด</td>
+              <td>1.5K</td>
+              <td class="win">฿1,200</td>
+            </tr>
+            <tr>
+              <td>19 เม.ย.</td>
+              <td>แก้วเก็บความเย็น</td>
+              <td>ASMR เทน้ำ</td>
+              <td>3.2K</td>
+              <td class="lose">฿250</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 Crystal Castle | P1 ทำเงินต้องมาก่อน</p>
+    </footer>
+  </div>
+</body>
+</html>
