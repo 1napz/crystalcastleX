@@ -1,0 +1,32 @@
+name: Telegram Alerts
+
+on:
+  workflow_run:
+    workflows: ["Security Scan with Microsoft Defender", "Vercel Deploy", "Frontend Build & Deploy"]
+    types:
+      - completed
+
+jobs:
+  send-telegram-alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Critical Alert
+        if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="🚨 CrystalCastle Alert: Workflow FAILED at ${{ github.event.workflow_run.name }} (commit: ${{ github.event.workflow_run.head_sha }})\n❌ แจ้งเตือน CrystalCastle: Workflow ล้มเหลว ที่ ${{ github.event.workflow_run.name }} (commit: ${{ github.event.workflow_run.head_sha }})"
+
+      - name: Send Success Alert
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="✅ CrystalCastle Info: Workflow ${{ github.event.workflow_run.name }} completed successfully\n✅ ข้อมูล CrystalCastle: Workflow ${{ github.event.workflow_run.name }} สำเร็จเรียบร้อยแล้ว"
+
+      - name: Send Warning Alert (Rate Limit Example)
+        if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.name == 'Security Scan with Microsoft Defender' }}
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="⚠️ CrystalCastle Alert: Security Scan quota nearly exhausted\n⚠️ แจ้งเตือน CrystalCastle: โควต้า Security Scan ใกล้หมดแล้ว"
