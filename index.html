@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CrystalCastle Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; }
+    header { background: #222; color: #fff; padding: 1rem; text-align: center; }
+    nav { background: #444; padding: 0.5rem; text-align: center; }
+    nav a { color: #fff; margin: 0 1rem; text-decoration: none; }
+    section { padding: 2rem; }
+    .card { background: #fff; padding: 1rem; margin: 1rem auto; max-width: 600px; border-radius: 8px; }
+    .card h2 { margin-top: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CrystalCastle Dashboard</h1>
+    <p>Centralized Access to Boards, Docs, and Diagrams</p>
+  </header>
+
+  <nav>
+    <a href="/board/index.html">Project Board</a>
+    <a href="/board/prompt.html">Knowledge/Prompt Board</a>
+    <a href="/board/docs/">Docs</a>
+    <a href="/board/diagrams/">Diagrams</a>
+  </nav>
+
+  <section>
+    <div class="card">
+      <h2>📊 Project Board</h2>
+      <p>Track Issues & Pull Requests with workflow columns.</p>
+      <a href="/board/index.html">Open Project Board →</a>
+    </div>
+
+    <div class="card">
+      <h2>🧠 Knowledge/Prompt Board</h2>
+      <p>Develop, test, and validate prompts for CrystalCastle Knowledge Log.</p>
+      <a href="/board/prompt.html">Open Prompt Board →</a>
+    </div>
+
+    <div class="card">
+      <h2>📑 Documentation</h2>
+      <p>Reviewer checklist, audit trail, governance rules.</p>
+      <a href="/board/docs/">View Docs →</a>
+    </div>
+
+    <div class="card">
+      <h2>📈 Diagrams</h2>
+      <p>Workflow and audit trail diagrams (Mermaid).</p>
+      <a href="/board/diagrams/">View Diagrams →</a>
+    </div>
+  </section>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client CRM & Quote Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+
+    <nav class="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center">
+        <h1 class="text-xl font-bold">🚀 ClientHub MVP</h1>
+        <span class="text-sm bg-blue-700 px-3 py-1 rounded">Offline Mode Active</span>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">👤 Add New Client <span class="text-xs text-gray-400">(Saves Offline)</span></h2>
+                <form id="clientForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="text" id="clientName" placeholder="Client Name / ชื่อลูกค้า" class="p-2 border rounded w-full" required>
+                    <input type="text" id="clientCompany" placeholder="Company / บริษัท" class="p-2 border rounded w-full">
+                    <input type="email" id="clientEmail" placeholder="Email / อีเมล" class="p-2 border rounded w-full">
+                    <button type="submit" class="sm:col-span-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition">Save Client</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="text-lg font-bold mb-4">📋 Client Directory</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b bg-gray-100 text-sm">
+                                <th class="p-3">Name</th>
+                                <th class="p-3">Company</th>
+                                <th class="p-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-fit">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold">💰 Quote Builder</h2>
+                <select id="langToggle" class="bg-gray-100 p-1 rounded text-sm font-semibold border">
+                    <option value="en">English (EN)</option>
+                    <option value="th">ไทย (TH)</option>
+                </select>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Target Client</label>
+                    <select id="quoteClientSelect" class="w-full p-2 border rounded bg-white">
+                        <option value="">Select a client...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1" id="lblService">Service Scope</label>
+                    <select id="serviceSelect" class="w-full p-2 border rounded bg-white">
+                        <option value="web" data-en="Web Development" data-th="พัฒนาเว็บไซต์">Web Development / พัฒนาเว็บไซต์</option>
+                        <option value="design" data-en="UI/UX Design" data-th="ออกแบบ UI/UX">UI/UX Design / ออกแบบ UI/UX</option>
+                        <option value="consulting" data-en="IT Consulting" data-th="ที่ปรึกษาด้านไอที">IT Consulting / ที่ปรึกษาด้านไอที</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1" id="lblCost">Estimated Cost (THB)</label>
+                    <input type="number" id="quoteCost" value="50000" class="w-full p-2 border rounded">
+                </div>
+                <button id="generateQuoteBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded transition">
+                    Generate Output
+                </button>
+            </div>
+
+            <div class="mt-6 p-4 bg-gray-50 border rounded-lg hidden" id="quoteOutputBox">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Generated Text</span>
+                    <button onclick="navigator.clipboard.writeText(document.getElementById('quoteText').innerText); alert('Copied!');" class="text-xs text-blue-600 hover:underline">Copy</button>
+                </div>
+                <p id="quoteText" class="text-sm text-gray-700 whitespace-pre-line bg-white p-3 border rounded shadow-inner"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Dictionary for Bilingual switching
+        const dict = {
+            en: {
+                greeting: "Dear",
+                intro: "Thank you for the meeting. Here is the preliminary quote for your project details:",
+                service: "Project Scope",
+                cost: "Estimated Investment",
+                total: "Total",
+                footer: "This is an initial estimate. Final terms to be detailed in the official contract.",
+                lblService: "Service Scope",
+                lblCost: "Estimated Cost (THB)"
+            },
+            th: {
+                greeting: "เรียนคุณ",
+                intro: "ขอบคุณสำหรับข้อมูลหลังจากการประชุมร่วมกัน นี่คือเอกสารเสนอราคาเบื้องต้นสำหรับโครงการของคุณ:",
+                service: "ขอบเขตงานประกอบด้วย",
+                cost: "ประมาณการค่าใช้จ่าย",
+                total: "ยอดรวมทั้งสิ้น",
+                footer: "นี่คือการประเมินราคาเบื้องต้น เงื่อนไขสุดท้ายจะระบุไว้ในสัญญาฉบับจริง",
+                lblService: "ขอบเขตบริการ",
+                lblCost: "ราคาประเมิน (บาท)"
+            }
+        };
+
+        let clients = JSON.parse(localStorage.getItem('crm_clients')) || [];
+
+        // UI Elements
+        const clientForm = document.getElementById('clientForm');
+        const clientTableBody = document.getElementById('clientTableBody');
+        const quoteClientSelect = document.getElementById('quoteClientSelect');
+        const langToggle = document.getElementById('langToggle');
+        const generateQuoteBtn = document.getElementById('generateQuoteBtn');
+
+        function render() {
+            // Save to localStorage
+            localStorage.setItem('crm_clients', JSON.stringify(clients));
+            
+            // Clear items
+            clientTableBody.innerHTML = '';
+            quoteClientSelect.innerHTML = '<option value="">Select a client...</option>';
+
+            // Populate items
+            clients.forEach((client, index) => {
+                // Table row
+                const row = document.createElement('tr');
+                row.className = "border-b text-sm hover:bg-gray-50";
+                row.innerHTML = `
+                    <td class="p-3 font-medium">${client.name}</td>
+                    <td class="p-3 text-gray-500">${client.company || '-'}</td>
+                    <td class="p-3"><button onclick="deleteClient(${index})" class="text-red-500 hover:underline text-xs">Delete</button></td>
+                `;
+                clientTableBody.appendChild(row);
+
+                // Quote dropdown option
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.textContent = `${client.name} (${client.company || 'N/A'})`;
+                quoteClientSelect.appendChild(opt);
+            });
+        }
+
+        // Handle language label updates dynamically
+        langToggle.addEventListener('change', () => {
+            const l = langToggle.value;
+            document.getElementById('lblService').textContent = dict[l].lblService;
+            document.getElementById('lblCost').textContent = dict[l].lblCost;
+        });
+
+        // Add client logic
+        clientForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newClient = {
+                name: document.getElementById('clientName').value,
+                company: document.getElementById('clientCompany').value,
+                email: document.getElementById('clientEmail').value
+            };
+            clients.push(newClient);
+            clientForm.reset();
+            render();
+        });
+
+        // Delete client logic
+        window.deleteClient = function(index) {
+            clients.splice(index, 1);
+            render();
+        };
+
+        // Quote Generation Engine
+        generateQuoteBtn.addEventListener('click', () => {
+            const lang = langToggle.value;
+            const clientIndex = quoteClientSelect.value;
+            const serviceOpt = document.getElementById('serviceSelect').selectedOptions[0];
+            const cost = Number(document.getElementById('quoteCost').value).toLocaleString();
+
+            const clientName = clientIndex !== "" ? clients[clientIndex].name : "[Client Name]";
+            const serviceName = serviceOpt.getAttribute(`data-${lang}`);
+
+            const text = `${dict[lang].greeting} ${clientName},\n\n${dict[lang].intro}\n\n• ${dict[lang].service}: ${serviceName}\n• ${dict[lang].cost}: ฿${cost} THB\n\n${dict[lang].footer}`;
+            
+            document.getElementById('quoteText').innerText = text;
+            document.getElementById('quoteOutputBox').classList.remove('hidden');
+        });
+
+        // Initial Run
+        render();
+    </script>
+</body>
+</html>
+

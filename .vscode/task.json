@@ -1,0 +1,38 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🛠️ [Dev] Run UI Tests (Chromium-Headed)",
+            "type": "shell",
+            "command": "npx playwright test --project=chromium --headed",
+            "group": "test",
+            "detail": "รันการทดสอบหน้าเว็บแบบเปิดเบราว์เซอร์เพื่อเช็คความสวยงาม [4, 5]"
+        },
+        {
+            "label": "👗 [Affiliate] Broken Link Checker",
+            "type": "shell",
+            "command": "python shopee_affiliate.py",
+            "group": "test",
+            "detail": "ตรวจสอบลิงก์สินค้าแฟชั่น 50+ รายการเพื่อรักษา Conversion Rate [6, 7]"
+        },
+        {
+            "label": "🧹 [System] Master Environment Reset",
+            "type": "shell",
+            "command": "rm -rf node_modules && pnpm store prune && pnpm install",
+            "problemMatcher": [],
+            "detail": "ล้างเครื่องและติดตั้ง Library ใหม่ทั้งหมดเพื่อแก้ปัญหา Environment conflict [8, 9]"
+        },
+        {
+            "label": "🚀 [Deploy] Local Vercel Preview",
+            "type": "shell",
+            "command": "vercel deploy",
+            "detail": "Deploy ขึ้น Vercel Preview เพื่อตรวจทานงานก่อน Push จริง [10]"
+        },
+        {
+            "label": "📊 [Docs] Preview Knowledge Base",
+            "type": "shell",
+            "command": "mkdocs serve",
+            "detail": "เปิดดูหน้าเว็บเอกสาร Crystal Castle ในเครื่อง Local [11]"
+        }
+    ]
+}

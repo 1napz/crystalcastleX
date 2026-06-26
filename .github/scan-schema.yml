@@ -1,0 +1,38 @@
+project: path-scan-automation
+version: 1.0.0
+maintainer: 1napz
+components:
+  - path: scripts/scan_paths.py
+    role: scanner
+  - path: scripts/create_github_issues.py
+    role: issue-creator
+  - path: scripts/create_clickup_tasks.py
+    role: clickup-creator
+triggers:
+  - pull_request: true
+  - schedule: "0 2 * * *"
+secrets_required:
+  - GITHUB_TOKEN
+  - GITHUB_PAT
+  - CLICKUP_TOKEN
+  - CLICKUP_LIST_ID
+inputs:
+  codeowners_paths:
+    - CODEOWNERS
+    - .github/CODEOWNERS
+outputs:
+  - path_report.md
+  - path_report.json
+dedupe:
+  key_format: "scan://{repo}:{file}:{lineno}:{match}"
+policies:
+  fail_on_issue: false
+  severity_threshold: low
+tests:
+  unit: tests/test_scan.py
+  fixtures: tests/fixtures/
+deployment:
+  instructions: docs/ops.md
+notifications:
+  slack: ${{ secrets.SLACK_WEBHOOK }}
+  line: ${{ secrets.LINE_WEBHOOK }}

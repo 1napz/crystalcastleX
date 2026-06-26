@@ -1,0 +1,27 @@
+
+name: 🚀 Crystal Castle Dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_mode:
+        description: '📱 เลือกโหมดการทำงาน'
+        required: true
+        default: 'check_status'
+        type: choice
+        options:
+          - check_status
+          - fetch_openai_feed
+
+jobs:
+  trigger-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🟢 เช็กการเชื่อมต่อระบบ
+        run: |
+          echo "ระบบเริ่มทำงานด้วยคำสั่งแมนนวลสำเร็จ!"
+          echo "โหมดที่เลือกคือ: ${{ github.event.inputs.run_mode }}"
+          echo "อัปเดตล่าสุด: YYYY-MM-DD"
+```
+
+---

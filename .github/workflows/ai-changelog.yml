@@ -1,0 +1,25 @@
+name: AI Changelog
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate changelog
+        run: node scripts/generate-changelog.js
+
+      - name: Commit docs
+        run: |
+          git config user.name "ai-doc-bot"
+          git config user.email "bot@crystalcastle.dev"
+
+          git add docs/CHANGELOG.md
+          git commit -m "docs: auto update changelog" || exit 0
+          git push

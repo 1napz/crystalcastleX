@@ -1,0 +1,2 @@
+- name: Copy log to docs
+  run: cp logs/action_review.log docs/action_review.md

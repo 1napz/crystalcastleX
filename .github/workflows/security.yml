@@ -1,0 +1,44 @@
+# .github/workflows/security.yml
+name: Security and Compliance
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  trufflehog-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.before }}
+          head: ${{ github.sha }}
+          extra_args: --only-verified
+
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if grep -R "API_KEY" .; then exit 1; fi
+          if grep -R "SECRET" .; then exit 1; fi
+
+  ignore-file-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if git diff --name-only origin/main HEAD | grep -E ".gitignore|.eslintignore|.vercelignore"; then exit 1; fi
+
+  repo-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          VERSION=$(node -p "require('./package.json').version")
+          CHANGELOG_VERSION=$(grep -m1 '^## ' changelog.md | sed 's/## //')
+          if [ "$VERSION" != "$CHANGELOG_VERSION" ]; then exit 1; fi

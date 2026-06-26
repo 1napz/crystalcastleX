@@ -1,0 +1,44 @@
+version: 2
+updates:
+  # Root Next.js project
+    - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Asia/Bangkok"
+    open-pull-requests-limit: 5
+    labels:
+            - "dependencies"
+            - "nextjs"
+    groups:
+      nextjs:
+        patterns:
+                    - "next"
+                    - "react*"
+                    - "@types/react*"
+      dev-deps:
+        dependency-type: "development"
+        update-types: ["patch", "minor"]
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Docker
+    - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      timezone: "Asia/Bangkok"
+    labels: ["dependencies", "docker"]
+
+  # GitHub Actions
+    - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      timezone: "Asia/Bangkok"
+    labels: ["dependencies", "ci"]
+    commit-message:
+      prefix: "ci"
