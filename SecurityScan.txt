@@ -1,0 +1,29 @@
+name: Security Scan with Microsoft Defender
+
+on:
+pull_request:
+branches: ["main"]
+push:
+branches: ["main"]
+
+jobs:
+security-scan:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout repo
+uses: actions/checkout@v4
+
+- name: Initialize CodeQL
+uses: github/codeql-action/init@v3
+with:
+languages: javascript, python
+
+- name: Perform CodeQL scan
+uses: github/codeql-action/analyze@v3
+
+- name: Upload results to Microsoft Defender
+env:
+DEFENDER_TOKEN:  DEFENDER_TOKEN" 
+ -H "Content-Type: application/json" 
+ --data-binary @codeql-results.json 
+ https://defender.microsoft.com/api/code-to-cloud/upload

@@ -1,0 +1,35 @@
+version: 2
+
+instructions:
+  default_comment_style: concise
+  comment_format_v2: |
+    ⚠️ Issue: {{issue}}
+    👉 Action Required: {{suggestion}}
+    📂 File: {{file}}
+
+  comment_format_v1: |
+    🚨 High Risk Detected
+    File: {{file}}
+    Issue: {{issue}}
+    Details: {{details}}
+    Suggested Fix: {{suggestion}}
+    Impact: {{impact}}
+    Reviewer Notes: Manual check required
+
+rules:
+  - id: concise-comments
+    description: "Default concise actionable comments"
+    severity: minor
+    enforce:
+      files: ["**/*"]
+    suggest:
+      - "Summarize actionable fix in checklist form"
+
+  - id: high-risk-comments
+    description: "Switch to verbose Version1 format for high risk issues"
+    severity: critical
+    match:
+      - pattern: "security|token|license|compliance|unsafe"
+    enforce:
+      files: ["**/*"]
+    instructions: "Use comment_format_v1 for high risk findings"

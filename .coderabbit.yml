@@ -1,0 +1,33 @@
+`yaml
+
+Crystal Castle – CodeRabbit Config
+
+reviewers:
+  - coderabbitai
+
+instructions:
+  general: |
+    เขียน review โดยอธิบายเหตุผลชัดเจน
+    ถ้ามี bug หรือ security issue ให้แนะนำวิธีแก้
+    ถ้าเป็น style issue ให้เสนอ refactor ที่เหมาะสม
+    เขียน reviewer notes ลงไฟล์ docs/review_notes.md
+    เขียน unit test suggestion สำหรับทุก function ใหม่
+
+rules:
+  - paths: ["lib/"]
+    instructions: |
+      ตรวจสอบ logic และเสนอ refactor ถ้าจำเป็น
+      เขียน reviewer notes อธิบายการเปลี่ยนแปลง
+
+  - paths: ["tests/"]
+    instructions: |
+      เขียน unit test suggestion ครอบคลุมทุก function
+      ตรวจสอบว่า test coverage เพียงพอ
+
+  - paths: ["docs/"]
+    instructions: |
+      เขียน reviewer notes อัปเดต docs อัตโนมัติ
+      ตรวจสอบว่า onboarding guide สอดคล้องกับ workflow ล่าสุด
+`
+
+---

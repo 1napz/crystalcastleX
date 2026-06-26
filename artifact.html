@@ -1,0 +1,25 @@
+<div id="artifactList"></div>
+
+<script>
+  function loadArtifacts() {
+    const artifacts = JSON.parse(localStorage.getItem("artifacts")) || [];
+    const listDiv = document.getElementById("artifactList");
+
+    if (artifacts.length === 0) {
+      listDiv.innerHTML = "<p>ยังไม่มีผลงานที่บันทึกไว้</p>";
+      return;
+    }
+
+    // สร้างรายการแสดงผล
+    let html = "<ul>";
+    artifacts.forEach(item => {
+      html += `<li>${item.name} <small>(สร้างเมื่อ: ${item.createdAt})</small></li>`;
+    });
+    html += "</ul>";
+
+    listDiv.innerHTML = html;
+  }
+
+  // โหลดทันทีเมื่อเปิดหน้า
+  window.onload = loadArtifacts;
+</script>
