@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Diagnostic - Crystal Castle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-2">🔍 API Diagnostic Tool</h1>
+        <p class="text-gray-400 mb-6">ตรวจสอบว่า API แต่ละตัวทำงานหรือไม่ และ error อะไร</p>
+
+        <div class="bg-gray-900 rounded-xl p-4 mb-6">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse" id="liveIndicator"></div>
+                <span class="text-sm text-gray-400">ตรวจสอบแบบ Real-time</span>
+                <button id="refreshBtn" class="ml-auto bg-purple-600 px-3 py-1 rounded text-sm hover:bg-purple-700">🔄 ตรวจสอบอีกครั้ง</button>
+            </div>
+            <div id="results" class="space-y-3">
+                <!-- ผลลัพธ์จะแสดงที่นี่ -->
+                <div class="text-center text-gray-500 py-8">กำลังตรวจสอบ...</div>
+            </div>
+        </div>
+
+        <div class="bg-gray-900 rounded-xl p-4">
+            <h2 class="font-semibold mb-3">📋 Environment Variables (ตรวจสอบ)</h2>
+            <div id="envStatus" class="space-y-2 text-sm">
+                <!-- แสดงสถานะ Environment Variables -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // รายการ API ที่จะตรวจสอบ
+        const endpoints = [
+            { 
+                name: '📸 Upload', 
+                path: '/api/upload', 
+                method: 'POST',
+                testBody: null,  // ใช้ HEAD ถ้าไม่มี body
+                needBody: false
+            },
+            { 
+                name: '🎬 FAL Kling (Video)', 
+                path: '/api/video', 
+                method: 'POST',
+                testBody: { image_url: 'https://example.com/test.jpg', prompt: 'test video' },
+                needBody: true
+            },
+            { 
+                name: '✨ Magic Hour', 
+                path: '/api/magichour', 
+                method: 'POST',
+                testBody: { image_url: 'https://example.com/test.jpg', prompt: 'test' },
+                needBody: true
+            },
+            { 
+                name: '🤖 Gen Prompt', 
+                path: '/api/prompt', 
+                method: 'POST',
+                testBody: { user_prompt: 'test product video', category: 'Menswear' },
+                needBody: true
+            },
+            { 
+                name: '📝 Generate Post', 
+                path: '/api/post', 
+                method: 'POST',
+                testBody: { prompt: 'test', brand: 'Nike', category: 'Shoes' },
+                needBody: true
+            }
+        ];
+
+        // ฟังก์ชันตรวจสอบ API
+        async function checkAPI(ep) {
+            const startTime = Date.now();
+            
+            try {
+                let response;
+                const options = {
+                    method: ep.method,
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: AbortSignal.timeout(8000) // timeout 8 วิ
+                };
+
+                if (ep.needBody && ep.testBody) {
+                    options.body = JSON.stringify(ep.testBody);
+                    response = await fetch(ep.path, options);
+                } else {
+                    // ใช้ HEAD request
+                    response = await fetch(ep.path, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+                }
+
+                const duration = Date.now() - startTime;
+                let errorDetail = '';
+                let responseData = null;
+
+                // ถ้าไม่ success พยายามอ่าน error
+                if (!response.ok) {
+                    try {
+                        responseData = await response.clone().json();
+                        errorDetail = responseData.error || responseData.details || responseData.message || '';
+                    } catch(e) {
+                        errorDetail = await response.clone().text().catch(() => '');
+                        errorDetail = errorDetail.substring(0, 100);
+                    }
+                }
+
+                return {
+                    name: ep.name,
+                    path: ep.path,
+                    status: response.ok,
+                    statusCode: response.status,
+                    duration: duration,
+                    error: errorDetail,
+                    data: responseData
+                };
+            } catch (err) {
+                const duration = Date.now() - startTime;
+                let errorType = err.name;
+                let errorMsg = err.message;
+                
+                if (err.name === 'AbortError') {
+                    errorType = 'Timeout';
+                    errorMsg = 'การเชื่อมต่อหมดเวลา (เกิน 8 วินาที)';
+                } else if (err.name === 'TypeError' && err.message.includes('fetch')) {
+                    errorType = 'Network Error';
+                    errorMsg = 'ไม่สามารถเชื่อมต่อ API (อาจไม่มีไฟล์หรือ server error)';
+                }
+                
+                return {
+                    name: ep.name,
+                    path: ep.path,
+                    status: false,
+                    statusCode: '❌',
+                    duration: duration,
+                    error: `${errorType}: ${errorMsg}`,
+                    isException: true
+                };
+            }
+        }
+
+        // ตรวจสอบ Environment Variables (ฝั่ง client)
+        async function checkEnv() {
+            // วิธีนี้จะตรวจสอบแค่ว่ามีการตั้งค่าหรือไม่ (จริงๆ ต้องเรียก API ที่อ่าน env)
+            // แต่ใช้เพื่อบอกใบ้ว่าอาจจะขาด
+            const envList = [
+                'GROQ_API_KEY',
+                'FAL_API_KEY', 
+                'MAGIC_HOUR_API_KEY',
+                'NEXT_PUBLIC_SUPABASE_URL',
+                'NEXT_PUBLIC_SUPABASE_ANON_KEY'
+            ];
+            
+            const envStatusDiv = document.getElementById('envStatus');
+            envStatusDiv.innerHTML = '<div class="text-yellow-500">⚠️ ไม่สามารถตรวจสอบ Environment Variables โดยตรงได้ (ต้องดูที่ Vercel Dashboard)</div>';
+            envStatusDiv.innerHTML += '<div class="text-gray-400 text-xs mt-2">👉 ไปที่ Vercel → Project → Settings → Environment Variables เพื่อตรวจสอบว่ามีตัวแปรเหล่านี้ครบ:</div>';
+            envStatusDiv.innerHTML += `<div class="text-xs font-mono mt-1">${envList.join(', ')}</div>`;
+        }
+
+        // แสดงผลลัพธ์
+        async function runDiagnostic() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="text-center text-gray-500 py-8">⏳ กำลังตรวจสอบ API ทั้งหมด...</div>';
+            
+            const results = [];
+            for (const ep of endpoints) {
+                const result = await checkAPI(ep);
+                results.push(result);
+                
+                // สร้าง card แสดงผล
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800 rounded-lg p-3 border-l-4 ' + 
+                    (result.status ? 'border-green-500' : 'border-red-500');
+                
+                const statusIcon = result.status ? '✅' : '❌';
+                const statusText = result.status ? 'สำเร็จ' : `ล้มเหลว (${result.statusCode})`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-medium">${result.name}</div>
+                            <div class="text-xs text-gray-400 font-mono">${result.path}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg">${statusIcon} ${statusText}</div>
+                            <div class="text-xs text-gray-500">${result.duration}ms</div>
+                        </div>
+                    </div>
+                    ${!result.status && result.error ? `
+                    <div class="mt-2 text-sm bg-red-950/50 p-2 rounded">
+                        <div class="text-red-400 font-mono text-xs break-all">${escapeHtml(result.error)}</div>
+                    </div>
+                    ` : ''}
+                    ${result.status && result.data?.warning ? `
+                    <div class="mt-2 text-sm bg-yellow-950/50 p-2 rounded">
+                        <div class="text-yellow-400 text-xs">⚠️ ${escapeHtml(result.data.warning)}</div>
+                    </div>
+                    ` : ''}
+                `;
+                
+                resultsDiv.appendChild(card);
+            }
+            
+            // สรุปภาพรวม
+            const failed = results.filter(r => !r.status).length;
+            const summary = document.createElement('div');
+            summary.className = 'mt-4 p-3 bg-gray-800 rounded-lg text-center';
+            if (failed === 0) {
+                summary.innerHTML = '<div class="text-green-400">🎉 ทุก API ทำงานปกติ!</div>';
+            } else {
+                summary.innerHTML = `<div class="text-red-400">⚠️ มี ${failed} จาก ${results.length} API ที่ไม่ทำงาน</div>
+                <div class="text-gray-400 text-xs mt-1">แนะนำ: ตรวจสอบว่าไฟล์ .js ใน api/ มีครบ และ Environment Variables ถูกตั้งค่า</div>`;
+            }
+            resultsDiv.appendChild(summary);
+            
+            // ตรวจสอบ env (ให้คำแนะนำ)
+            await checkEnv();
+        }
+        
+        // ป้องกัน XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+        
+        // โหลดตอนเริ่ม
+        runDiagnostic();
+        
+        // ปุ่ม refresh
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            runDiagnostic();
+        });
+        
+        // ตัวบ่งชี้ live
+        setInterval(() => {
+            const indicator = document.getElementById('liveIndicator');
+            indicator.classList.toggle('bg-green-500');
+            indicator.classList.toggle('bg-gray-500');
+            setTimeout(() => {
+                indicator.classList.toggle('bg-green-500');
+                indicator.classList.toggle('bg-gray-500');
+            }, 500);
+        }, 1000);
+    </script>
+</body>
+</html>
