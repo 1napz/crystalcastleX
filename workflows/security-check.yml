@@ -1,0 +1,43 @@
+name: Security Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 0 * * *'  # ทุกวันเที่ยงคืน (UTC)
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run security checks
+        run: |
+          set -e
+          echo "🔍 Starting security check..."
+
+          # ตัวอย่าง check (คุณสามารถเพิ่ม logic จริงของคุณตรงนี้)
+          if grep -R "API_KEY" .; then
+            echo "❌ Found exposed API key!"
+            exit 1
+          fi
+
+          if grep -R "SECRET" .; then
+            echo "❌ Found exposed secret!"
+            exit 1
+          fi
+
+          echo "✅ No obvious secrets found"
+
+      - name: Summary
+        run: echo "🎉 Security check completed successfully"

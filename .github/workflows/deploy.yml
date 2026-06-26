@@ -1,0 +1,49 @@
+name: 🚀 Deploy After Release
+
+on:
+  workflow_run:
+    workflows: ["📦 Release Pipeline"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: >
+      ${{
+        github.event.workflow_run.conclusion == 'success'
+      }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install
+        run: npm ci
+
+      - name: 🏗 Build
+        run: npm run build
+
+      - name: 🚀 Deploy to Vercel
+        run: |
+          npx vercel --token=${{ secrets.VERCEL_TOKEN }} --prod --confirm
+
+      - name: 🔍 Smoke Test
+        run: |
+          curl -f https://your-domain.com || exit 1
+
+      - name: 📣 Notify Slack
+        uses: slackapi/slack-github-action@v1.23.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          payload: |
+            {
+              "text": "🚀 New release deployed successfully!"
+            }
