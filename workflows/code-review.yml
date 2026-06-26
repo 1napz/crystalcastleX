@@ -1,0 +1,62 @@
+name: multi-provider-review
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for incremental review
+
+      - name: 🤖 Multi-Provider Review
+        uses: keithah/multi-provider-code-review@486a7bd1172671cfe034ee1da832f515b716fb07
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEW_PROVIDERS: openrouter/free,coderabbit
+          INCREMENTAL_ENABLED: 'false'
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+      - name: 📝 Log PR Event
+        run: |
+          mkdir -p version/CrystalCastle/logs
+          DATE=$(date +%Y-%m-%d_%H-%M-%S)
+          PR_NO=${{ github.event.pull_request.number }}
+          EVENT=${{ github.event.action }}
+          TITLE=$(echo "${{ github.event.pull_request.title }}" | tr ' ' '-' | tr -cd '[:alnum:]-')
+
+          # Severity Matrix
+          if [ "$EVENT" = "opened" ]; then
+            SEVERITY="Major"
+          elif [ "$EVENT" = "closed" ]; then
+            SEVERITY="Minor"
+          elif [ "$EVENT" = "reopened" ]; then
+            SEVERITY="Critical"
+          elif [ "$EVENT" = "synchronize" ]; then
+            SEVERITY="Info"
+          else
+            SEVERITY="Info"
+          fi
+
+          LOG_FILE="version/CrystalCastle/logs/pr-${PR_NO}-${EVENT}-${DATE}.md"
+
+          echo "# Pull Request Event Log" > $LOG_FILE
+          echo "- Event: $EVENT" >> $LOG_FILE
+          echo "- PR Number: #$PR_NO" >> $LOG_FILE
+          echo "- Title: ${{ github.event.pull_request.title }}" >> $LOG_FILE
+          echo "- Author: ${{ github.event.pull_request.user.login }}" >> $LOG_FILE
+          echo "- Timestamp: $(date)" >> $LOG_FILE
+          echo "- Severity: $SEVERITY" >> $LOG_FILE
+          echo "" >> $LOG_FILE
+          echo "## Details" >> $LOG_FILE
+          echo "This PR event was logged automatically by multi-provider workflow." >> $LOG_FILE
+          echo "" >> $LOG_FILE
+          echo "## Notes" >> $LOG_FILE
+          echo "- Triggered by workflow 'multi-provider-review'" >> $LOG_FILE
+          echo "- Audit trail stored under version/CrystalCastle/logs/" >> $LOG_FILE

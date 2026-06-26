@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crystal Castle - Admin Logs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans Thai', system-ui, sans-serif; }
+    </style>
+    <script src="/speed-insights.js" defer></script>
+</head>
+<body class="bg-gray-950 text-gray-100">
+    <div class="max-w-7xl mx-auto p-6">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    📊 ประวัติการสร้างวิดีโอ
+                </h1>
+                <p class="text-gray-400 text-sm mt-1">Crystal Castle - Video Generation Logs</p>
+            </div>
+            <div class="flex gap-3">
+                <button id="refreshBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition">
+                    🔄 รีเฟรช
+                </button>
+                <a href="/product.html" class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">
+                    🎬 กลับไปสร้างวิดีโอ
+                </a>
+            </div>
+        </div>
+
+        <!-- สถิติ -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gray-800 rounded-xl p-4">
+                <div class="text-gray-400 text-sm">วิดีโอทั้งหมด</div>
+                <div id="totalCount" class="text-3xl font-bold text-purple-400">-</div>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-4">
+                <div class="text-gray-400 text-sm">สำเร็จ</div>
+                <div id="successCount" class="text-3xl font-bold text-green-400">-</div>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-4">
+                <div class="text-gray-400 text-sm">ล้มเหลว</div>
+                <div id="failedCount" class="text-3xl font-bold text-red-400">-</div>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-4">
+                <div class="text-gray-400 text-sm">รอดำเนินการ</div>
+                <div id="pendingCount" class="text-3xl font-bold text-yellow-400">-</div>
+            </div>
+        </div>
+
+        <!-- ตารางแสดง Logs -->
+        <div class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-800">
+                        <tr>
+                            <th class="px-4 py-3 text-left">เวลา</th>
+                            <th class="px-4 py-3 text-left">Engine</th>
+                            <th class="px-4 py-3 text-left">Prompt</th>
+                            <th class="px-4 py-3 text-left">สถานะ</th>
+                            <th class="px-4 py-3 text-left">ลิงก์วิดีโอ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTable" class="divide-y divide-gray-800">
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                ⏳ กำลังโหลดข้อมูล...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- แสดงจำนวนทั้งหมด -->
+        <div class="text-center text-gray-500 text-xs mt-4" id="footerInfo"></div>
+    </div>
+
+    <script>
+        async function loadLogs() {
+            try {
+                const response = await fetch('/api/get-logs');
+                const data = await response.json();
+                
+                if (!data.success) throw new Error(data.error);
+                
+                const logs = data.logs || [];
+                
+                // อัปเดตสถิติ
+                const total = logs.length;
+                const success = logs.filter(l => l.status === 'success').length;
+                const failed = logs.filter(l => l.status === 'failed').length;
+                const pending = logs.filter(l => l.status === 'pending').length;
+                
+                document.getElementById('totalCount').textContent = total;
+                document.getElementById('successCount').textContent = success;
+                document.getElementById('failedCount').textContent = failed;
+                document.getElementById('pendingCount').textContent = pending;
+                
+                // แสดงตาราง
+                const tbody = document.getElementById('logsTable');
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">📭 ยังไม่มีข้อมูลการสร้างวิดีโอ</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = logs.map(log => `
+                    <tr class="hover:bg-gray-800/50 transition">
+                        <td class="px-4 py-3 text-gray-300 whitespace-nowrap">
+                            ${new Date(log.created_at).toLocaleString('th-TH')}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-xs font-medium ${log.engine === 'FAL' ? 'bg-purple-600/30 text-purple-300' : 'bg-emerald-600/30 text-emerald-300'}">
+                                ${log.engine || 'N/A'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-400 max-w-md truncate" title="${escapeHtml(log.prompt || '')}">
+                            ${escapeHtml(log.prompt?.substring(0, 80) || '-')}${log.prompt?.length > 80 ? '...' : ''}
+                        </td>
+                        <td class="px-4 py-3">
+                            ${getStatusBadge(log.status)}
+                        </td>
+                        <td class="px-4 py-3">
+                            ${log.video_url ? `<a href="${log.video_url}" target="_blank" class="text-blue-400 hover:underline text-sm">🔗 ดูวิดีโอ</a>` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('footerInfo').textContent = `แสดง ${logs.length} รายการล่าสุด`;
+                
+            } catch (err) {
+                console.error('Load logs error:', err);
+                document.getElementById('logsTable').innerHTML = `
+                    <tr><td colspan="5" class="px-4 py-8 text-center text-red-400">
+                        ❌ โหลดข้อมูลไม่สำเร็จ: ${err.message}
+                    </td></tr>
+                `;
+            }
+        }
+        
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'success': return '<span class="px-2 py-1 rounded text-xs bg-green-600/30 text-green-300">✅ สำเร็จ</span>';
+                case 'failed': return '<span class="px-2 py-1 rounded text-xs bg-red-600/30 text-red-300">❌ ล้มเหลว</span>';
+                case 'pending': return '<span class="px-2 py-1 rounded text-xs bg-yellow-600/30 text-yellow-300">⏳ กำลังดำเนินการ</span>';
+                default: return '<span class="px-2 py-1 rounded text-xs bg-gray-600/30 text-gray-300">❓ ไม่ทราบสถานะ</span>';
+            }
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                if (m === '"') return '&quot;';
+                if (m === "'") return '&#39;';
+                return m;
+            });
+        }
+        
+        // โหลดข้อมูลเมื่อเปิดหน้า
+        loadLogs();
+        
+        // ปุ่มรีเฟรช
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            loadLogs();
+        });
+        
+        // รีเฟรชอัตโนมัติทุก 30 วินาที
+        setInterval(loadLogs, 30000);
+    </script>
+</body>
+</html>
