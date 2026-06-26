@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+reviews:
+  profile: "assertive"
+  request_changes_workflow: true
+  path_filters:
+    - "!package-lock.json"
+    - "!**/dist/**"
+    - "!**/*.min.js"
+  path_instructions:
+    - path: "**/__tests__/**"
+      instructions: "Review test coverage, edge cases, and meaningful assertions."
+    - path: "api/**"
+      instructions: "Check for 

@@ -1,0 +1,6 @@
+- name: Write log file
+  run: |
+    mkdir -p logs
+    echo "Run ID: ${{ github.run_id }}" >> logs/run.log
+    echo "Actor: ${{ github.actor }}" >> logs/run.log
+    echo "Time: $(date)" >> logs/run.log

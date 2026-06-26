@@ -1,0 +1,26 @@
+{
+  "date": "2026-05-09T08:23:00",
+  "repo": "CrystalCastle",
+  "notifications": [
+    {
+      "id": "NOTI-ENV-VPN-001",
+      "type": "critical",
+      "title_en": "VPN connectivity pending",
+      "title_th": "VPN connectivity ยังไม่ยืนยัน",
+      "message_en": "VPN connectivity not confirmed — must verify secure tunnel before merge.",
+      "message_th": "VPN connectivity ยังไม่ถูกตรวจสอบ — ต้องยืนยัน secure tunnel ก่อน merge",
+      "impact": "Blocking condition for Governance Agent access",
+      "status": "open"
+    },
+    {
+      "id": "NOTI-ENV-GOV-002",
+      "type": "critical",
+      "title_en": "Governance Agent VPN access pending",
+      "title_th": "Governance Agent VPN access ยังไม่ยืนยัน",
+      "message_en": "Governance Agent cannot enforce bilingual logs until VPN access is confirmed.",
+      "message_th": "Governance Agent ไม่สามารถ enforce bilingual logs ได้จนกว่าจะยืนยัน VPN access",
+      "impact": "Blocking merge until VPN confirmed",
+      "status": "open"
+    }
+  ]
+}

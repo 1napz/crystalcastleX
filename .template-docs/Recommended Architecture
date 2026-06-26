@@ -1,0 +1,18 @@
+🧱 Recommended Architecture
+
+.github/
+└── workflows/
+    ├── ai-pr-summary.yml
+    ├── release-notes.yml
+    └── docs-memory.yml
+
+scripts/
+├── summarize-pr.js
+├── generate-release.js
+└── classify-change.js
+
+docs/
+├── CHANGELOG.md
+├── RELEASE_NOTES.md
+├── KNOWN_ISSUES.md
+└── TROUBLESHOOTING.md

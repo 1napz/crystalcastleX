@@ -1,0 +1,7 @@
+#ปรับขนาดจอ vscode(dev)
+#ให้ใช้งานง่ายบนมือถือ
+{
+  "editor.fontSize": 11,
+  "editor.lineHeight": 18,
+"terminal.integrated.fontSize": 10
+}

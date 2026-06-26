@@ -1,0 +1,104 @@
+เข้าใจแล้วครับ คุณอยากได้ทั้ง เอกสารการจัดการความรู้แบบคู่มือองค์กร และ เอกสารเชิงเทคนิคสำหรับ GitHub Repo โดยผมจะจัดโครงสร้างให้ครบถ้วน พร้อมตำแหน่งการเก็บไฟล์ที่เหมาะสม และมีรายละเอียดให้อ่านชัดเจน
+
+📂 โครงสร้างการเก็บไฟล์
+
+crystalcastle/
+ ├── docs/
+ │    ├── knowledge-management-org.md      # คู่มือองค์กร
+ │    ├── knowledge-management-repo.md     # เอกสารเชิงเทคนิคสำหรับ Repo
+ │    └── waitting_review.txt              # ไฟล์รอการตรวจสอบ (ไม่ commit)
+ └── .gitignore                            # กันไม่ให้ log/ไฟล์ชั่วคราวหลุด commit
+
+🏢 1. คู่มือองค์กร (docs/knowledge-management-org.md)
+
+# คู่มือการจัดการความรู้ (Knowledge Management)
+
+## บทนำ
+การจัดการความรู้ (KM) คือการสร้าง รวบรวม แลกเปลี่ยน และใช้ประโยชน์จากความรู้ เพื่อเพิ่มประสิทธิภาพและสร้างนวัตกรรมในองค์กร
+
+## วัตถุประสงค์
+- ลดการสูญเสียความรู้เมื่อบุคลากรออกจากองค์กร
+- สร้างวัฒนธรรมการเรียนรู้และการแบ่งปัน
+- สนับสนุนการตัดสินใจด้วยข้อมูลที่ถูกต้อง
+
+## กระบวนการ KM
+1. **สร้างความรู้** – จากประสบการณ์/การวิจัย  
+2. **รวบรวมและจัดเก็บ** – ผ่านฐานข้อมูล/คลังความรู้  
+3. **แบ่งปัน** – ผ่านประชุม เวิร์กช็อป หรือแพลตฟอร์มออนไลน์  
+4. **ใช้ประโยชน์** – นำไปแก้ปัญหาและพัฒนานวัตกรรม  
+
+## เครื่องมือที่ใช้
+- Wiki / Knowledge Base  
+- Document Management System  
+- Collaboration Tools (Teams, Slack)  
+- AI/ML สำหรับการค้นหาและวิเคราะห์  
+
+## บทบาท
+- **ผู้บริหาร**: กำหนดนโยบายและสนับสนุนทรัพยากร  
+- **ทีม KM**: ออกแบบและดูแลระบบ  
+- **บุคลากร**: สร้างและแบ่งปันความรู้  
+
+## ตัวชี้วัดความสำเร็จ
+- จำนวนบทความที่ถูกสร้างและแชร์  
+- อัตราการเข้าถึงคลังความรู้  
+- ความพึงพอใจของบุคลากร  
+- ผลลัพธ์ทางธุรกิจที่ดีขึ้น  
+
+---
+
+💻 2. เอกสารเชิงเทคนิคสำหรับ Repo (docs/knowledge-management-repo.md)
+
+# Knowledge Management สำหรับ CrystalCastle Repo
+
+## วัตถุประสงค์
+- จัดเก็บและแชร์ความรู้เชิงเทคนิคภายในทีม
+- ใช้เป็น reference สำหรับ workflow และ automation
+
+## โครงสร้างไฟล์
+- `docs/knowledge-management-org.md` → คู่มือองค์กร
+- `docs/knowledge-management-repo.md` → คู่มือเชิงเทคนิค
+- `docs/waitting_review.txt` → ไฟล์รอการตรวจสอบ (ไม่ commit)
+
+## Workflow ตัวอย่าง (GitHub Actions)
+```yaml
+name: KM-Workflow
+on:
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  log-km:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Append PR Log
+        run: |
+          mkdir -p crystalcastle/testcase/PR${{ github.event.number }}_${{ github.event.pull_request.title }}
+          echo "Event: ${{ github.event.action }}" >> crystalcastle/testcase/PR${{ github.event.number }}_${{ github.event.pull_request.title }}/test-${{ github.event.pull_request.title }}.txt
+      - name: Archive on Close
+        if: github.event.action == 'closed'
+        run: |
+          cp crystalcastle/testcase/PR${{ github.event.number }}_${{ github.event.pull_request.title }}/test-${{ github.event.pull_request.title }}.txt crystalcastle/testcase/PR${{ github.event.number }}_${{ github.event.pull_request.title }}/Update_PR${{ github.event.number }}.txt
+
+แนวทางการใช้งาน
+
+ใช้ .gitignore กันไม่ให้ log ไฟล์หลุด commit
+
+ใช้โครงสร้างโฟลเดอร์แยกตาม PR เพื่อความชัดเจน
+
+ใช้ waitting_review.txt สำหรับ draft หรือเอกสารที่ยังไม่ผ่านการตรวจสอบ
+
+
+---
+
+## 📝 3. ไฟล์รอการตรวจสอบ (`docs/waitting_review.txt`)
+
+[WAITING REVIEW]
+
+ชื่อเหตุการณ์: การจัดการความรู้ (KM) รายละเอียด: เอกสารคู่มือและ workflow สำหรับ CrystalCastle ระดับความรุนแรง: ปานกลาง (ต้องตรวจสอบก่อน commit) ผู้ที่เกี่ยวข้อง: ทีม KM, Maintainer, Developer วิธีแก้: ตรวจสอบเอกสารและ workflow ก่อน commit สถานะ: รอการตรวจสอบ
+
+
+---
+
+👉 แบบนี้คุณจะได้ทั้ง **คู่มือองค์กร** และ **คู่มือเชิงเทคนิคสำหรับ Repo** พร้อมตำแหน่งการเก็บไฟล์ที่ชัดเจน และไฟล์ `waitting_review.txt` สำหรับการตรวจสอบก่อน commit  
+
+คุณอยากให้ผมเพิ่ม **ตัวอย่าง `.gitignore`** ที่เหมาะกับ repo ของคุณด้วยไหมครับ จะได้ครบชุดทั้ง policy และ technical practice?

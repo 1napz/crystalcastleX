@@ -1,0 +1,82 @@
+name: 🚀 Production Deploy & Automation Test
+on:
+  push:
+    branches: [main]
+    # Path Filtering: รันเฉพาะเมื่อไฟล์ระบบเปลี่ยน ห้ามรันเมื่อแก้ไฟล์ .md หรือเอกสาร docs
+    paths-ignore:
+      - '**.md'
+      - 'main/docs/**'
+      - '.github/CODEOWNERS'
+
+  # Schedule-Driven: สั่งรันคำสั่งเช็คระบบและเทสเว็บอัตโนมัติทุกวัน ตอนเที่ยงคืน (เวลาไทย UTC+7)
+  schedule:
+    - cron: '0 17 * * *' # 17:00 UTC คือ 00:00 น. ของประเทศไทย
+
+  # Open for Manual Run: เปิดให้สามารถกดปุ่มสั่งรันเองได้จากหน้าต่าง Actions
+  workflow_dispatch:
+
+# Concurrency Control: หากมีการ Push ถี่ๆ ให้ยกเลิกตัวเก่าแล้วรันตัวล่าสุดตัวเดียว เพื่อประหยัดทรัพยากร
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  environment-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip' # เปิดระบบ Cache เพื่อให้รันรอบถัดไปเร็วขึ้น
+
+      - name: 📦 Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest-playwright
+          # pip install -r requirements.txt (เปิดใช้เมื่อมีไฟล์นี้)
+
+      - name: 🌐 Install Playwright Web Browsers
+        run: playwright install chromium --with-deps
+
+      - name: 🧪 Execute Multi-platform Testing (Headless Mode)
+        env:
+          AFFILIATE_SECRET_KEY: ${{ secrets.AFFILIATE_SECRET_KEY }} # ดึงค่าความลับจาก GitHub Secrets
+        run: |
+          # รันระบบตรวจสอบเบื้องหลังแบบข้ามแพลตฟอร์ม
+          pytest --headless
+
+      - name: 📸 Artifact Storage on Failure (ระบบบันทึกหลักฐานกรณีเทสพัง)
+        if: failure() # ขั้นตอนนี้จะทำงานเฉพาะตอนที่การทดสอบด้านบน "พัง" เท่านั้น
+        uses: actions/upload-artifact@v4
+        with:
+          name: playables-error-evidence
+          path: |
+            failure-screenshots/
+            test-results/
+          retention-days: 7 # เก็บไฟล์หลักฐานไว้บน GitHub 7 วันก่อนลบอัตโนมัติ
+
+  vercel-deployment:
+    needs: environment-validation # ต้องผ่านด่านการทดสอบระบบก่อน ถึงจะปล่อยผ่านไปขั้นตอน Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: ⚡ Build & Push to Vercel production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: |
+          npm ci
+          npm run build
+          npx vercel --token ${VERCEL_TOKEN} --prod --yes
