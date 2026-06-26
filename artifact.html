@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผลงานทั้งหมด - Crystal Castle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                🏰 ผลงานวิดีโอสินค้าทั้งหมด
+            </h1>
+            <div class="flex gap-3">
+                <button id="refreshBtn" class="bg-gray-700 px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+                    🔄 รีเฟรช
+                </button>
+                <a href="/product.html" class="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                    + สร้างวิดีโอใหม่
+                </a>
+            </div>
+        </div>
+
+        <!-- Grid แสดงวิดีโอ -->
+        <div id="artifactsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center text-gray-500 py-12">กำลังโหลดข้อมูล...</div>
+        </div>
+    </div>
+
+    <script>
+        // ฟังก์ชัน escape HTML attributes (ป้องกัน XSS)
+        function escapeHtmlAttr(value) {
+            if (!value) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // ฟังก์ชัน escape HTML content (เผื่อใช้ในอนาคต)
+        function escapeHtmlText(value) {
+            if (!value) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        async function loadArtifacts() {
+            const grid = document.getElementById('artifactsGrid');
+            grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">⏳ กำลังโหลด...</div>';
+            
+            try {
+                // ใช้ endpoint /api/artifacts (ไฟล์รวม GET+POST)
+                const res = await fetch('/api/artifacts');
+                const data = await res.json();
+                
+                if (!data.success || !data.artifacts?.length) {
+                    grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">📭 ยังไม่มีวิดีโอที่สร้าง ลองสร้างวิดีโอแรกกัน!</div>';
+                    return;
+                }
+                
+                const artifacts = data.artifacts;
+                
+                grid.innerHTML = artifacts.map(art => {
+                    const brand = art.brand || 'สินค้า';
+                    const category = art.category || 'หมวดหมู่';
+                    const promptShort = art.prompt ? art.prompt.substring(0, 120) + (art.prompt.length > 120 ? '...' : '') : '';
+                    const createdAt = new Date(art.created_at).toLocaleDateString('th-TH');
+                    const videoUrl = art.video_url || '';
+                    
+                    // ปลอดภัย XSS → ใช้ escapeHtmlAttr สำหรับ attribute, escapeHtmlText สำหรับ text content
+                    const safeBrand = escapeHtmlText(brand);
+                    const safeCategory = escapeHtmlText(category);
+                    const safePromptShort = escapeHtmlText(promptShort);
+                    const safePromptFull = escapeHtmlAttr(art.prompt || '');
+                    
+                    return `
+                        <div class="bg-gray-800 rounded-xl overflow-hidden hover:scale-[1.02] transition">
+                            ${videoUrl ? `<video src="${escapeHtmlAttr(videoUrl)}" controls class="w-full aspect-video object-cover"></video>` : '<div class="w-full aspect-video bg-gray-700 flex items-center justify-center text-gray-400">ไม่มีวิดีโอ</div>'}
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-semibold text-purple-400">${safeBrand} - ${safeCategory}</h3>
+                                    <span class="text-xs text-gray-500">${escapeHtmlText(createdAt)}</span>
+                                </div>
+                                <p class="text-sm text-gray-400 line-clamp-3 mb-3">${safePromptShort}</p>
+                                <div class="flex gap-2">
+                                    <button data-prompt="${safePromptFull}" class="copy-prompt-btn text-xs bg-gray-700 px-2 py-1 rounded hover:bg-gray-600">
+                                        📋 คัดลอก Prompt
+                                    </button>
+                                    <button data-prompt="${safePromptFull}" class="use-prompt-btn text-xs bg-purple-700 px-2 py-1 rounded hover:bg-purple-600">
+                                        ✨ ใช้สร้างใหม่
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // ผูก event สำหรับปุ่ม copy
+                document.querySelectorAll('.copy-prompt-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const prompt = btn.getAttribute('data-prompt') || '';
+                        navigator.clipboard.writeText(prompt);
+                        alert('📋 คัดลอก Prompt เรียบร้อย');
+                    });
+                });
+
+                // ผูก event สำหรับปุ่ม use
+                document.querySelectorAll('.use-prompt-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const prompt = btn.getAttribute('data-prompt') || '';
+                        localStorage.setItem('reuse_prompt', prompt);
+                        window.location.href = '/product.html';
+                    });
+                });
+                
+            } catch (err) {
+                console.error('Load error:', err);
+                grid.innerHTML = '<div class="col-span-full text-center text-red-400 py-12">❌ โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่ภายหลัง</div>';
+            }
+        }
+        
+        // โหลดครั้งแรก
+        loadArtifacts();
+        
+        // ปุ่มรีเฟรช
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', loadArtifacts);
+        }
+    </script>
+</body>
+</html>
