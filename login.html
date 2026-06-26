@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>เข้าสู่ระบบ - Crystal Castle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        const supabase = createClient(
+            'https://wqkreaoqkunjhlzzdimd.supabase.co',
+            'sb_publishable_g4wlvVA-eASs1SMRGSIatA_Gk4Nu13c'
+        )
+
+        window.loginWithGoogle = async () => {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + '/product.html' }
+            })
+            if (error) alert('Login failed: ' + error.message)
+        }
+
+        window.loginWithEmail = async () => {
+            const email = document.getElementById('email').value
+            const { error } = await supabase.auth.signInWithOtp({ email })
+            if (error) alert(error.message)
+            else alert('ตรวจสอบอีเมลของคุณเพื่อรับลิงก์เข้าสู่ระบบ')
+        }
+    </script>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+    <div class="bg-gray-800 p-8 rounded-2xl w-96">
+        <h1 class="text-2xl font-bold text-white mb-6">Crystal Castle</h1>
+        <button onclick="loginWithGoogle()" class="w-full bg-white text-gray-800 p-2 rounded-lg mb-3">เข้าสู่ระบบด้วย Google</button>
+        <div class="relative my-4"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-600"></div></div><div class="relative flex justify-center text-sm"><span class="px-2 bg-gray-800 text-gray-400">หรือ</span></div></div>
+        <input type="email" id="email" placeholder="อีเมลของคุณ" class="w-full p-2 rounded bg-gray-700 text-white mb-3">
+        <button onclick="loginWithEmail()" class="w-full bg-blue-600 text-white p-2 rounded-lg">ส่งลิงก์เข้าสู่ระบบ</button>
+    </div>
+</body>
+</html>
