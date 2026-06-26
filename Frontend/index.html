@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crystal Castle Dashboard</title>
+</head>
+
+<body>
+
+  <h2>📊 Crystal Castle Analytics</h2>
+
+  <canvas id="chart"></canvas>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    const ctx = document.getElementById('chart');
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        datasets: [{
+          label: 'Active Users',
+          data: [12, 19, 30, 25, 40]
+        }]
+      }
+    });
+  </script>
+
+</body>
+</html>  if (!token || Date.now() > expiry) {
+    const refreshToken = localStorage.getItem('refreshToken');
+    const res = await fetch('/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ token: refreshToken })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      token = data.accessToken;
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('expiry', Date.now() + 30*60*1000);
+    } else {
+      logout();
+    }
+  }
+  return token;
+}
+
+// --- Logout ---
+async function logout() {
+  const refreshToken = localStorage.getItem('refreshToken');
+  await fetch('/auth/logout', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ token: refreshToken })
+  });
+  localStorage.clear();
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login').style.display = 'block';
+}
+
+// --- Load PR Data ---
+async function loadData() {
+  const token = await getAccessToken();
+  const res = await fetch('version/CrystalCastle/logs/pr_status.json', {
+    headers: { 'Authorization':'Bearer ' + token }
+  });
+  const data = await res.json();
+
+  const severityCount = { "Critical":0, "Major":0, "Minor":0 };
+  data.prs.forEach(pr => severityCount[pr.severity]++);
+  new Chart(document.getElementById('overviewChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(severityCount),
+      datasets: [{
+        data: Object.values(severityCount),
+        backgroundColor: Object.keys(severityCount).map(s => colors[s])
+      }]
+    }
+  });
+
+  const columns = ["To Do","In Progress","Blocked","Ready to Merge","Done"];
+  let boardHtml = '';
+  columns.forEach(col => {
+    boardHtml += `<div style="flex:1;"><h3>${col}</h3>`;
+    data.prs.filter(pr => pr.status === col).forEach(pr => {
+      boardHtml += `
+        <div style="background:${colors[pr.severity]};color:#fff;padding:10px;margin:5px;border-radius:5px;">
+          <h4>PR #${pr.id}: ${pr.title}</h4>
+          <p>Status: ${pr.status}</p>
+          <p>Impact: ${pr.severity}</p>
+        </div>
+      `;
+    });
+    boardHtml += `</div>`;
+  });
+  document.getElementById('board').innerHTML = boardHtml;
+}
+
+// --- Realtime Feed ---
+function connectRealtime() {
+  const ws = new WebSocket('ws://localhost:3000');
+  ws.onmessage = (msg) => {
+    const ev = JSON.parse(msg.data);
+    const li = document.createElement('li');
+    li.style.background = colors[ev.severity];
+    li.style.color = "#fff";
+    li.style.padding = "10px";
+    li.style.margin = "5px 0";
+    li.style.borderRadius = "5px";
+    li.textContent = `[${ev.timestamp}] PR #${ev.pr} → ${ev.event} (${ev.severity})`;
+    document.getElementById('eventList').prepend(li);
+  };
+}
+
+// --- Admin Functions ---
+function clearLogs() {
+  alert("Admin cleared logs (example action).");
+}
+function manageUsers() {
+  alert("Admin managing users (example action).");
+}
+</script>

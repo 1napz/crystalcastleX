@@ -1,0 +1,33 @@
+-------
+
+knowledge File
+-------
+
+Done — I cleaned up your notes and filled in the missing GraphQL + Actions code.
+
+Here are both files ready to drop into your repo:
+
+-
+📎 LOGGING.md
+
+.env.example
+
+What I added:
+
+1. Project ID query — replaces your null:
+null
+2. Standard workflow — complete add-to-project.yml with label filtering for log, bug, task
+
+3. Draft-issue workflow — full GraphQL mutation for CI failures, deploys, or commits:
+null
+4. Field updates — query to get Status field IDs + mutation to set them
+
+The .env.example has placeholders for:
+PROJECT_TOKEN (your PAT)
+PROJECT_ID (starts with PVT_)
+optional field IDs so you can automate Status → Done
+
+Want me to also generate the actual .github/workflows/ YAML files as separate files you can commit directly?
+
+
+----------

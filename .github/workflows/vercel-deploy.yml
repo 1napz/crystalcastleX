@@ -1,0 +1,17 @@
+name: Vercel Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Vercel
+        run: npm i -g vercel
+
+      - name: Deploy
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}

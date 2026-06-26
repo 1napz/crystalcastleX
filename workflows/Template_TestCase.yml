@@ -1,0 +1,20 @@
+version: 1
+
+rules:
+  - name: Create Testcase File on PR Open
+    triggers:
+      - pull_request.opened
+    actions:
+      - run: |
+          DATE=$(date +%Y-%m-%d)
+          PR_NO=${{ pull_request.number }}
+          TITLE=$(echo "${{ pull_request.title }}" | tr ' ' '-' | tr -cd '[:alnum:]-')
+
+          mkdir -p crystalcastle/testcase
+
+          LOG_FILE="crystalcastle/testcase/test-${TITLE}.txt"
+
+          echo "ชื่อเหตุการณ์: PR #$PR_NO - ${{ pull_request.title }}" > $LOG_FILE
+          echo "รายละเอียด: Pull Request ถูกเปิดเมื่อ $DATE" >> $LOG_FILE
+          echo "ผู้ที่เกี่ยวข้อง: Author - ${{ pull_request.user.login }}" >> $LOG_FILE
+          echo "Timestamp: $(date)" >> $LOG_FILE

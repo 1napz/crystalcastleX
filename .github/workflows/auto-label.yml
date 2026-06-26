@@ -1,0 +1,112 @@
+name: 🔖 Auto Labeler
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+  issues:
+    types: [opened, edited]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Apply labels from title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const item = context.payload.pull_request || context.payload.issue;
+            if (!item) return;
+
+            const title = item.title.toLowerCase();
+            const labels = new Set();
+
+            // -------------------------
+            // 🧩 TYPE
+            // -------------------------
+            if (title.match(/\bfix\b|\bbug\b/)) {
+              labels.add("type:bug");
+            }
+
+            if (title.match(/\bfeat\b|\bfeature\b/)) {
+              labels.add("type:feature");
+            }
+
+            if (title.match(/\bchore\b|\bcleanup\b/)) {
+              labels.add("type:chore");
+            }
+
+            if (title.match(/\brefactor\b/)) {
+              labels.add("type:refactor");
+            }
+
+            // -------------------------
+            // ⚙️ AREA
+            // -------------------------
+            if (title.match(/\bai\b|\bmodel\b|\bllm\b/)) {
+              labels.add("area:ai");
+            }
+
+            if (title.match(/\bvideo\b|\brender\b/)) {
+              labels.add("area:video");
+            }
+
+            if (title.match(/\bci\b|\bworkflow\b|\bgithub action\b/)) {
+              labels.add("area:ci");
+            }
+
+            if (title.match(/\binfra\b|\bsupabase\b|\bdeploy\b/)) {
+              labels.add("area:infra");
+            }
+
+            // -------------------------
+            // 📚 DOC
+            // -------------------------
+            if (title.match(/\bdocs?\b/)) {
+              labels.add("documentation");
+            }
+
+            // -------------------------
+            // 🔐 SECURITY
+            // -------------------------
+            if (title.match(/\bsecurity\b|\bvulnerability\b/)) {
+              labels.add("security");
+            }
+
+            // -------------------------
+            // 🧹 CLEAN OLD LABELS
+            // -------------------------
+            const oldLabels = ["bug", "enhancement", "ci/cd", "video"];
+
+            try {
+              const current = await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: item.number
+              });
+
+              for (const l of current.data) {
+                if (oldLabels.includes(l.name)) {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: item.number,
+                    name: l.name
+                  });
+                }
+              }
+            } catch (e) {
+              core.warning("Failed to clean old labels");
+            }
+
+            // -------------------------
+            // 🚀 APPLY LABELS
+            // -------------------------
+            if (labels.size > 0) {
+              await github.rest.issues.addLabels({
+                issue_number: item.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: Array.from(labels)
+              });
+            }

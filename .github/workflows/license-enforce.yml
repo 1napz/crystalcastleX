@@ -1,0 +1,79 @@
+name: License Enforcement
+
+on:
+  pull_request:
+
+jobs:
+  license-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify license structure
+        run: |
+          echo "🔍 Checking license compliance..."
+
+          root_status="missing"
+          frontend_status="ok"
+          docs_status="optional"
+          label="license-compliant"
+
+          if [ ! -f LICENSE ]; then
+            root_status="missing"
+            label="license-violation"
+          else
+            root_status="present"
+          fi
+
+          if [ -f frontend/LICENSE ]; then
+            frontend_status="forbidden"
+            label="license-violation"
+          fi
+
+          if [ -f docs/license/LICENSE ]; then
+            docs_status="present"
+          fi
+
+          echo "ROOT=$root_status" >> $GITHUB_ENV
+          echo "FRONTEND=$frontend_status" >> $GITHUB_ENV
+          echo "DOCS=$docs_status" >> $GITHUB_ENV
+          echo "LABEL=$label" >> $GITHUB_ENV
+
+      - name: Apply PR label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = process.env.LABEL;
+
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: [label]
+              });
+            } catch (e) {
+              console.log("Label error ignored:", e.message);
+            }
+
+      - name: Post compliance comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `
+### 📜 License Compliance Report
+
+- Root LICENSE: ${process.env.ROOT}
+- Frontend LICENSE: ${process.env.FRONTEND}
+- Docs LICENSE: ${process.env.DOCS}
+
+Status: **${process.env.LABEL}**
+            `;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
