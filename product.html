@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Castle - Lite อัพรูป</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎬 เครื่องเจียระไน Lite</h1>
+      <p>อัพรูป + ตั้งชื่อไฟล์ + เช็ครูปซ้ำ</p>
+      <a href="/mission-control.html" style="color: #666; font-size: 14px;">← กลับฐานบัญชาการ</a>
+    </header>
+
+    <section class="generator-box">
+      <div class="input-group">
+        <label for="product-image">1. เลือกรูปสินค้า</label>
+        <input type="file" id="product-image" accept="image/*">
+        <img id="image-preview" style="display:none; max-width:100%; margin-top:12px; border-radius:8px;">
+      </div>
+
+      <div class="input-group">
+        <label>2. ตั้งชื่อไฟล์</label>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <select id="input-category" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;">
+              <option value="">-- เลือก Category --</option>
+                <option value="Menswear">เสื้อผ้าผู้ชาย</option>
+                  <option value="Womenswear">เสื้อผ้าผู้หญิง</option>
+                  </select>
+          <input type="text" id="input-brand" placeholder="Brand" style="flex:1;">
+        </div>
+        <input type="text" id="input-filename" placeholder="YYYYMMDD-Category-Brand" style="width:100%;">
+        <p style="font-size:12px; color:#666; margin-top:4px;">ฟอร์แมต: YYYYMMDD-Category-Brand.jpg</p>
+      </div>
+<!-- ต่อจาก input ตั้งชื่อไฟล์ -->
+<div class="space-y-2">
+  <label class="block text-sm font-medium text-gray-700">Prompt สำหรับเจนคลิป</label>
+    <div class="flex gap-2">
+        <textarea
+              id="promptInput"
+                    rows="3"
+                          placeholder="เช่น A model walking on runway, wearing this outfit, cinematic lighting"
+                                class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                    ></textarea>
+                                        <button
+                                              id="genPromptBtn"
+                                                    class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 whitespace-nowrap h-fit"
+                                                        >
+                                                              ✨ Gen Prompt
+                                                                  </button>
+                                                                    </div>
+                                                                      <p class="text-xs text-gray-500">กดปุ่มให้ AI ช่วยคิด Prompt จากชื่อสินค้า</p>
+                                                                      </div>
+      <button id="generate-btn" class="btn-generate">บันทึกชื่อไฟล์ + เช็ครูปซ้ำ</button>
+
+      <div id="status-box" class="status-box" style="display:none;">
+        <p id="status-text">กำลังเช็ค...</p>
+      </div>
+    </section>
+  </div>
+  <script src="generate-lite.js"></script>
+</body>
+</html>
