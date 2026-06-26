@@ -1,0 +1,21 @@
+name: multi-provider-review
+on:
+  pull_request:
+  workflow_dispatch:    # เพิ่มบรรทัดนี้
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for incremental review
+      - uses: keithah/multi-provider-code-review@main
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEW_PROVIDERS: openrouter/free
+          INCREMENTAL_ENABLED: 'true'  # 6x faster on updates
+        env:
+          # Required when using OpenRouter providers (even free ones)
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
