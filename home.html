@@ -1,0 +1,66 @@
+<script>
+const endpoints = [
+  { name: 'Gen Prompt', path: '/api/prompt', method: 'POST', testBody: { user_prompt: 'test', category: 'test' } },
+  { name: 'Generate Post', path: '/api/post', method: 'POST', testBody: { prompt: 'test', brand: 'test', category: 'test' } },
+  { name: 'FAL Kling', path: '/api/falkling', method: 'POST', testBody: { image_url: 'https://example.com/test.jpg', prompt: 'test' } },
+  { name: 'Magic Hour', path: '/api/magichour', method: 'POST', testBody: { image_url: 'https://example.com/test.jpg', prompt: 'test' } },
+  { name: 'Upload', path: '/api/video', method: 'POST' }
+];
+
+async function checkStatus() {
+  const list = document.getElementById('statusList');
+  list.innerHTML = '';
+  
+  for (const ep of endpoints) {
+    const li = document.createElement('li');
+    li.className = 'flex justify-between items-start gap-2 mb-2';
+    li.innerHTML = `<span class="text-gray-400 flex-shrink-0">${ep.name}</span><span>⏳</span>`;
+    list.appendChild(li);
+    
+    try {
+      let res;
+      if (ep.method === 'POST' && ep.testBody) {
+        res = await fetch(ep.path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(ep.testBody),
+          signal: AbortSignal.timeout(5000)
+        });
+      } else {
+        res = await fetch(ep.path, { method: 'HEAD', signal: AbortSignal.timeout(3000) });
+      }
+      
+      const ok = res.ok || res.status === 405;
+      if (ok) {
+        li.lastElementChild.innerHTML = '<span class="text-green-400">✅ ทำงาน</span>';
+      } else {
+        let errorDetail = '';
+        try {
+          const errorData = await res.clone().json();
+          errorDetail = errorData.error || errorData.details || '';
+        } catch(e) {}
+        li.lastElementChild.innerHTML = `<span class="text-red-400">❌ ${res.status}</span><span class="text-xs text-gray-500 ml-2">${errorDetail.slice(0, 50)}</span>`;
+      }
+    } catch(err) {
+      li.lastElementChild.innerHTML = `<span class="text-red-400">❌ ${err.name}</span><span class="text-xs text-gray-500 ml-2">${err.message.slice(0, 40)}</span>`;
+    }
+  }
+  document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString('th-TH');
+}
+
+checkStatus();
+setInterval(checkStatus, 30000);
+</script>
+
+<div class="flex justify-between items-start mb-3">
+    <div class="flex items-center gap-3">
+        <div class="text-3xl">📊</div>
+        <h2 class="text-xl font-bold">สถานะระบบ</h2>
+    </div>
+    <div class="flex items-center gap-2">
+        <a href="/api-check.html" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-full transition flex items-center gap-1">
+            🔍 ตรวจสอบ API
+        </a>
+        <span id="lastCheck" class="text-xs text-gray-500">กำลังเช็ค...</span>
+    </div>
+</div>
