@@ -1,0 +1,20 @@
+{
+  "name": "crystalcastle",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@supabase/ssr": "^0.10.2",
+fix/api-env-and-groq
+    "@supabase/supabase-js": "^2.104.1",
+    "groq-sdk": "^1.1.2"
+    "@supabase/supabase-js": "^2.104.1"
+ main
+  },
+  "devDependencies": {
+    "jsdoc": "^4.0.2"
+  },
+  "scripts": {
+    "docs": "jsdoc -c jsdoc.json",
+    "docs:generate": "jsdoc -c jsdoc.json"
+  }
+}
