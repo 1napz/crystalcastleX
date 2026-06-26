@@ -1,0 +1,38 @@
+name: PR Logger
+
+on:
+  pull_request:
+    types: [opened, edited, closed, reopened, synchronize]
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create log file
+        run: |
+          DATE=$(date +%Y%m%d)
+          PR_NO=${{ github.event.pull_request.number }}
+          TITLE=$(echo "${{ github.event.pull_request.title }}" | tr ' ' '-' | tr -cd '[:alnum:]-')
+          FILE="./docs/${DATE}_Logging_${PR_NO}-${TITLE}.md"
+
+          echo "# Logging PR #$PR_NO - ${{ github.event.pull_request.title }}" > $FILE
+          echo "" >> $FILE
+          echo "- Action: ${{ github.event.action }}" >> $FILE
+          echo "- Actor: ${{ github.actor }}" >> $FILE
+          echo "- Timestamp: $(date)" >> $FILE
+          echo "- State: ${{ github.event.pull_request.state }}" >> $FILE
+          echo "" >> $FILE
+          echo "Full Event JSON:" >> $FILE
+          echo '```json' >> $FILE
+          echo '${{ toJson(github.event) }}' >> $FILE
+          echo '```' >> $FILE
+
+      - name: Commit log file
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add ./docs/*.md
+          git commit -m "Add PR log for #${{ github.event.pull_request.number }}"
+          git push

@@ -1,0 +1,58 @@
+name: API Security Checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  security-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq
+
+      - name: HTTPS Enforcement Check
+        run: |
+          if curl -s http://your-api.example.com -o /dev/null; then
+            echo "❌ Insecure HTTP endpoint detected"
+            exit 1
+          else
+            echo "✅ HTTPS enforced"
+          fi
+
+      - name: JWT Expiry Check
+        run: |
+          TOKEN=$(curl -s -X POST https://your-api.example.com/auth | jq -r '.token')
+          EXP=$(echo $TOKEN | cut -d '.' -f2 | base64 -d | jq -r '.exp')
+          NOW=$(date +%s)
+          if [ "$EXP" -le "$NOW" ]; then
+            echo "❌ Token already expired"
+            exit 1
+          else
+            echo "✅ Token expiry valid"
+          fi
+
+      - name: Role-Based Access Check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $TOKEN" \
+            https://your-api.example.com/admin-only)
+          if [ "$STATUS" -eq 403 ]; then
+            echo "✅ RBAC enforced"
+          else
+            echo "❌ RBAC failure"
+            exit 1
+          fi
+
+      - name: Telegram Alert on Failure
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="🚨 API Security Check Failed in $GITHUB_REPOSITORY on commit $GITHUB_SHA"
