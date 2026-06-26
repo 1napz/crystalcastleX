@@ -1,0 +1,36 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch: # manual run (GitHub Mobile)
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}-ci
+      cancel-in-progress: true   # ยกเลิก run เก่า ใช้ run ล่าสุดแทน
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Unit Tests
+        run: npm test -- --coverage
+
+      - name: Save workflow run log
+        run: |
+          TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
+          echo "[${TIMESTAMP}] Workflow run triggered" >> version/CrystalCastle/logs/workflow-runs.log
+          echo "Branch: ${{ github.ref }}" >> version/CrystalCastle/logs/workflow-runs.log
+          echo "Actor: ${{ github.actor }}" >> version/CrystalCastle/logs/workflow-runs.log
+          echo "Concurrency: cancel-in-progress enabled" >> version/CrystalCastle/logs/workflow-runs.log
+          echo "" >> version/CrystalCastle/logs/workflow-runs.log

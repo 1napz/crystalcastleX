@@ -1,0 +1,36 @@
+# .coderabbit.yaml
+version: 1
+
+# กำหนด reviewer ที่ต้องการให้ AI ตรวจสอบ
+reviewers:
+  - name: "AI Reviewer"
+    rules:
+      - style
+      - security
+      - performance
+
+# กำหนดไฟล์หรือโฟลเดอร์ที่ต้องการ ignore ไม่ให้รีวิว
+ignore:
+  - "docs/**"
+  - "tests/mocks/**"
+
+# ระดับความเข้มงวดของการรีวิว
+severity:
+  style: medium
+  security: high
+  performance: medium
+
+# การตั้งค่า workflow
+workflow:
+  auto_approve: false
+  auto_comment: true
+  require_human_review: true
+
+# การเชื่อมต่อกับ GitHub
+github:
+  enabled: true
+  pull_requests: true
+
+# การใช้งาน CLI
+cli:
+  enabled: true

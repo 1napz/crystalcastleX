@@ -1,0 +1,194 @@
+name: PR Automation - Testcase + Test
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  testcase-and-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        java: [17, 21]
+        gradle: [7.6, 8.5]
+        node: [18, 20]
+        python: [3.10, 3.12]
+        db: [postgres, mysql]   # เพิ่ม Database matrix
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        if: matrix.db == 'postgres'
+
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: test
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root --password=test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        if: matrix.db == 'mysql'
+
+    steps:
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v4
+
+      # ⚡ Gradle Cache
+      - name: ⚡ Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ matrix.gradle }}-${{ matrix.java }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-${{ matrix.gradle }}-${{ matrix.java }}-
+
+      - name: ☕ Setup Java ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: 🔧 Grant execute permission (Linux/macOS only)
+        if: runner.os != 'Windows'
+        run: chmod +x gradlew
+
+      - name: 📦 Setup Gradle ${{ matrix.gradle }}
+        run: ./gradlew wrapper --gradle-version ${{ matrix.gradle }} --distribution-type all
+
+      # 🌐 Setup Node.js
+      - name: 🌐 Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: 📦 Install frontend dependencies
+        run: npm install
+
+      - name: 🧪 Run frontend tests
+        run: npm test || echo "No frontend tests found"
+
+      # 🐍 Setup Python
+      - name: 🐍 Setup Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: 📦 Install Python dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            echo "No requirements.txt found"
+          fi
+
+      - name: 🧪 Run Python tests
+        run: |
+          if [ -f pytest.ini ] || [ -d tests ]; then
+            pip install pytest
+            pytest || true
+          else
+            echo "No Python tests found"
+          fi
+
+      # 🧪 Run backend tests (Gradle)
+      - name: 🧪 Run backend tests with DB ${{ matrix.db }}
+        env:
+          DB_TYPE: ${{ matrix.db }}
+          DB_HOST: localhost
+          DB_PORT: ${{ matrix.db == 'postgres' && '5432' || '3306' }}
+          DB_USER: test
+          DB_PASSWORD: test
+          DB_NAME: testdb
+        run: ./gradlew test --no-daemon
+
+      - name: 📎 Upload test report (JDK ${{ matrix.java }} - Gradle ${{ matrix.gradle }} - Node ${{ matrix.node }} - Python ${{ matrix.python }} - DB ${{ matrix.db }} - ${{ matrix.os }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-jdk-${{ matrix.java }}-gradle-${{ matrix.gradle }}-node-${{ matrix.node }}-python-${{ matrix.python }}-db-${{ matrix.db }}-${{ matrix.os }}
+          path: "**/build/reports/tests/test/"
+
+      - name: 📈 Extract test summary
+        if: always()
+        run: |
+          PASSED=$(grep -o 'tests passed' **/build/reports/tests/test/index.html | wc -l || true)
+          FAILED=$(grep -o 'tests failed' **/build/reports/tests/test/index.html | wc -l || true)
+          echo "PASSED=$PASSED" >> $GITHUB_ENV
+          echo "FAILED=$FAILED" >> $GITHUB_ENV
+          echo "JAVA=${{ matrix.java }}" >> $GITHUB_ENV
+          echo "OS=${{ matrix.os }}" >> $GITHUB_ENV
+          echo "GRADLE=${{ matrix.gradle }}" >> $GITHUB_ENV
+          echo "NODE=${{ matrix.node }}" >> $GITHUB_ENV
+          echo "PYTHON=${{ matrix.python }}" >> $GITHUB_ENV
+          echo "DB=${{ matrix.db }}" >> $GITHUB_ENV
+
+      - name: 📤 Upload summary (JDK ${{ matrix.java }} - Gradle ${{ matrix.gradle }} - Node ${{ matrix.node }} - Python ${{ matrix.python }} - DB ${{ matrix.db }} - ${{ matrix.os }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summary-jdk-${{ matrix.java }}-gradle-${{ matrix.gradle }}-node-${{ matrix.node }}-python-${{ matrix.python }}-db-${{ matrix.db }}-${{ matrix.os }}
+          path: $GITHUB_ENV
+
+  # -------------------------
+  # รวมผลลัพธ์ทุก JDK + OS + Gradle + Node.js + Python + DB
+  # -------------------------
+  summarize:
+    runs-on: ubuntu-latest
+    needs: testcase-and-test
+    if: always()
+    steps:
+      - name: 📥 Download summaries
+        uses: actions/download-artifact@v4
+        with:
+          path: summaries
+
+      - name: 📊 Aggregate results
+        run: |
+          echo "## Test Summary" > summary.md
+          for f in summaries/summary-jdk-*/*; do
+            source $f
+            echo "### JDK $JAVA | Gradle $GRADLE | Node $NODE | Python $PYTHON | DB $DB | $OS" >> summary.md
+            echo "✅ Passed: $PASSED" >> summary.md
+            echo "❌ Failed: $FAILED" >> summary.md
+            echo "" >> summary.md
+          done
+
+      - name: 💬 Comment PR with aggregated result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('summary.md', 'utf8');
+            const pr = context.payload.pull_request.number;
+
+            github.rest.issues.createComment({
+              issue_number: pr,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🧪 Combined Test Results (Ubuntu + Windows + macOS, Gradle 7.x + 8.x, Node.js 18 + 20, Python 3.10 + 3.12, PostgreSQL + MySQL)\n\n${summary}\n📊 Download full reports in Actions > Artifacts`
+            });

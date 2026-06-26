@@ -1,0 +1,28 @@
+{
+  // === Editor ===
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+"editor.fontSize": 16
+
+  // === Files ===
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  // === Linting ===
+  "eslint.enable": true,
+  "eslint.validate": ["javascript", "typescript", "javascriptreact", "typescriptreact"],
+
+  // === Git ===
+  "git.confirmSync": false,
+  "git.autofetch": true,
+
+  // === Terminal ===
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+
+  // === Workbench ===
+  "workbench.iconTheme": "vscode-icons"
+}
