@@ -1,0 +1,15 @@
+{
+  "name": "crystalcastle",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "jsdoc": "^4.0.2"
+  },
+  "scripts": {
+    "docs": "jsdoc -c jsdoc.json",
+    "docs:generate": "jsdoc -c jsdoc.json"
+  }
+}
