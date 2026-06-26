@@ -1,0 +1,29 @@
+# .github/workflows/security-headers.yml
+name: Security Headers Check
+
+on:
+  deployment_status:
+
+jobs:
+  check:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Security Headers
+        run: |
+          URL="${{ github.event.deployment_status.environment_url }}"
+          HEADERS=$(curl -sI "$URL")
+          echo "$HEADERS"
+          
+          # Check required headers
+          if echo "$HEADERS" | grep -qi "content-security-policy"; then
+            echo "✅ CSP header found"
+          else
+            echo "❌ Missing CSP header"
+          fi
+          
+          if echo "$HEADERS" | grep -qi "x-frame-options"; then
+            echo "✅ X-Frame-Options header found"
+          else
+            echo "❌ Missing X-Frame-Options header"
+          fi

@@ -1,0 +1,194 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.coderabbit.ai/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# CodeRabbit Agent for Slack
+
+> Bring AI-powered investigation, planning, and action into your Slack workspace with shared controls, persistent knowledge, and governed access.
+
+export const Hint = ({type, children, headline, tip, href, cta}) => {
+  const TIPS = {
+    learnings: {
+      headline: "Learnings",
+      tip: "Review preferences CodeRabbit learns from your chat conversations and applies automatically to future reviews.",
+      cta: "Learn about Learnings",
+      href: "/knowledge-base/learnings",
+      content: "Learnings"
+    },
+    walkthrough: {
+      headline: "PR Walkthrough",
+      tip: "A structured comment posted by CodeRabbit at the top of every pull request, summarizing changes, sequence diagrams, review effort, and more.",
+      cta: "Learn about PR Walkthroughs",
+      href: "/pr-reviews/walkthroughs",
+      content: "Walkthrough"
+    },
+    "finishing-touches": {
+      headline: "Finishing Touches",
+      tip: "Post-review agentic actions (Autofix, writing docstrings or unit tests, and more) you trigger from a PR comment or a checkbox in the Walkthrough.",
+      cta: "See all Finishing Touches",
+      href: "/finishing-touches",
+      content: "Finishing Touches"
+    },
+    "coding-plan": {
+      headline: "Coding Plan",
+      tip: "A detailed, codebase-aware implementation plan CodeRabbit generates from an issue or description, ready to hand off to any coding agent.",
+      cta: "Learn about Coding Plans",
+      href: "/plan",
+      content: "Coding Plan"
+    },
+    "knowledge-base": {
+      headline: "Knowledge Base",
+      tip: "The collected context sources CodeRabbit draws on during reviews: Learnings, Code Guidelines, issue trackers, connected MCP servers, and cross-repo analysis.",
+      cta: "Explore the Knowledge Base",
+      href: "/knowledge-base",
+      content: "Knowledge Base"
+    },
+    "path-instructions": {
+      headline: "Path Instructions",
+      tip: "Custom review rules that only apply to files matching a glob pattern, e.g. 'src/controllers/**'.",
+      cta: "Configure path instructions",
+      href: "/configuration/path-instructions",
+      content: "Path Instructions"
+    },
+    scope: {
+      headline: "Scope",
+      tip: "A named set of repositories, connections, and spend limits that controls what CodeRabbit Agent can access in a given Slack conversation.",
+      cta: "Learn about Scopes",
+      href: "/slack-agent/scopes",
+      content: "Scope"
+    }
+  };
+  const defaults = TIPS[type] || ({});
+  return <Tooltip headline={headline ?? defaults.headline} tip={tip ?? defaults.tip} cta={cta ?? defaults.cta} href={href ?? defaults.href}>
+      {children ?? defaults.content}
+    </Tooltip>;
+};
+
+export const EarlyAccessBadge = ({tip = "This feature is in early access. Enable it by setting `early_access: true` in your `.coderabbit.yaml`, or by toggling Early Access on the web interface.", title = "Early Access", cta = "View configuration", href = "/reference/configuration#param-early-access", disabled = false}) => {
+  return <Tooltip tip={tip} cta={cta} href={href}>
+        <Badge icon="flask-conical" disabled={disabled || undefined}>
+            {title}
+        </Badge>
+    </Tooltip>;
+};
+
+<EarlyAccessBadge />
+
+CodeRabbit Agent is an AI agent for **your entire SDLC** right in Slack. Investigate issues, generate implementation plans, discuss requirements with colleagues, pull in context from tools like Linear or Figma, and ask CodeRabbit to open a pull request — all from the channel or thread where the conversation is already happening, or in a direct conversation through the CodeRabbit Slack app. Context carries over between messages, durable facts are saved for future conversations, and every run can be reviewed after the fact.
+
+<Warning>
+  CodeRabbit application for Slack uses AI (Large Language Models) to generate responses, which may occasionally be inaccurate. Verify important information independently because responses do not constitute professional advice. Some features, including the AI Agent/Assistant, require a paid Slack plan and may not be available on free plans.
+</Warning>
+
+## What you can do
+
+CodeRabbit Agent covers the full arc from investigation through implementation. Here are some of the things your team can do without leaving Slack.
+
+<Tabs borderBottom>
+  <Tab title="Design and implement" icon="search">
+    Ask the Agent to explore your codebase, review merged PRs and design documents, and surface the approach your team already follows. Once the investigation is complete, the Agent can suggest changes and open a pull request, all within the same Slack thread.
+
+    <Frame caption="CodeRabbit Agent investigates existing codebase, suggests a configuration, and opens a pull request, all from a single Slack thread">
+      <img src="https://mintcdn.com/coderabbit/ORDpQ77gsfAJLw4A/assets/images/slack-agent-eng-demo.png?fit=max&auto=format&n=ORDpQ77gsfAJLw4A&q=85&s=0d631065214f8a961dc1ce5ad752a3ae" alt="Slack conversation where a developer asks CodeRabbit how rate limiting was handled on an existing endpoint, CodeRabbit finds the pattern across merged PRs and ADRs, recommends a lower default for the new endpoint, and opens a pull request after approval" width="1642" height="806" data-path="assets/images/slack-agent-eng-demo.png" />
+    </Frame>
+  </Tab>
+
+  <Tab title="Triage and respond" icon="siren">
+    Let the Agent pull telemetry from connected tools, correlate the data with recent code changes, and pinpoint the root cause. Once the team agrees on the fix, the Agent can open a surgical revert or patch PR.
+
+    <Frame caption="CodeRabbit Agent pulls Datadog traces, correlates a latency spike with an accidental scaling config change in a merged PR, and opens a targeted revert">
+      <img src="https://mintcdn.com/coderabbit/ORDpQ77gsfAJLw4A/assets/images/slack-agent-demo-incident.png?fit=max&auto=format&n=ORDpQ77gsfAJLw4A&q=85&s=a3788487d561eaab0c580483fa66c071" alt="Slack conversation where a Datadog alert fires for checkout-service latency, CodeRabbit traces the bottleneck to an inventory-service scaling misconfiguration from a recent PR, and opens a revert PR on request" width="1472" height="1058" data-path="assets/images/slack-agent-demo-incident.png" />
+    </Frame>
+  </Tab>
+
+  <Tab title="Issues and PRs" icon="git-pull-request">
+    When investigation turns into action, your team can continue the discussion in a thread — referencing context from connected tools like Jira, Linear, or Notion — and then ask CodeRabbit Agent to open a pull request that incorporates the full conversation, or create issues in your connected trackers.
+
+    <Frame caption="CodeRabbit Agent identifies a breaking dependency upgrade as the root cause of a failed nightly build, opens a fix PR, and files a Linear ticket to track the full migration">
+      <img src="https://mintcdn.com/coderabbit/ORDpQ77gsfAJLw4A/assets/images/slack-agent-demo-build.png?fit=max&auto=format&n=ORDpQ77gsfAJLw4A&q=85&s=9c8c6c54a512d54850fabf9356c7ba4f" alt="Slack conversation where a developer reports a red nightly build, CodeRabbit traces the failure to an openapi-gen v3.2.0 breaking type change, opens a PR to pin the dependency and update the type, and creates a Linear ticket for the future enum migration" width="1436" height="746" data-path="assets/images/slack-agent-demo-build.png" />
+    </Frame>
+  </Tab>
+
+  <Tab title="Automate tasks" icon="clock">
+    Schedule tasks that CodeRabbit Agent runs [on a cadence](/slack-agent/automations): every few minutes, hourly, daily, or weekly. Each run posts results into a fresh or existing thread so the team stays informed without manual effort.
+
+    <Frame caption="A user creates a weekly Monday automation for customer-facing release summaries and CodeRabbit delivers a preview of the first report">
+      <img src="https://mintcdn.com/coderabbit/ORDpQ77gsfAJLw4A/assets/images/slack-agent-demo-automate.png?fit=max&auto=format&n=ORDpQ77gsfAJLw4A&q=85&s=7a6a0a5f0d78da276ee693ac77749bce" alt="Slack conversation where a user asks CodeRabbit to create a weekly Monday automation summarizing the most important customer-facing changes from the previous week, and CodeRabbit confirms and posts a preview of the weekly release update" width="1220" height="544" data-path="assets/images/slack-agent-demo-automate.png" />
+    </Frame>
+  </Tab>
+</Tabs>
+
+## Core Concepts
+
+<Tabs borderBottom>
+  <Tab title="Context" icon="radar">
+    The agent pulls your org's context together, across every tool and team conversation, into one place.
+
+    * **Code** · The repositories, recent changes, and opened PRs.
+    * **Tickets** · Jira, Linear, or wherever your team tracks work.
+    * **Docs** · Notion pages, Confluence wikis, internal runbooks.
+    * **Monitoring** · Datadog, PostHog, Sentry, and your observability stack.
+    * **Cloud** · AWS, GCP, and the infra that runs under it all.
+
+    Set up external tools and APIs through [Connections](/slack-agent/connections).
+  </Tab>
+
+  <Tab title="Memory" icon="brain">
+    The agent builds a Knowledge base from Slack and your systems. Decisions, fixes, and patterns are captured as they happen and refined through daily use, so it reflects how your team actually works.
+
+    * **Team knowledge** · Org-wide know-how, shared across teams, channels, and repos.
+    * **Channel memory** · Retains team-specific patterns, runbooks, and conventions.
+    * **Thread memory** · Carries forward everything from the current task.
+
+    Learn more about how facts are stored and scoped in the [CodeRabbit Agent Knowledge Base](/slack-agent/knowledge-base).
+  </Tab>
+
+  <Tab title="Multi-player" icon="users">
+    The agent works in a shared thread alongside your team. Anyone can guide, contribute, and move tasks forward. It learns from team conversations and stays aligned as work evolves.
+
+    * **Synchronous** · The agent lives in the Slack thread.
+    * **Steerable** · Redirect or expand the work mid-task.
+    * **Resumable** · Stop, switch devices, come back tomorrow.
+
+    See [Working in Slack](/slack-agent/use-in-slack) for how mentions, threads, and direct conversations work day to day.
+  </Tab>
+
+  <Tab title="Governance" icon="shield-check">
+    Access, knowledge, and spend, scoped to the channel and user. Every run is explainable and attributed, so you see what the agent did, for whom, and what it cost.
+
+    * **Access** · Scoped to who you are and what you do. See [Admin and security](/slack-agent/admin-and-security).
+    * **Knowledge** · Scoped to the channel where it belongs.
+    * **Tool control** · Decide which integrations are available where. See [Scopes](/slack-agent/scopes).
+    * **Cost control** · Attributed by team and channel, not individual keys. See [Usage](/slack-agent/usage).
+  </Tab>
+</Tabs>
+
+## Billing
+
+CodeRabbit Agent is billed separately from CodeRabbit [review subscriptions](/management/plans). Your CodeRabbit plan covers pull request reviews, IDE and CLI reviews, and related features. CodeRabbit Agent usage is measured in **agent minutes**, the actual runtime each Slack Agent run spends working, and is billed independently.
+
+This means:
+
+* A CodeRabbit Pro, Pro+, or Enterprise subscription does **not** include Agent usage.
+* Agent charges are based on accumulated agent minutes, not on the number of seats or reviews in your CodeRabbit plan.
+* You can use Agent without a paid CodeRabbit review plan, and vice versa.
+
+Track your agent-minute consumption from the [Usage](/slack-agent/usage) dashboard.
+
+## What's next
+
+Whether you are setting up CodeRabbit Agent for Slack for the first time or exploring what it can do, start at [agent.coderabbit.ai](https://agent.coderabbit.ai/) and follow the pages below to get up and running.
+
+<CardGroup cols={1}>
+  <Card title="Quickstart" href="/slack-agent/onboarding" icon="rocket" horizontal>
+    Get CodeRabbit Agent for Slack running in your workspace in minutes.
+  </Card>
+
+  <Card title="Working in Slack" href="/slack-agent/use-in-slack" icon="messages-square" horizontal>
+    Learn how mentions and direct conversations work day to day.
+  </Card>
+
+  <Card title="Connections" href="/slack-agent/connections" icon="plug" horizontal>
+    Connect external tools like Jira, Notion, Sentry, and Google Drive to your workspace.
+  </Card>
+</CardGroup>
