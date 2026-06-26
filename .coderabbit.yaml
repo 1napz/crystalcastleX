@@ -1,0 +1,147 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+# ─── General ────────────────────────────────────────────────────────────────
+language: "th-TH"
+tone_instructions: "รีวิวสั้น กระชับ ตรงประเด็น ไม่ต้องอธิบายยืดยาว"
+focus: "balanced"
+
+# ─── Reviews ────────────────────────────────────────────────────────────────
+reviews:
+  profile: "chill"
+  high_level_summary: true
+  high_level_summary_instructions: "สรุปการเปลี่ยนแปลงหลักเป็นข้อสั้นๆ ไม่เกิน 5 bullet"
+  sequence_diagrams: false
+  poem: false
+  collapse_walkthrough: true
+  changed_files_summary: true
+  estimate_code_review_effort: true
+  suggested_labels: true
+  auto_apply_labels: false
+  suggested_reviewers: false
+
+  # Auto-review behavior
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false                        # skip draft PRs
+    ignore_title_keywords:
+      - "wip"
+      - "WIP"
+      - "skip-review"
+      - "no-review"
+    base_branches:
+      - "main"
+      - "develop"
+
+  # Path-specific review instructions
+  path_instructions:
+    - path: "src/app/**"
+      instructions: |
+        Next.js 15 App Router — ตรวจ Server/Client Component boundary,
+        ห้ามใช้ useState/useEffect ใน Server Component,
+        ตรวจ metadata และ loading/error boundary ด้วย
+    - path: "src/components/**"
+      instructions: |
+        ตรวจ TypeScript type safety, props interface ครบหรือไม่,
+        และ accessibility (aria-*, alt text)
+    - path: "src/lib/supabase/**"
+      instructions: |
+        ตรวจ RLS policy ว่าไม่มี data leak,
+        ห้าม expose service_role key ฝั่ง client,
+        ตรวจ error handling ของ Supabase query
+    - path: "src/lib/groq/**"
+      instructions: |
+        ตรวจ prompt injection risk,
+        ตรวจว่า API key ไม่ถูก hardcode,
+        ตรวจ streaming error handling
+    - path: ".github/workflows/**"
+      instructions: |
+        ตรวจ secret ที่ใช้ผ่าน ${{ secrets.* }} เท่านั้น,
+        ห้าม hardcode token หรือ API key,
+        ตรวจ permissions ให้ minimal principle
+    - path: "**/*.env*"
+      instructions: "ห้าม commit ค่า secret จริง — ต้องเป็น placeholder เท่านั้น"
+
+  # Exclude paths ที่ไม่ต้องรีวิว
+  path_filters:
+    - "!node_modules/**"
+    - "!.next/**"
+    - "!dist/**"
+    - "!out/**"
+    - "!coverage/**"
+    - "!**/*.lock"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+
+  # Finishing touches
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+    simplify:
+      enabled: false
+
+  # Tools
+  tools:
+    eslint:
+      enabled: true
+    biome:
+      enabled: true
+    actionlint:
+      enabled: true
+    zizmor:
+      enabled: true
+    yamllint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    trufflehog:
+      enabled: true
+    dotenvLint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+    # ปิด tool ที่ไม่เกี่ยวกับ stack นี้
+    ruff:
+      enabled: false
+    phpstan:
+      enabled: false
+    phpmd:
+      enabled: false
+    phpcs:
+      enabled: false
+    golangci-lint:
+      enabled: false
+    rubocop:
+      enabled: false
+    swiftlint:
+      enabled: false
+    hadolint:
+      enabled: false
+    checkov:
+      enabled: false
+    tflint:
+      enabled: false
+
+# ─── Chat ───────────────────────────────────────────────────────────────────
+chat:
+  art: false
+  auto_reply: true
+  allow_non_org_members: false
+
+# ─── Knowledge Base ─────────────────────────────────────────────────────────
+knowledge_base:
+  web_search:
+    enabled: true
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "**/CLAUDE.md"
+      - "**/knowledge.md"
+      - "**/CONTRIBUTING.md"
+      - "**/.cursorrules"
+  learnings:
+    scope: "local"

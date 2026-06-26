@@ -1,0 +1,227 @@
+Great — I'll produce a minimal, complete CI demo (option 2) with clear, commented files you can paste into your repo.
+
+Files I'll create:
+- .github/workflows/compliance-license.yml
+- .github/workflows/compliance-security.yml
+- scripts/check-license.sh
+- scripts/check-security.sh
+- .github/actions/post-comment/post-comment.js
+- README.md (short usage)
+
+Assumptions (change if needed):
+- Platform: GitHub Actions
+- Node: 18
+- Shell: bash
+- PR commenting via GITHUB_TOKEN
+
+Ready — paste these file contents into your repo.
+
+1) .github/workflows/compliance-license.yml
+```yaml
+name: Compliance — License check
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run license check
+        run: bash ./scripts/check-license.sh
+        continue-on-error: true
+      - name: Post results as PR comment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Post comment (license)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHECK_NAME: "License check"
+          CHECK_OUTPUT_FILE: license-result.txt
+        run: |
+          node .github/actions/post-comment/post-comment.js
+```
+
+2) .github/workflows/compliance-security.yml
+```yaml
+name: Compliance — Security check
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run security check
+        run: bash ./scripts/check-security.sh
+        continue-on-error: true
+
+      - name: Post results as PR comment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Post comment (security)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHECK_NAME: "Security check"
+          CHECK_OUTPUT_FILE: security-result.txt
+        run: |
+          node .github/actions/post-comment/post-comment.js
+```
+
+3) scripts/check-license.sh
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+OUT_FILE="license-result.txt"
+echo "License check results" > "$OUT_FILE"
+
+# Simple example: ensure LICENSE file exists and contains "MIT" or "Apache"
+if [ ! -f LICENSE ]; then
+  echo "FAIL: LICENSE file missing" >> "$OUT_FILE"
+  exit 0
+fi
+
+if grep -qiE "mit|apache" LICENSE; then
+  echo "PASS: LICENSE file present and contains permissive license" >> "$OUT_FILE"
+else
+  echo "WARN: LICENSE file present but license not recognized (expected MIT/Apache)" >> "$OUT_FILE"
+fi
+
+# Print to stdout for logs and keep file for the comment step
+cat "$OUT_FILE"
+```
+Make executable: chmod +x scripts/check-license.sh
+
+4) scripts/check-security.sh
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+OUT_FILE="security-result.txt"
+echo "Security check results" > "$OUT_FILE"
+
+# Minimal illustrative checks:
+# 1) No secrets in tracked files (simple grep for typical tokens)
+if git ls-files | xargs grep -En --line-number "(API_KEY|SECRET|PASSWORD|token[:=])" >/dev/null 2>&1; then
+  echo "FAIL: Possible secret found in repository files" >> "$OUT_FILE"
+else
+  echo "PASS: No obvious secrets found (simple scan)" >> "$OUT_FILE"
+fi
+
+# 2) Ensure .github/workflows doesn't run unpinned actions (basic check)
+if grep -R "uses: .*@main" .github/workflows >/dev/null 2>&1; then
+  echo "WARN: Some workflows use actions pinned to a branch (e.g., @main). Prefer tags/sha." >> "$OUT_FILE"
+else
+  echo "PASS: Workflow actions appear pinned (no @main/@master detected)" >> "$OUT_FILE"
+fi
+
+cat "$OUT_FILE"
+```
+Make executable: chmod +x scripts/check-security.sh
+
+5) .github/actions/post-comment/post-comment.js
+```javascript
+// Minimal script to post a comment to a PR using GITHUB_TOKEN
+// Expects env: GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_EVENT_PATH, CHECK_NAME, CHECK_OUTPUT_FILE
+
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+
+const token = process.env.GITHUB_TOKEN;
+const repo = process.env.GITHUB_REPOSITORY;
+const eventPath = process.env.GITHUB_EVENT_PATH;
+const checkName = process.env.CHECK_NAME || 'Check';
+const outputFile = process.env.CHECK_OUTPUT_FILE || 'result.txt';
+
+if (!token || !repo || !eventPath) {
+  console.error('Missing required environment variables.');
+  process.exit(1);
+}
+
+const event = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
+const prNumber = event.pull_request && event.pull_request.number;
+if (!prNumber) {
+  console.log('Not a pull_request event — skipping comment.');
+  process.exit(0);
+}
+
+const body = fs.existsSync(outputFile)
+  ? fs.readFileSync(outputFile, 'utf8')
+  : `${checkName}: no output file found`;
+
+const comment = {
+  body: `### ${checkName}\n\n\`\`\`\n${body}\n\`\`\``
+};
+
+const options = {
+  hostname: 'api.github.com',
+  path: `/repos/${repo}/issues/${prNumber}/comments`,
+  method: 'POST',
+  headers: {
+    'User-Agent': 'github-action',
+    Authorization: `token ${token}`,
+    'Content-Type': 'application/json'
+  }
+};
+
+const req = https.request(options, (res) => {
+  let data = '';
+  res.on('data', (chunk) => (data += chunk));
+  res.on('end', () => {
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      console.log('Comment posted.');
+    } else {
+      console.error('Failed to post comment', res.statusCode, data);
+      process.exit(1);
+    }
+  });
+});
+
+req.on('error', (err) => {
+  console.error('Request error', err);
+  process.exit(1);
+});
+
+req.write(JSON.stringify(comment));
+req.end();
+```
+
+6) README.md (short usage)
+```markdown
+# Minimal CI compliance demo
+
+How it works:
+- Two workflows run on PRs: license and security.
+- Each runs a simple bash script that writes results to a file.
+- A small Node script posts the results as a PR comment using GITHUB_TOKEN.
+
+To use:
+1. Create the files above in your repo.
+2. Ensure scripts are executable (chmod +x scripts/*.sh).
+3. Open a PR — the workflows will run and post comments.
+
+Notes:
+- These checks are intentionally minimal for clarity. Replace/extend checks for your real project.
+- GITHUB_TOKEN is provided automatically by GitHub Actions.
+```
+
+Next steps I recommend (one-line each):
+- Replace the naive secret grep with a dedicated scanner (e.g., trufflehog or git-secrets).
+- Expand license detection to use SPDX parsing if needed.
+- Add deduplication so the comment updates instead of posting duplicates (store comment id or use labels).
+
+If you want, I can:
+- Generate a version that updates a single comment instead of posting multiple.
+- Add a combined workflow that runs both checks and summarizes results.
+- Convert the Node commenter to use octokit (more robust).
+
+Which one of those next steps would you like?

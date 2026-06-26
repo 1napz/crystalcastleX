@@ -1,0 +1,28 @@
+name: 🤖 AutoMerge
+
+on:
+  # Note: 'pull_request' is generally safer and recommended over 'pull_request_target' 
+  # unless you specifically need to auto-merge PRs from external forks.
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: AutoMerge PRs
+        uses: pascalgn/automerge-action@v0.15.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          # --- Configuration via Environment Variables ---
+          MERGE_METHOD: squash
+          MERGE_LABELS: automerge
+          MERGE_DELETE_BRANCH: "true"
+          
+          # Optional: Automatically remove the 'automerge' label after a successful merge
+          MERGE_REMOVE_LABELS: automerge

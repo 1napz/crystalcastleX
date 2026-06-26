@@ -1,0 +1,22 @@
+jobs:
+  generate-pr-status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch open PRs
+        run: |
+          gh pr list --state open --json number,title,state \
+            > version/CrystalCastle/logs/pr_status.json
+
+      - name: Append CI/CD fail counts
+        run: |
+          FAIL_COUNT=$(grep -r "❌" version/CrystalCastle/logs/ | wc -l)
+          jq ".overview.ci_failures = ${FAIL_COUNT}" version/CrystalCastle/logs/pr_status.json \
+            > tmp.json && mv tmp.json version/CrystalCastle/logs/pr_status.json
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-status
+          path: version/CrystalCastle/logs/pr_status.json

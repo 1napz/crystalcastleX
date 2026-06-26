@@ -1,0 +1,52 @@
+🧾 Reviewer Quick Reference Card (EN/TH)
+
+```
+
+🧾 Reviewer Quick Reference Card — CrystalCastle
+
+🚀 Deploy Essentials
+- ✅ Entry point: index.html (AI Video Studio)
+- ⚙️ Config: vercel.json with AI Gateway (Groq, Gemini, OpenAI)
+- 🧩 Ignore: vitest.config.js, task.md, tiktok* via .vercelignore
+- 📦 Deploy command: vercel deploy --prod --archive=tgz
+
+---
+
+🔍 Governance & Workflow
+- Active workflows:
+  - ci.yml, reviewer-checklist.yml, auto-apply.yml
+  - security-scan.yml, ai-validation.yml
+- Archived workflows:
+  - release.yml, stale.yml, dispatchflow.yml → workflows/notuse/
+
+---
+
+⚠️ Troubleshooting
+- 🕒 Build Timeout → Pre-build locally (npm run build)
+- 📁 File Size Error → Compress or host externally
+- 🚫 Rate Limit → Reduce deploys / upgrade plan
+- 🧠 CI/CD Fail → Fix workflow or remove unused jobs
+
+---
+
+✅ Reviewer Checklist
+- [ ] Failover tested (Groq → Gemini → OpenAI)
+- [ ] Cache works (TTL 60s)
+- [ ] Logs + severity matrix visible
+- [ ] Cost tracking enabled
+- [ ] Notes bilingual (EN/TH)
+
+---
+
+TH (สรุปสำหรับ Reviewer):
+- ✅ ตรวจสอบ Failover, Cache, Logs, และ Cost Tracking
+- ⚙️ ใช้เฉพาะ Workflow ที่จำเป็น
+- 🧩 Deploy ด้วยคำสั่ง vercel deploy --archive=tgz
+- 🗂️ ตัดไฟล์ที่ไม่จำเป็นออกด้วย .vercelignore
+```
+
+---
+
+📌 Placement Tip
+Add this card right below your main project title in README.md.  
+It gives reviewers instant visibility into deploy rules and governance compliance before reading deeper sections.  

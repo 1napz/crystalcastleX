@@ -1,0 +1,25 @@
+#!/bin/sh
+
+echo "🔍 Running Zyntro AI Studio Commit Checklist..."
+
+# 1. ตรวจสอบว่าไม่มี sensitive data
+if grep -r "API_KEY" .; then
+  echo "❌ Found API_KEY in commit. Remove sensitive data!"
+  exit 1
+fi
+
+# 2. ตรวจสอบ commit message format
+commit_msg_file=$(git rev-parse --git-dir)/COMMIT_EDITMSG
+if ! grep -Eq "^(feat|fix|docs|chore|refactor|test)\(.+\): .+" "$commit_msg_file"; then
+  echo "❌ Commit message must follow Conventional Commits format!"
+  exit 1
+fi
+
+# 3. รัน lint และ test
+npm run lint && npm run test
+if [ $? -ne 0 ]; then
+  echo "❌ Lint/Test failed. Fix issues before commit!"
+  exit 1
+fi
+
+echo "✅ Checklist passed. Proceeding with commit..."

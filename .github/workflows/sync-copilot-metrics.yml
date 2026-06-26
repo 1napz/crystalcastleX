@@ -1,0 +1,25 @@
+name: Sync Copilot Metrics
+on:
+  schedule:
+    - cron: '0 0 * * 1' # รันทุกวันจันทร์ตอนเที่ยงคืน
+
+jobs:
+  fetch-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-python: '3.x'
+
+      - name: Install Dependencies
+        run: pip install requests
+
+      - name: Run Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.COPILOT_METRICS_TOKEN }} # แนะนำให้เก็บ Token ใน GitHub Secrets เพื่อความปลอดภัย
+        run: python src/fetch_metrics.py
+

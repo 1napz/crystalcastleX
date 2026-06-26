@@ -1,0 +1,25 @@
+name: Cleanup old reviewer docs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Remove old reviewer md files
+        run: |
+          # ลบไฟล์ที่ match *review*.md ยกเว้น ReviewerGuide.md
+          find docs -type f -name "*review*.md" ! -name "ReviewerGuide.md" -exec git rm {} \;
+
+      - name: Commit cleanup
+        run: |
+          git config user.name "CrystalCastle Bot"
+          git config user.email "bot@crystalcastle.local"
+          git commit -m "chore(docs): auto-cleanup old reviewer md files"
+          git push origin main

@@ -1,0 +1,41 @@
+name: Log Summary
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download logs (artifact)
+        uses: actions/download-artifact@v4
+        with:
+          name: workflow-logs
+          path: logs/
+        continue-on-error: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run summarizer
+        run: node scripts/summarize-log.js
+
+      - name: Commit summary
+        run: |
+          git config user.name "summary-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add update/
+          git commit -m "📝 log summary ${{ github.run_id }}" || echo "no changes"
+          git push

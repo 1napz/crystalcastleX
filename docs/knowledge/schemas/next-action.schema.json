@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Next Action Recommendation",
+  "description": "AI recommendation output for document analysis and content optimization suggestions",
+  "type": "object",
+  "required": ["analysis", "best_next_action", "actions"],
+  "properties": {
+    "analysis": {
+      "type": "object",
+      "description": "Document content analysis results",
+      "required": ["content_type", "topic", "word_count", "complexity"],
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "description": "Document category type",
+          "enum": ["article", "guide", "tutorial", "reference", "howto", "faq", "documentation", "blog", "image", "other"]
+        },
+        "topic": {
+          "type": "string",
+          "description": "Main topic or subject of the document"
+        },
+        "word_count": {
+          "type": "integer",
+          "description": "Total word count of the document",
+          "minimum": 0
+        },
+        "complexity": {
+          "type": "string",
+          "description": "Content complexity level",
+          "enum": ["beginner", "intermediate", "advanced", "expert"]
+        },
+        "has_visual_content": {
+          "type": "boolean",
+          "description": "Whether the content contains images or visual elements"
+        }
+      }
+    },
+    "best_next_action": {
+      "type": "string",
+      "description": "Recommended action to improve the document",
+      "enum": [
+        "simplify",
+        "generate_faq",
+        "extract_key_points",
+        "generate_glossary",
+        "generate_toc",
+        "summarize",
+        "translate",
+        "repurpose_content",
+        "create_knowledge_doc",
+        "generate_video_from_image"
+      ]
+    },
+    "actions": {
+      "type": "object",
+      "description": "Scores and confidence for all possible actions",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["score", "confidence"],
+        "properties": {
+          "score": {
+            "type": "number",
+            "description": "Action relevance score",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "confidence": {
+            "type": "number",
+            "description": "Confidence level of this recommendation",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "reason": {
+            "type": "string",
+            "description": "Explanation for the recommendation"
+          },
+          "video_generation_config": {
+            "type": "object",
+            "description": "Configuration for video generation from image",
+            "properties": {
+              "duration_seconds": {
+                "type": "integer",
+                "description": "Desired video duration in seconds",
+                "minimum": 1,
+                "maximum": 300
+              },
+              "fps": {
+                "type": "integer",
+                "description": "Frames per second for the generated video",
+                "enum": [24, 30, 60]
+              },
+              "motion_intensity": {
+                "type": "string",
+                "description": "Level of motion to apply to the image",
+                "enum": ["subtle", "moderate", "dynamic"]
+              },
+              "style": {
+                "type": "string",
+                "description": "Style of animation/motion applied",
+                "enum": ["zoom", "pan", "kinetic", "fade", "auto"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
