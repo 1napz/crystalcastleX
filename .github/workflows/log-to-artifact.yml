@@ -1,0 +1,5 @@
+- name: Upload log artifact
+  uses: actions/upload-artifact@v4
+  with:
+    name: action-review-log
+    path: logs/action_review.log

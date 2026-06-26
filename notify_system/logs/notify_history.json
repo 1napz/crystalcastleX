@@ -1,0 +1,24 @@
+{
+  "date": "2026-05-13T02:34:00",
+  "repo": "CrystalCastle",
+  "notifications": [
+    {
+      "id": "NOTI-DEV-001",
+      "type": "success",
+      "title_en": "DevContainer Setup Completed",
+      "title_th": "DevContainer Setup สำเร็จ",
+      "message_en": "Container ID abc123 started with backend docker.",
+      "message_th": "Container ID abc123 เริ่มทำงานด้วย backend docker",
+      "status": "closed"
+    },
+    {
+      "id": "NOTI-DEV-002",
+      "type": "failure",
+      "title_en": "DevContainer Setup Failed",
+      "title_th": "DevContainer Setup ล้มเหลว",
+      "message_en": "Please check Docker/Podman backend and devcontainer command.",
+      "message_th": "โปรดตรวจสอบ Docker/Podman backend และ devcontainer command",
+      "status": "open"
+    }
+  ]
+}

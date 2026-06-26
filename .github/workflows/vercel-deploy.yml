@@ -1,0 +1,33 @@
+# .github/workflows/deploy.yml
+name: Deploy (Vercel)
+
+on:
+  push:
+    branches: [main]
+  # ✅ เพิ่มตรงนี้: เพื่อบอกว่าถ้าแก้ไฟล์พวกนี้ "ไม่ต้องรัน" ขั้นตอนข้างล่าง
+    paths-ignore:
+      - '**.md'                # ไฟล์เอกสารทั้งหมด
+      - 'docs/**'              # โฟลเดอร์เก็บคู่มือ
+      - 'reviewer/**'          # โฟลเดอร์งานตรวจสอบ
+      - '.ai-context.md'       # ไฟล์บริบท AI
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Vercel
+        run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+

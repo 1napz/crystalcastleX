@@ -1,0 +1,35 @@
+name: Force Squash Merge
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *" # ทุกชั่วโมงเช็คจำนวน PR
+
+jobs:
+  check-pr-count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Count Open PRs
+        run: |
+          PR_COUNT=$(gh pr list --state open --json number | jq length)
+          echo "Open PRs: $PR_COUNT"
+          if [ "$PR_COUNT" -gt 30 ]; then
+            echo "trigger_merge=true" >> $GITHUB_ENV
+          fi
+
+  squash-merge:
+    needs: check-pr-count
+    if: env.trigger_merge == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Squash Merge Oldest PRs
+        run: |
+          for pr in $(gh pr list --state open --json number --jq '.[].number' | head -n 10); do
+            gh pr merge $pr --squash --admin
+          done
+
+      - name: LINE Notify Logging
+        run: |
+          curl -X POST https://notify-api.line.me/api/notify \
+            -H "Authorization: Bearer ${{ secrets.LINE_NOTIFY_TOKEN }}" \
+            -F "message=⚠️ CrystalCastle Auto-Squash Triggered (PR > 30). Manual review required."
