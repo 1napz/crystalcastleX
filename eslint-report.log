@@ -1,0 +1,24 @@
+=== ESLint Report ===
+✅ Passed: 120 checks
+❌ Failed: 3 checks
+
+Severity Matrix:
+- Critical: 1
+- Major: 2
+- Minor: 0
+
+---
+
+📝 Summary (English)
+- Source code passed most lint rules.
+- ❌ Critical: `no-undef` violation in src/utils/helpers.js (undefined variable).
+- ❌ Major: `eqeqeq` violation in src/components/Login.js (used == instead of ===).
+- ❌ Major: `consistent-return` violation in src/services/api.js (function returns inconsistent types).
+- All other rules passed, including security checks (`no-eval`, `no-new-func`) and code quality (`curly`, `complexity`).
+
+📝 สรุป (ภาษาไทย)
+- Source code ผ่าน lint rule ส่วนใหญ่
+- ❌ Critical: พบ `no-undef` ใน src/utils/helpers.js (ตัวแปรไม่ได้ถูกประกาศ)
+- ❌ Major: พบ `eqeqeq` ใน src/components/Login.js (ใช้ == แทน ===)
+- ❌ Major: พบ `consistent-return` ใน src/services/api.js (ฟังก์ชัน return ไม่สม่ำเสมอ)
+- Rule อื่น ๆ ผ่านทั้งหมด รวมถึง security (`no-eval`, `no-new-func`) และคุณภาพโค้ด (`curly`, `complexity`)

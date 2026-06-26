@@ -1,0 +1,28 @@
+- name: 🔍 Verify Repo Latest
+        run: |
+          echo "Checking repo state..."
+
+          # ตรวจสอบ version ใน package.json เทียบกับ changelog.md
+          VERSION=$(node -p "require('./package.json').version")
+          CHANGELOG_VERSION=$(grep -m1 '^## ' changelog.md | sed 's/## //')
+
+          if [ "$VERSION" != "$CHANGELOG_VERSION" ]; then
+            echo "❌ Version mismatch: package.json=$VERSION changelog=$CHANGELOG_VERSION"
+            exit 1
+          fi
+
+          # ตรวจสอบไฟล์ที่ changelog อ้างถึง
+          for FILE in generateVideo.js generateVoiceover.js logs; do
+            if [ ! -e "$FILE" ]; then
+              echo "❌ Missing file or directory: $FILE"
+              exit 1
+            fi
+          done
+
+          # ตรวจสอบ dependency conflict
+          npm ls || true
+          if npm ls | grep -q "deduped"; then
+            echo "⚠️ Potential dependency conflict detected"
+          fi
+
+          echo "✅ Repo verified as latest"

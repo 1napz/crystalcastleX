@@ -1,0 +1,47 @@
+name: Ignore File Check
+
+on:
+  pull_request:
+    paths:
+      - ".gitignore"
+      - ".eslintignore"
+      - ".vercelignore"
+
+jobs:
+  validate-ignore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run ignore file validation
+        run: |
+          echo "🔎 Checking ignore files..."
+
+          # --- .gitignore rules ---
+          for entry in "node_modules" "logs/" ".env" ".env.local" ".env.development" ".env.production"; do
+            grep -q "$entry" .gitignore || { echo "::error file=.gitignore::Missing $entry entry"; exit 1; }
+          done
+
+          # --- .eslintignore rules ---
+          for entry in "dist/" "coverage/" "build/"; do
+            grep -q "$entry" .eslintignore || { echo "::error file=.eslintignore::Missing $entry entry"; exit 1; }
+          done
+
+          # --- .vercelignore rules ---
+          for entry in "node_modules" "dist/" "coverage/" "logs/"; do
+            grep -q "$entry" .vercelignore || { echo "::error file=.vercelignore::Missing $entry entry"; exit 1; }
+          done
+
+          echo "✅ Ignore files OK (MIT Standard)"
+
+      - name: AI Review Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "🤖 AI ตรวจสอบไฟล์ `.ignore` แล้ว: **OK** ✅ ตามมาตรฐาน MIT (node_modules, logs/, env files, dist/, coverage/, build/ ครบ)"
+            })

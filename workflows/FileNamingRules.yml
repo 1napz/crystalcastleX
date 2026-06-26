@@ -1,0 +1,47 @@
+name: File Naming Governance
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # รันทุกวันตอนตี 2
+  workflow_dispatch:
+
+jobs:
+  check-filenames:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Scan Filenames
+        run: |
+          mkdir -p logs
+          issues=0
+          for file in $(git ls-files); do
+            filename=$(basename "$file")
+            if echo "$filename" | grep -q '[A-Z]'; then
+              case "$filename" in
+                README.md|LICENSE|CHANGELOG.md) ;; # allow
+                *)
+                  echo "❌ Invalid filename: $file" >> logs/file_naming.log
+                  issues=$((issues+1))
+                  ;;
+              esac
+            fi
+          done
+          echo "Total issues: $issues"
+          if [ "$issues" -gt 0 ]; then
+            exit 1
+          fi
+
+      - name: Upload Log
+        uses: actions/upload-artifact@v4
+        with:
+          name: file-naming-log
+          path: logs/file_naming.log
+
+      - name: LINE Notify
+        if: failure()
+        run: |
+          curl -X POST https://notify-api.line.me/api/notify \
+            -H "Authorization: Bearer ${{ secrets.LINE_NOTIFY_TOKEN }}" \
+            -F "message=⚠️ File Naming Governance Failed. See logs/file_naming.log"

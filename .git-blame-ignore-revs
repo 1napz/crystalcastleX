@@ -1,0 +1,5 @@
+# .git-blame-ignore-revs
+# Removed semi-colons from the entire codebase
+a8940f7fbddf7fad9d7d50014d4e8d46baf30592
+# Converted all JavaScript to TypeScript
+69d029cec8337c616552756310748c4a507bd75a
