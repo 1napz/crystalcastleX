@@ -1,0 +1,25 @@
+# ✅ Crystalcastle CI/CD Pull Request Checklist
+
+## ก่อนเปิด Pull Request
+- [ ] ใช้ **Conventional Commit message** ที่ชัดเจน (feat, fix, docs, chore, ci, refactor, test)
+- [ ] อัปเดตไฟล์ที่เกี่ยวข้อง เช่น `CHANGELOG.md`, `README.md`, หรือ docs/ หากมีการเปลี่ยนแปลงที่ผู้ใช้ต้องรู้
+- [ ] ตรวจสอบว่าไม่มีไฟล์ที่ไม่จำเป็น (เช่น `package-lock.json` หากไม่ใช้)
+
+## ระหว่าง Pull Request
+- [ ] ให้ **CodeRabbit AI** สร้าง Unit Tests สำหรับโค้ดใหม่
+- [ ] ตรวจสอบผลการรัน **GitHub Actions** (lint, test, build, security scan)
+- [ ] ตรวจสอบผลการสแกนจาก **GitHub Advanced Security** และแก้ไขตามคำแนะนำ
+- [ ] ตรวจสอบว่า workflow ไฟล์ใหม่ใน `.github/workflows/` ทำงานถูกต้อง
+
+## ก่อน Merge
+- [ ] Pull Request ต้องผ่าน **CI/CD checks ทั้งหมด**
+- [ ] มี reviewer ตรวจสอบโค้ด (human review) หากจำเป็น
+- [ ] ใช้ **AutoMerge** เมื่อ PR ผ่านการตรวจสอบทั้งหมด
+- [ ] อัปเดต `CHANGELOG.md` เพื่อบันทึกการเปลี่ยนแปลง
+
+## หลัง Merge
+- [ ] ตรวจสอบว่า release pipeline ทำงานสมบูรณ์ (deploy/build)
+- [ ] ยืนยันว่าเอกสารและ config ถูกต้องตามมาตรฐานทีม
+- [ ] ทำการ cleanup branch ที่ merge แล้ว (ถ้าไม่ต้องใช้ต่อ)
+
+---

@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CrystalCastle Governance Config (Schema v2)
+
+settings:
+  reject_on_error: true
+  min_reviewers: 2
+  auto_comment:
+    enabled: true
+    message: |
+      👋 Reviewer Reminder / ข้อควรจำสำหรับผู้ตรวจสอบ
+
+      Please follow the **CrystalCastle Reviewer Enforcement Flow** before approving this PR:
+
+      ✅ Checklist / เช็คลิสต์
+      - `.vercelignore` exists and excludes unnecessary files
+      - `.env.local` keys are set (Supabase, Groq, Gemini, Video)
+      - `npm run dev:mock` tested locally
+      - `/api/` routes are lightweight (shared logic in `/lib/`)
+      - Supabase RLS policies + `groq_logs` table verified
+      - Vercel plan quota checked (Hobby vs Pro)
+
+      ⚠️ PRs missing these confirmations must be requested for changes.
+      ❌ Do not approve until all steps pass.
+
+      ---
+      สำหรับ Reviewer: โปรดตรวจสอบ Flowchart การบังคับใช้ก่อนอนุมัติ PR
+      ✅ อนุมัติได้เมื่อทุกข้อผ่านแล้ว
+
+rules:
+  - id: vercelignore-check
+    description: "Require .vercelignore file"
+    severity: error
+    match:
+      files: [".vercelignore"]
+
+  - id: env-check
+    description: "Require .env.local keys"
+    severity: error
+    match:
+      files: [".env.local"]
+
+  - id: api-lightweight
+    description: "Ensure /api/ routes are lightweight"
+    severity: warning
+    match:
+      files: ["api/**/*.ts"]
+
+branch:
+  naming_convention:
+    - feature/*
+    - fix/*
+    - docs/*
+    - chore/*
