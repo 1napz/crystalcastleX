@@ -1,0 +1,78 @@
+name: Auto Update Changelog
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  push:
+    branches:
+      - main
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest commits
+        id: commits
+        run: |
+          # ดึง commits ตั้งแต่ tag ล่าสุด
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%an)" -10)
+          else
+            COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s (%an)")
+          fi
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update Changelog
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          TEMP_FILE=$(mktemp)
+
+          # แยก commits ตาม prefix
+          LOGS=$(echo "${{ steps.commits.outputs.commits }}" | grep "^- log:" || true)
+          ANALYSIS=$(echo "${{ steps.commits.outputs.commits }}" | grep "^- analysis:" || true)
+          INSIGHTS=$(echo "${{ steps.commits.outputs.commits }}" | grep "^- insight:" || true)
+          FIXES=$(echo "${{ steps.commits.outputs.commits }}" | grep "^- fix:" || true)
+          OTHERS=$(echo "${{ steps.commits.outputs.commits }}" | grep -v "^- log:\|^- analysis:\|^- insight:\|^- fix:" || true)
+
+          # สร้าง entry ใหม่
+          {
+            echo "# Changelog"
+            echo ""
+            echo "All notable changes to \`pure-agent-dev\` will be documented here."
+            echo ""
+            echo "---"
+            echo ""
+            echo "## [Unreleased] — ${DATE}"
+            echo ""
+            [ -n "$LOGS" ]     && echo "### Log Sources" && echo "$LOGS" && echo ""
+            [ -n "$ANALYSIS" ] && echo "### Analysis" && echo "$ANALYSIS" && echo ""
+            [ -n "$INSIGHTS" ] && echo "### Insights" && echo "$INSIGHTS" && echo ""
+            [ -n "$FIXES" ]    && echo "### Fixed" && echo "$FIXES" && echo ""
+            [ -n "$OTHERS" ]   && echo "### Other" && echo "$OTHERS" && echo ""
+            echo "---"
+            echo ""
+            # ต่อด้วย content เก่า (ข้าม header)
+            tail -n +3 CHANGELOG.md
+          } > "$TEMP_FILE"
+
+          mv "$TEMP_FILE" CHANGELOG.md
+
+      - name: Commit updated Changelog
+        run: |
+          git config user.name "CrystalCastle Bot"
+          git config user.email "bot@crystalcastle.local"
+          git diff --cached --quiet && git add CHANGELOG.md
+          git diff --cached --quiet || git commit -m "log: auto-update CHANGELOG"
+          git push origin main

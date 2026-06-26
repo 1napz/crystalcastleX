@@ -1,0 +1,34 @@
+name: Sync After Merge
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  pull_request:
+    types: [closed]   # ✅ Trigger เมื่อ PR ถูกปิด
+  workflow_dispatch:   # ✅ เผื่อกรณี manual run
+
+jobs:
+  sync:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🔄 Sync Repo State
+        run: |
+          echo "✅ PR #${{ github.event.pull_request.number }} merged via GitHub Mobile"
+          echo "🔄 Running sync tasks..."
+          npm ci
+          npm run build
+
+      - name: 🚀 Deploy to Vercel (One-Time)
+        run: |
+          npx vercel --token=${{ secrets.VERCEL_TOKEN }} --prod --confirm

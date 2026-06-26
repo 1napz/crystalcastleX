@@ -1,0 +1,30 @@
+# .github/workflows/license-check.yml
+name: License Path Check
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  pull_request:
+    paths:
+      - '**LICENSE*'
+      - 'docs/license/**'
+      - 'frontend/license/**'
+
+jobs:
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify license placement
+        run: |
+          if [ ! -f LICENSE ]; then
+            echo "❌ Root LICENSE file missing"
+            exit 1
+          fi
+          if [ -f frontend/LICENSE ]; then
+            echo "❌ LICENSE must not be inside frontend/"
+            exit 1
+          fi
+          echo "✅ License placement verified"

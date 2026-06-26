@@ -1,0 +1,45 @@
+name: Docstring Enforcement Gate
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  pull_request:
+    branches: [main, develop, Crystalcastle]
+
+jobs:
+  docstring-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 1. Detect missing docstrings
+      - name: Scan missing docstrings
+        run: |
+          node scripts/check-docstrings.js
+
+      # 2. Validate coverage threshold
+      - name: Coverage gate (≥85%)
+        run: |
+          node scripts/docstring-coverage.js --min 85
+
+      # 3. Validate format consistency
+      - name: Format validation
+        run: |
+          node scripts/validate-docstrings.js
+
+      # 4. Fail-safe blocker
+      - name: Block merge if violations exist
+        run: |
+          if [ -f "docstring-violations.json" ]; then
+            echo "❌ Docstring violations detected"
+            cat docstring-violations.json
+            exit 1
+          fi

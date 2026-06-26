@@ -1,0 +1,14 @@
+name: Lint Commit Message
+on: [pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: '^(feat|fix|docs|style|chore|affiliate)(\(.+\))?: .+'
+          error: '❌ รูปแบบ Commit ไม่ถูกต้อง! โปรดใช้: type(scope): description'

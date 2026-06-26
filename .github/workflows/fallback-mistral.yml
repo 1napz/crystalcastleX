@@ -1,0 +1,52 @@
+# .github/workflows/mistral-agent.yml
+name: Mistral Agent Test
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  workflow_dispatch:
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install mistralai
+      - name: Run Mistral Agent with Fallback
+        env:
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+        run: |
+          python - << 'EOF'
+          from mistralai import Mistral
+          import os
+
+          client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
+
+          free_models = [
+              "mistral/mistral-7b-instruct",
+              "meta/meta-llama-3.1-8b-instruct",
+              "microsoft/phi-3-mini-4k-instruct"
+          ]
+
+          for model in free_models:
+              try:
+                  print(f"⚡ Trying model: {model}")
+                  res = client.chat.complete(
+                      model=model,
+                      messages=[{"role":"user","content":"Hello from GitHub Actions!"}]
+                  )
+                  print(res)
+                  break
+              except Exception as e:
+                  if "rate limit" in str(e).lower() or "quota" in str(e).lower():
+                      print(f"⚠️ Quota exceeded for {model}, trying next...")
+                      continue
+                  else:
+                      raise
+          EOF

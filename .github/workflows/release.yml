@@ -1,0 +1,38 @@
+name: 📦 Release Pipeline
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    outputs:
+      new_release: ${{ steps.semantic.outputs.new_release_published }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Run semantic-release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release
+
+      # 🔥 AI SUMMARY (optional แต่โคตรดี)
+      - name: Generate AI Release Summary
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          echo "Generating AI summary..."
+          # ต่อ OpenAI API ของคุณตรงนี้ได้เลย

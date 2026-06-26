@@ -1,0 +1,24 @@
+{
+  "name": "crystalcastle",
+  "version": "1.0.0",
+  "description": "> **Open Source Workflow Automation & Governance Enforcement**   > โอเพ่นซอร์สสำหรับการทำงานอัตโนมัติและการกำกับดูแลโปรเจกต์",
+  "main": "app.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/Zyntro-Media-AI/crystalcastle.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Zyntro-Media-AI/crystalcastle/issues"
+  },
+  "homepage": "https://github.com/Zyntro-Media-AI/crystalcastle#readme"
+}

@@ -1,0 +1,6 @@
+*.apk
+*.aab
+local.properties
+/.idea
+/build
+captures/

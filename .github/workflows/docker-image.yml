@@ -1,0 +1,21 @@
+name: Docker Image CI
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  push:
+    branches: [ "Crystalcastle" ]
+  pull_request:
+    branches: [ "Crystalcastle" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)

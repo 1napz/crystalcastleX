@@ -1,0 +1,127 @@
+name: Check absolute paths
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then python -m pytest -q; fi
+
+      - name: Run path scanner
+        id: scanner
+        run: |
+          python scripts/scan_paths.py --format md > path_report.md || true
+          python scripts/scan_paths.py --format json > path_report.json || true
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: path-scan-reports
+          path: |
+            path_report.md
+            path_report.json
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: path_report.md
+
+      - name: Check for CODEOWNERS
+        id: check_codeowners
+        run: |
+          if [ -f CODEOWNERS ] || [ -f .github/CODEOWNERS ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create CODEOWNERS template and open PR
+        if: steps.check_codeowners.outputs.found == 'false' && github.event_name != 'schedule' && !startsWith(github.head_ref, 'automation/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          BRANCH="automation/add-codeowners-$(date +%s)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          mkdir -p .github
+          cat > .github/CODEOWNERS <<'EOF'
+# Auto-generated CODEOWNERS template.
+# Review and replace with real owners.
+
+# /scripts/ @team-backend
+# /tests/ @team-qa
+EOF
+          git add .github/CODEOWNERS
+          git commit -m "chore: add CODEOWNERS template (automation)"
+          git push --set-upstream origin "$BRANCH"
+
+      - name: Create PR for CODEOWNERS
+        if: steps.check_codeowners.outputs.found == 'false' && github.event_name != 'schedule' && !startsWith(github.head_ref, 'automation/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="automation/add-codeowners-$(date +%s)"
+          gh pr create \
+            --title "chore: add CODEOWNERS template (automation)" \
+            --body "Auto-generated CODEOWNERS template. Please review and replace with real owners." \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH" \
+            --label "automation" \
+            --label "needs-review"
+
+      - name: Add labels to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = ['automation', 'path-scan'];
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels
+            });

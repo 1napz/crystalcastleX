@@ -1,0 +1,14 @@
+{
+  "recommendations": ["msjsdiag.debugger-for-chrome", "unity.unity-debug"],
+"esbenp.prettier-vscode"        // Formatter
+"editorconfig.editorconfig"     // EditorConfig support
+"streetsidesoftware.code-spell-checker" // Spell check
+"eamodio.gitlens"               // Git blame/history
+"dbaeumer.vscode-eslint"        // ESLint
+"ms-vscode.vscode-typescript-next" // TS nightly
+"dsznajder.es7-react-js-snippets"
+"bradlc.vscode-tailwindcss"     // ถ้าใช้ Tailwind
+"ms-azuretools.vscode-docker"
+"ms-vscode-remote.remote-containers"
+humao.rest-
+}

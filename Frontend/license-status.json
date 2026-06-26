@@ -1,0 +1,6 @@
+{
+  "root": { "status": "present" },
+  "frontend": { "status": "forbidden" },
+  "docs": { "status": "optional" },
+  "archive": { "status": "archived" }
+}

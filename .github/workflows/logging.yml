@@ -1,0 +1,31 @@
+name: Essential Logging Workflow
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  pull_request:
+    types: [opened, synchronize, closed]
+
+jobs:
+  log-essential:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Log Essential PR Data
+        run: |
+          echo "## PR #${{ github.event.pull_request.number }}" >> CHANGELOG.md
+          echo "- Title: ${{ github.event.pull_request.title }}" >> CHANGELOG.md
+          echo "- Author: ${{ github.event.pull_request.user.login }}" >> CHANGELOG.md
+          echo "- Status: ${{ github.event.action }}" >> CHANGELOG.md
+          echo "- Updated: $(date)" >> CHANGELOG.md
+
+      - name: Commit logs
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add CHANGELOG.md
+          git commit -m "log: essential PR data (#${{ github.event.pull_request.number }})"
+          git push

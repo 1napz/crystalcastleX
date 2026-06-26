@@ -1,0 +1,36 @@
+name: Sync README to Other Repos
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  push:
+    paths:
+      - README.md
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+
+      - name: Clone target repo
+        run: |
+          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/1napz/crystalcastleai.git target
+
+      - name: Copy README
+        run: |
+          cp README.md target/README.md
+
+      - name: Commit & Push
+        run: |
+          cd target
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add README.md
+          git commit -m "chore: sync README from main repo" || echo "No changes"
+          git push

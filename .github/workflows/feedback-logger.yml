@@ -1,0 +1,109 @@
+name: Feedback Logger
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  pull_request:
+    paths:
+      - 'pending_review/*.md'
+
+permissions:
+  contents: write          # ← required to commit & push
+
+jobs:
+  feedback-logger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}   # ← check out the PR branch, not detached HEAD
+
+      - name: Verify Bilingual Sections
+        run: |
+          for file in pending_review/*.md; do
+            # Check headers exist
+            if ! grep -q "### English" "$file" || ! grep -q "### ภาษาไทย" "$file"; then
+              echo "❌ $file missing bilingual sections"
+              exit 1
+            fi
+
+            # FIX: use grep -A to capture multiple lines, then check any non-blank line exists
+            if ! grep -A5 "### English" "$file" | grep -v "### English" | grep -q '[^[:space:]]'; then
+              echo "❌ $file English section empty"
+              exit 1
+            fi
+            if ! grep -A5 "### ภาษาไทย" "$file" | grep -v "### ภาษาไทย" | grep -q '[^[:space:]]'; then
+              echo "❌ $file Thai section empty"
+              exit 1
+            fi
+          done
+          echo "✅ All feedback docs contain bilingual content"
+
+      - name: Move Feedback + Generate Logs
+        run: |
+          for file in pending_review/*.md; do
+            filename=$(basename "$file" .md)
+            timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S")
+
+            mkdir -p knowledge_hub/feedback
+            mkdir -p "knowledge_hub/logs/$filename"
+
+            mv "$file" "knowledge_hub/feedback/$filename.md"
+
+            # FIX: properly formed JSON with correct EOF delimiter
+            cat <<'EOF' > "knowledge_hub/logs/$filename/version.json"
+{
+  "version": "1.0.0",
+  "generated_at": "TIMESTAMP_PLACEHOLDER",
+  "source": "workflow-bot",
+  "type": "feedback",
+  "reviewer": "admin",
+  "notes": "Auto-moved to knowledge_hub after bilingual check"
+}
+EOF
+            # Substitute placeholders after the fact to keep heredoc clean
+            sed -i "s|TIMESTAMP_PLACEHOLDER|$timestamp|g" "knowledge_hub/logs/$filename/version.json"
+            sed -i "s|RELATED_FILE_PLACEHOLDER|$file|g"   "knowledge_hub/logs/$filename/version.json"
+            sed -i "s|MOVED_TO_PLACEHOLDER|knowledge_hub/feedback/$filename.md|g" "knowledge_hub/logs/$filename/version.json"
+
+            cat <<EOF > "knowledge_hub/logs/$filename/raw_log.md"
+# Feedback Audit Log
+
+## Metadata
+- Version: 1.0.0
+- Generated At: $timestamp
+- Source: workflow-bot
+- Type: Feedback
+- Related File: $file
+- Moved To: knowledge_hub/feedback/$filename.md
+- Reviewer: admin
+
+### English
+Summary:
+- File $file marked as "interesting"
+- Auto-moved to knowledge_hub/feedback/
+- Bilingual check passed
+
+### ภาษาไทย
+สรุป:
+- ไฟล์ $file ถูก mark ว่า "น่าสนใจ"
+- ระบบย้ายไปที่ knowledge_hub/feedback/
+- ตรวจ bilingual ผ่านเรียบร้อย
+EOF
+          done
+
+      - name: Commit Logs
+        run: |
+          git config --global user.name "workflow-bot"
+          git config --global user.email "workflow@bot"
+          git add knowledge_hub/
+          # FIX: only commit if there are actual changes
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git pull --rebase origin "${{ github.head_ref }}"   # ← avoid non-fast-forward push
+            git commit -m "Auto-generated feedback logs and moved files"
+            git push origin HEAD:"${{ github.head_ref }}"
+          fi

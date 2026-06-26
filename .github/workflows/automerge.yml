@@ -1,0 +1,28 @@
+name: 🤖 AutoMerge
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: AutoMerge PRs
+        uses: pascalgn/automerge-action@v0.15.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # ✅ Supported inputs
+          mergeMethod: squash
+          label: automerge
+          # Comma-separated list of required checks
+          requiredStatusChecks: lint,test,build,security
+          deleteBranchAfterMerge: true

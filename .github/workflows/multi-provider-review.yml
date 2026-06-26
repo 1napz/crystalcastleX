@@ -1,0 +1,80 @@
+name: multi-provider-review
+
+on:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for incremental review
+
+      - name: 🤖 Multi-Provider Review
+        uses: keithah/multi-provider-code-review@v1.3.0  # upgraded from @486a7bd
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEW_PROVIDERS: openrouter/free,coderabbit
+          INCREMENTAL_ENABLED: 'false'
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+      - name: 📝 Log PR Event
+        run: |
+          mkdir -p CrystalCastle/logs
+          DATE=$(date +%Y-%m-%d_%H-%M-%S)
+          PR_NO=${{ github.event.pull_request.number }}
+          EVENT=${{ github.event.action }}
+          TITLE=$(echo "${{ github.event.pull_request.title }}" | tr ' ' '-' | tr -cd '[:alnum:]-')
+
+          # Severity Matrix
+          case "$EVENT" in
+            opened)
+              SEVERITY="Major"
+              TARGET_DIR="CrystalCastle/logs/active"
+              ;;
+            closed)
+              SEVERITY="Minor"
+              TARGET_DIR="CrystalCastle/logs/active"
+              ;;
+            reopened)
+              SEVERITY="Critical"
+              TARGET_DIR="CrystalCastle/logs/deprecated"
+              ;;
+            synchronize)
+              SEVERITY="Info"
+              TARGET_DIR="CrystalCastle/logs/active"
+              ;;
+            *)
+              SEVERITY="Info"
+              TARGET_DIR="CrystalCastle/logs/active"
+              ;;
+          esac
+
+          mkdir -p "$TARGET_DIR"
+          LOG_FILE="$TARGET_DIR/pr-${PR_NO}-${EVENT}-${DATE}.md"
+
+          cat > "$LOG_FILE" << EOF
+          # Pull Request Event Log
+          - Event: $EVENT
+          - PR Number: #$PR_NO
+          - Title: ${{ github.event.pull_request.title }}
+          - Author: ${{ github.event.pull_request.user.login }}
+          - Timestamp: $(date)
+          - Severity: $SEVERITY
+
+          ## Details
+          This PR event was logged automatically by multi-provider workflow.
+
+          ## Notes
+          - Triggered by workflow 'multi-provider-review'
+          - Audit trail stored under $TARGET_DIR/
+          EOF
+          
