@@ -1,0 +1,16 @@
+name: Governance
+on:
+  pull_request:
+    branches: [ main, develop ]
+jobs:
+  privacy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm run privacy-check
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/analyze@v2

@@ -1,0 +1,30 @@
+# ลบ PDF ทั้งหมด
+git rm --cached *.pdf
+git rm --cached **/*.pdf 2>/dev/null
+
+# ลบ Backup/
+git rm -r --cached Backup/
+
+# ลบ logs/
+git rm -r --cached logs/
+git rm -r --cached .logs/
+
+# ลบ log files
+git rm --cached eslint-report.log
+git rm --cached SecurityScan.txt
+
+# เพิ่ม .gitignore
+cat >> .gitignore << 'EOF'
+
+# Generated / logs / backup
+*.pdf
+logs/
+.logs/
+Backup/
+*.log
+SecurityScan.txt
+EOF
+
+# Commit
+git add .gitignore
+git commit -m "chore: remove non-code files and update .gitignore"

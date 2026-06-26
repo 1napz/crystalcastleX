@@ -1,0 +1,8 @@
+### 🔍 Quick PR Checklist
+- [ ] ใช้ Conventional Commit message ที่ชัดเจน
+- [ ] อัปเดต CHANGELOG.md / docs หากมีการเปลี่ยนแปลงสำคัญ
+- [ ] ผ่าน GitHub Actions checks (lint, test, build, security)
+- [ ] มี Unit Tests ครอบคลุม (CodeRabbit หรือ manual)
+- [ ] ผ่านการตรวจสอบ Security scan (GitHub Advanced Security)
+- [ ] Reviewer ตรวจสอบโค้ดเรียบร้อย
+- [ ] พร้อม AutoMerge เมื่อทุก checks ผ่าน

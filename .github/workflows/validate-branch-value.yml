@@ -1,0 +1,164 @@
+name: 🔒 Validate Branch Value
+name: Validate Branch Value
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  push:
+    branches:
+    - main
+    - master
+    - develop
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  schedule:
+    - cron: '0 3 * * 1' # Every Monday at 3am – detect drift over time
+
+concurrency:
+  group: package-lock-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-compare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout PR branch (or push commit)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Get base branch name
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "base_branch=${{ github.base_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "base_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fetch base branch
+        run: git fetch origin ${{ steps.vars.outputs.base_branch }}:${{ steps.vars.outputs.base_branch }}
+
+      # Step 1: Ensure package-lock.json is valid (parseable)
+      - name: Validate package-lock.json syntax
+        run: |
+          if! jq empty package-lock.json 2>/dev/null; then
+            echo "::error::package-lock.json is not valid JSON. Run 'npm install' to regenerate it."
+            exit 1
+          fi
+
+      # Step 2: Strict check - npm ci fails if lock is out of sync
+      - name: Verify lock file integrity with npm ci
+        run: |
+          # npm ci deletes node_modules and installs from lock file
+          # It fails if package.json and package-lock.json are mismatched
+          npm ci --ignore-scripts --dry-run=false
+          echo "✅ npm ci succeeded - lock file is in sync with package.json"
+
+      # Step 3: Compare package-lock.json with base branch
+      - name: Compare package-lock.json
+        id: compare
+        run: |
+          if git diff --quiet ${{ steps.vars.outputs.base_branch }} HEAD -- package-lock.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "✅ package-lock.json unchanged from base branch."
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "❌ package-lock.json has changed compared to ${{ steps.vars.outputs.base_branch }}."
+          fi
+
+      # Step 4: If lock file changed, ensure package.json also changed
+      - name: Check for package.json change when lock changed
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          if git diff --quiet ${{ steps.vars.outputs.base_branch }} HEAD -- package.json; then
+            echo "::error::package-lock.json changed but package.json did not. This suggests manual editing of lock file. Please revert or run 'npm install' and commit both."
+            exit 1
+          else
+            echo "✅ Both package.json and package-lock.json changed – acceptable."
+          fi
+
+      # Step 5: Check if package.json changed but lock did NOT change
+      - name: Ensure lock file is updated when package.json changes
+        run: |
+          if git diff --name-only ${{ steps.vars.outputs.base_branch }} HEAD | grep -q 'package.json'; then
+            if git diff --quiet ${{ steps.vars.outputs.base_branch }} HEAD -- package-lock.json; then
+              echo "::error::package.json changed but package-lock.json is unchanged. Run 'npm install' and commit the updated lock file."
+              exit 1
+            fi
+          fi
+
+  # ------------------------------------------------------------
+  # Auto‑fix job – only runs on same-repo PRs when enabled
+  # ------------------------------------------------------------
+  auto-fix-lock:
+    needs: validate-and-compare
+    if: |
+      failure() &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      vars.AUTO_FIX_LOCK == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Regenerate package-lock.json
+        run: |
+          rm -f package-lock.json
+          npm install
+
+      - name: Commit and push if changed
+        run: |
+          if! git diff --quiet package-lock.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -m "chore: auto‑fix package-lock.json [skip ci]"
+            git push
+            echo "✅ Auto‑fixed and pushed package-lock.json."
+          else
+            echo "ℹ️ No changes needed after npm install."
+      - "package-lock.json"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Validate package-lock.json
+        run: |
+          jq . package-lock.json > /dev/null
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Check Lockfile Drift
+        run: |
+          if ! git diff --quiet package-lock.json; then
+            echo "Lockfile drift detected. Please commit updated package-lock.json."
+            exit 1
+          fi

@@ -1,0 +1,60 @@
+name: 🛠️ Admin Custom Commands
+on:
+  workflow_dispatch:
+    inputs:
+      command_type:
+        description: 'เลือกคำสั่งที่ต้องการรัน'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - migrate_codeowners  # สั่งย้ายและจัดการไฟล์
+          - test_scripts        # สั่งเทสระบบ/สคริปต์
+          - fetch_data          # สั่งหาข้อมูล/ดึงข้อมูลสินค้า
+
+jobs:
+  admin_tasks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- 1. สั่งย้าย (Migration & Archive) ---
+      - name: Execute Migration
+        if: github.event.inputs.command_type == 'migrate_codeowners'
+        run: |
+          mkdir -p .github/archive
+          if [ -f .github/CODEOWNERS.txt ]; then
+            cat .github/CODEOWNERS.txt > .github/CODEOWNERS
+            mv .github/CODEOWNERS.txt .github/archive/CODEOWNERS.txt.bak_$(date +%Y%m%d)
+            echo "✅ ย้ายไฟล์และ Archive เรียบร้อยแล้ว"
+          else
+            echo "⚠️ ไม่พบไฟล์ .txt สำหรับการย้าย"
+          fi
+
+      # --- 2. สั่งเทส (Testing) ---
+      - name: Execute Test
+        if: github.event.inputs.command_type == 'test_scripts'
+        run: |
+          echo "🔍 กำลังทดสอบสคริปต์ใน Path Dev..."
+          # ใส่คำสั่งเทสของคุณ เช่น python -m pytest หรือเช็ค syntax
+          python3 -m py_compile scripts/*.py || echo "พบข้อผิดพลาดในโค้ด"
+          echo "✅ ทดสอบเบื้องต้นเสร็จสิ้น"
+
+      # --- 3. สั่งหาข้อมูล (Data Fetching) ---
+      - name: Fetch Affiliate Data
+        if: github.event.inputs.command_type == 'fetch_data'
+        run: |
+          echo "🌐 กำลังดึงข้อมูลสินค้า/อัปเดตสต็อก..."
+          # ใส่คำสั่งรันสคริปต์ดึงข้อมูลของคุณ
+          # python scripts/fetch_items.py
+          echo "✅ ดึงข้อมูลสำเร็จ (จำลองสถานการณ์)"
+
+      # --- ส่วนสุดท้าย: บันทึกการเปลี่ยนแปลงกลับขึ้น GitHub ---
+      - name: Commit & Push changes
+        if: github.event.inputs.command_type == 'migrate_codeowners'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "chore: automated file migration and cleanup" || echo "No changes to commit"
+          git push

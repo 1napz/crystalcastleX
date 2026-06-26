@@ -1,0 +1,65 @@
+name: Commit, PR & Release Automation
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g @commitlint/cli @commitlint/config-conventional
+      - run: git log --format=%s -n 10 | commitlint
+
+  pr-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr.title || pr.title.trim() === "") {
+              const commits = await github.rest.pulls.listCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+              const subject = commits.data[0].commit.message.split("\n")[0];
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                title: subject
+              });
+            }
+            if (!pr.body || pr.body.trim() === "") {
+              const template = `
+### 📌 Summary
+Auto-generated PR description.
+
+### 🔄 Changes
+- Consolidated workflows into .github/workflows
+- Enforced commit message linting
+- Auto-set PR title
+
+### ✅ Note
+workflow already merged from crystalcastle/workflows to .github/workflows
+              `;
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                body: template
+              });
+            }
+
+  release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npx semantic-release

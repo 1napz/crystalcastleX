@@ -1,0 +1,43 @@
+# =========================================================================
+# CrystalCastle - Official .editorconfig Template (2026)
+# =========================================================================
+
+# บอกให้ Editor รู้ว่าเป็นไฟล์คอนฟิกตัวบนสุด ไม่ต้องไปหาในโฟลเดอร์เหนือกว่านี้
+root = true
+
+# --- เกณฑ์ฟอร์แมตพื้นฐานสำหรับทุกไฟล์ ---
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# --- สำหรับไฟล์ JavaScript, TypeScript และ JSON ---
+# ล็อกให้เป็นสเปซ 2 เคาะตามมาตรฐานของ eslint และ prettierrc ที่ระบบคุณใช้อยู่
+[*.{js,jsx,ts,tsx,json}]
+indent_style = space
+indent_size = 2
+
+# --- สำหรับไฟล์ Python (requirements-dev.txt และ สคริปต์อื่น ๆ) ---
+# เผื่อระบบคุณมีโมดูลหลังบ้านที่ใช้ Python แนะนำให้ล็อกไว้ที่ 4 เคาะตาม PEP 8
+[*.py]
+indent_style = space
+indent_size = 4
+
+# --- สำหรับไฟล์ Markdown (*.md) ---
+# เปิดข้อยกเว้นเรื่อง trailing_whitespace ไว้ เพราะใน Markdown การเคาะเว้นวรรคท้ายประโยค 2 ครั้งหมายถึงการขึ้นบรรทัดใหม่
+[*.md]
+trim_trailing_whitespace = false
+
+# --- สำหรับไฟล์ Makefile หรือ Shell Script ---
+[Makefile]
+indent_style = tab
+indent_size = 4
+
+[*.sh]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+

@@ -1,0 +1,47 @@
+name: Move Files to Frontend/Backend/Development
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  restructure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Create folders
+        run: |
+          mkdir -p frontend backend development
+
+      - name: Move frontend files
+        run: |
+          mv index.html frontend/ || true
+          mv product.html frontend/ || true
+          mv artifacts.html frontend/ || true
+          mv style.css frontend/ || true
+          mv product.js frontend/ || true
+
+      - name: Move backend files
+        run: |
+          mv api/ backend/ || true
+          mv lib/ backend/ || true
+          mv services/ backend/ || true
+          mv models/ backend/ || true
+          mv tests/ backend/ || true
+
+      - name: Move development docs
+        run: |
+          mv docs/ development/ || true
+          mv roadmap.md development/ || true
+          mv governance.md development/ || true
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "chore: move files into frontend/backend/development folders" || echo "No changes to commit"
+          git push origin main

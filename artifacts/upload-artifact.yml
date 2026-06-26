@@ -1,0 +1,5 @@
+- name: Upload logs
+  uses: actions/upload-artifact@v4
+  with:
+    name: workflow-logs
+    path: logs/
