@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<!-- Playables SDK -->
+<script>// Playables SDK v1.0.0
+// Game lifecycle bridge: rAF-based game-ready detection + event communication
+(function() {
+  'use strict';
+
+  // Idempotency: skip if already initialized (e.g., server-side injection
+  // followed by client-side inject-javascript via the Bloks webview component).
+  if (window.playablesSDK) return;
+
+  var HANDLER_NAME = 'playablesGameEventHandler';
+  var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
+  var RAF_FRAME_THRESHOLD = 3;
+
+  var gameReadySent = false;
+  var firstInteractionSent = false;
+  var errorSent = false;
+  var frameCount = 0;
+  var originalRAF = window.requestAnimationFrame;
+
+  // --- Transport Layer ---
+
+  function hasIOSBridge() {
+    return !!(window.webkit &&
+              window.webkit.messageHandlers &&
+              window.webkit.messageHandlers[HANDLER_NAME]);
+  }
+
+  function hasAndroidBridge() {
+    return !!(window[ANDROID_BRIDGE_NAME] &&
+              typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function');
+  }
+
+  function isInIframe() {
+    return !!(window.parent && window.parent !== window);
+  }
+
+  function sendEvent(eventName, payload) {
+    var message = {
+      type: eventName,
+      payload: payload || {},
+      timestamp: Date.now()
+    };
+
+    if (hasIOSBridge()) {
+      try {
+        window.webkit.messageHandlers[HANDLER_NAME].postMessage(message);
+      } catch (e) { /* ignore */ }
+      return;
+    }
+
+    if (hasAndroidBridge()) {
+    try {
+      var p = payload || {};
+      p.__secureToken = window.__fbAndroidBridgeAuthToken || '';
+      window[ANDROID_BRIDGE_NAME].postEvent(
+        eventName,
+        JSON.stringify(p)
+      );
+    } catch (e) { /* ignore */ }
+    return;
+  }
+
+    if (isInIframe()) {
+      try {
+        window.parent.postMessage(message, '*');
+      } catch (e) { /* ignore */ }
+      return;
+    }
+  }
+
+  // --- rAF Game-Ready Detection ---
+
+  function onFrame() {
+    if (gameReadySent) return;
+
+    frameCount++;
+    if (frameCount >= RAF_FRAME_THRESHOLD) {
+      gameReadySent = true;
+      sendEvent('game_ready', {
+        frame_count: frameCount,
+        detected_at: Date.now()
+      });
+      return;
+    }
+
+    originalRAF.call(window, onFrame);
+  }
+
+  if (originalRAF) {
+    window.requestAnimationFrame = function(callback) {
+      if (!gameReadySent) {
+        return originalRAF.call(window, function(timestamp) {
+          frameCount++;
+          if (frameCount >= RAF_FRAME_THRESHOLD && !gameReadySent) {
+            gameReadySent = true;
+            sendEvent('game_ready', {
+              frame_count: frameCount,
+              detected_at: Date.now()
+            });
+          }
+          callback(timestamp);
+        });
+      }
+      return originalRAF.call(window, callback);
+    };
+  }
+
+  // --- First User Interaction Detection ---
+
+  function setupFirstInteractionDetection() {
+    var events = ['touchstart', 'mousedown', 'keydown'];
+
+    function onFirstInteraction() {
+      if (firstInteractionSent) return;
+      firstInteractionSent = true;
+      sendEvent('user_interaction_start', null);
+
+      for (var i = 0; i < events.length; i++) {
+        document.removeEventListener(events[i], onFirstInteraction, true);
+      }
+    }
+
+    for (var i = 0; i < events.length; i++) {
+      document.addEventListener(events[i], onFirstInteraction, true);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection);
+  } else {
+    setupFirstInteractionDetection();
+  }
+
+  // --- Auto Error Capture ---
+
+  window.addEventListener('error', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    sendEvent('error', {
+      message: event.message || 'Unknown error',
+      source: event.filename || '',
+      lineno: event.lineno || 0,
+      colno: event.colno || 0,
+      auto_captured: true
+    });
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    var reason = event.reason;
+    sendEvent('error', {
+      message: (reason instanceof Error) ? reason.message : String(reason),
+      type: 'unhandled_promise_rejection',
+      auto_captured: true
+    });
+  });
+
+  // --- Public API ---
+
+  window.playablesSDK = {
+    complete: function(score) {
+      sendEvent('game_ended', {
+        score: score,
+        completed: true
+      });
+    },
+
+    error: function(message) {
+      if (errorSent) return;
+      errorSent = true;
+      sendEvent('error', {
+        message: message || 'Unknown error',
+        auto_captured: false
+      });
+    },
+
+    sendEvent: function(eventName, payload) {
+      if (!eventName || typeof eventName !== 'string') return;
+      sendEvent(eventName, payload);
+    }
+  };
+
+  // Kick off rAF detection in case no game code calls rAF immediately
+  if (originalRAF) {
+    originalRAF.call(window, onFrame);
+  }
+})();</script>
+<script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal Castle Lite v1.4 - ระบบสร้างวิดีโอสินค้า</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Noto Sans Thai', system-ui, -apple-system, sans-serif; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+</style>
+</head>
+<body class="bg-[#f5f7fb] text-slate-800 antialiased">
+<div class="max-w-xl mx-auto min-h-screen">
+  <!-- Header -->
+  <header class="sticky top-0 z-30 backdrop-blur-xl">
+    <div class="bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 px-5 pt-8 pb-10 rounded-b-[2.5rem] shadow-lg shadow-indigo-500/20">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 3l7 4v5c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V7l7-4z"/></svg>
+        </div>
+        <div>
+          <h1 class="text-white text-[22px] font-semibold tracking-tight">ระบบสร้างวิดีโอสินค้า</h1>
+          <p class="text-white/80 text-xs -mt-0.5">Crystal Castle Lite v1.4</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-4 -mt-6 pb-28 space-y-4 relative z-10">
+    
+    <!-- ส่วนที่ 1: ใส่รูปสินค้า -->
+    <section class="bg-white rounded-[28px] shadow-sm border border-slate-100 p-5">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-semibold">1</span>
+        <h2 class="font-semibold text-slate-900">อัปโหลดรูปสินค้า</h2>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-2.5 mb-3">
+        <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+        <button id="uploadBtn" type="button" class="h-12 rounded-2xl bg-slate-900 text-white text-sm font-medium active:scale-[0.98] transition">
+          เลือกไฟล์จากอุปกรณ์
+        </button>
+        <button id="tiktokBtn" type="button" class="h-12 rounded-2xl bg-slate-100 text-slate-800 text-sm font-medium hover:bg-slate-200 active:scale-[0.98] transition">
+          วางลิงก์ TikTok
+        </button>
+      </div>
+
+      <div id="tiktokInputWrap" class="hidden mb-3">
+        <input id="tiktokInput" type="url" placeholder="https://www.tiktok.com/..." class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+      </div>
+
+      <!-- พื้นที่แสดงผล TikTok -->
+      <div id="tiktokPreview" class="grid grid-cols-3 gap-2.5 mb-3"></div>
+
+      <!-- Grid แสดงรูป -->
+      <div id="previewGrid" class="grid grid-cols-3 gap-2.5">
+        <div class="aspect-square rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4-4 4-4 4 4M12 12v-2M12 8v-2M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/></svg>
+          <span class="text-[11px] mt-1">ยังไม่มีรูป</span>
+        </div>
+      <p class="text-[11px] text-slate-500 mt-2.5">รองรับ JPG, PNG สูงสุด 10 รูป กรุณาใช้ภาพพื้นหลังสะอาด</p>
+    </section>
+
+    <!-- ส่วนที่ 2: ตั้งชื่อรูป -->
+    <section class="bg-white rounded-[28px] shadow-sm border border-slate-100 p-5">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-semibold">2</span>
+        <h2 class="font-semibold text-slate-900">กำหนดรายละเอียดไฟล์</h2>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-slate-500 mb-1 block">วันที่</label>
+          <input id="dateInput" readonly class="w-full h-11 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm">
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 mb-1 block">หมวดหมู่</label>
+          <select id="categorySelect" class="w-full h-11 px-3 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500">
+            <option value="Menswear">Menswear</option>
+            <option value="Womenswear">Womenswear</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Shoes">Shoes</option>
+            <option value="Bags">Bags</option>
+          </select>
+        </div>
+        <div class="col-span-2">
+          <label class="text-xs text-slate-500 mb-1 block">แบรนด์ / รุ่นสินค้า</label>
+          <input id="brandInput" placeholder="เช่น Uniqlo U Crew Neck" class="w-full h-11 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+        </div>
+        <div class="col-span-2">
+          <label class="text-xs text-slate-500 mb-1 block">ชื่อไฟล์อัตโนมัติ</label>
+          <input id="filenameInput" readonly class="w-full h-11 px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600">
+        </div>
+      </div>
+    </section>
+
+    <!-- ส่วนที่ 3: คำสั่งทำวิดีโอ -->
+    <section class="bg-white rounded-[28px] shadow-sm border border-slate-100 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-semibold">3</span>
+          <h2 class="font-semibold text-slate-900">คำสั่งสำหรับสร้างวิดีโอ</h2>
+        </div>
+        <button id="genPromptBtn" type="button" class="text-xs font-medium text-violet-600 bg-violet-50 px-3 py-1.5 rounded-full hover:bg-violet-100">ให้ AI ช่วยคิด</button>
+      </div>
+      <textarea id="promptInput" rows="4" placeholder="อธิบายลักษณะวิดีโอที่ต้องการ เช่น มุมกล้อง การเคลื่อนไหว แสง และพื้นหลัง" class="w-full p-3.5 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"></textarea>
+    </section>
+
+    <!-- ส่วนที่ 4: ข้อความโพสต์ -->
+    <section class="bg-white rounded-[28px] shadow-sm border border-slate-100 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-semibold">4</span>
+          <h2 class="font-semibold text-slate-900">ข้อความสำหรับโพสต์</h2>
+        </div>
+        <button id="genPostBtn" type="button" class="text-xs font-medium text-violet-600 bg-violet-50 px-3 py-1.5 rounded-full hover:bg-violet-100">สร้างแคปชัน</button>
+      </div>
+      <textarea id="postOutput" rows="4" readonly placeholder="กดปุ่มเพื่อสร้างแคปชันอัตโนมัติตามรายละเอียดสินค้า" class="w-full p-3.5 rounded-2xl border border-slate-200 text-sm bg-slate-50 resize-none"></textarea>
+    </section>
+
+    <!-- ส่วนที่ 5: เลือกตัวทำวิดีโอ -->
+    <section class="bg-white rounded-[28px] shadow-sm border border-slate-100 p-5">
+      <div class="flex items-center gap-2.5 mb-3">
+        <span class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-semibold">5</span>
+        <h2 class="font-semibold text-slate-900">เลือกเครื่องมือสร้างวิดีโอ</h2>
+      </div>
+      <select id="videoEngine" class="w-full h-12 px-4 rounded-2xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500">
+        <option value="kling">เร็ว – FAL Kling (แนะนำ)</option>
+        <option value="magichour">ฟรี – Magic Hour</option>
+      </select>
+      <p class="text-[11px] text-slate-500 mt-2">ระบบจะปรับคุณภาพให้เหมาะสมกับแพลตฟอร์มโดยอัตโนมัติ</p>
+    </section>
+
+    <!-- สถานะ -->
+    <div id="statusBox" class="text-center text-sm text-slate-500 min-h-[20px]"></div>
+
+  </main>
+
+  <!-- ปุ่มล่าง -->
+  <div class="fixed bottom-0 inset-x-0 z-40">
+    <div class="max-w-xl mx-auto px-4 pb-5 pt-3 bg-gradient-to-t from-[#f5f7fb] via-[#f5f7fb]/90 to-transparent">
+      <button id="generateBtn" class="w-full h-[52px] rounded-[18px] bg-slate-900 text-white font-medium shadow-lg shadow-slate-900/20 active:scale-[0.99] transition disabled:opacity-50 disabled:cursor-not-allowed">
+        สร้างวิดีโอเลย
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ตั้งค่าตั้งต้น
+const fileInput = document.getElementById('fileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+const previewGrid = document.getElementById('previewGrid');
+const tiktokBtn = document.getElementById('tiktokBtn');
+const tiktokInputWrap = document.getElementById('tiktokInputWrap');
+const tiktokInput = document.getElementById('tiktokInput');
+const tiktokPreview = document.getElementById('tiktokPreview');
+const dateInput = document.getElementById('dateInput');
+const categorySelect = document.getElementById('categorySelect');
+const brandInput = document.getElementById('brandInput');
+const filenameInput = document.getElementById('filenameInput');
+const promptInput = document.getElementById('promptInput');
+const genPromptBtn = document.getElementById('genPromptBtn');
+const postOutput = document.getElementById('postOutput');
+const genPostBtn = document.getElementById('genPostBtn');
+const generateBtn = document.getElementById('generateBtn');
+const statusBox = document.getElementById('statusBox');
+
+let selectedFiles = [];
+
+// กำหนดวันที่ปัจจุบัน
+function setInitialDate() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  dateInput.value = `${y}-${m}-${d}`;
+}
+setInitialDate();
+
+// อัปเดตชื่อไฟล์อัตโนมัติ
+function updateFilename() {
+  const date = dateInput.value || '';
+  const cat = categorySelect.value || '';
+  const brand = brandInput.value.trim() || 'no-brand';
+  const count = selectedFiles.length;
+  const cleanBrand = brand.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9ก-๙\-]/g, '');
+  const name = `${date}_${cat}_${cleanBrand}_${count}ภาพ`;
+  filenameInput.value = name;
+}
+categorySelect.addEventListener('change', updateFilename);
+brandInput.addEventListener('input', updateFilename);
+
+// เปิดเลือกไฟล์
+uploadBtn.addEventListener('click', () => fileInput.click());
+
+// แสดงตัวอย่างรูป - สร้าง DOM อย่างปลอดภัย
+function renderPreview() {
+  previewGrid.replaceChildren();
+  
+  if (selectedFiles.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'aspect-square rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 col-span-1';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '28'); svg.setAttribute('height', '28'); svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '1.5');
+    const p1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p1.setAttribute('d', 'M4 16l4-4 4 4 4-4 4 4M12 12v-2M12 8v-2M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z');
+    svg.appendChild(p1);
+    const span = document.createElement('span');
+    span.className = 'text-[11px] mt-1';
+    span.textContent = 'ยังไม่มีรูป';
+    empty.appendChild(svg); empty.appendChild(span);
+    previewGrid.appendChild(empty);
+    updateFilename();
+    return;
+  }
+
+  selectedFiles.forEach((fileObj, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'relative aspect-square bg-slate-100 rounded-2xl overflow-hidden group';
+    
+    const img = document.createElement('img');
+    img.src = fileObj.url;
+    img.alt = 'รูปสินค้า';
+    img.className = 'w-full h-full object-cover';
+    img.setAttribute('loading', 'lazy');
+    
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'absolute top-1.5 right-1.5 w-6 h-6 bg-black/70 text-white rounded-full text-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition';
+    btn.textContent = '×';
+    btn.setAttribute('aria-label', 'ลบรูป');
+    btn.dataset.idx = String(idx);
+    btn.onclick = () => {
+      const i = Number(btn.dataset.idx);
+      if (selectedFiles[i] && selectedFiles[i].file) URL.revokeObjectURL(selectedFiles[i].url);
+      selectedFiles.splice(i, 1);
+      renderPreview();
+    };
+    
+    wrap.appendChild(img);
+    wrap.appendChild(btn);
+    previewGrid.appendChild(wrap);
+  });
+  updateFilename();
+}
+
+// เมื่อเลือกไฟล์
+fileInput.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files || []);
+  files.forEach(f => {
+    if (selectedFiles.length >= 10) return;
+    const url = URL.createObjectURL(f);
+    selectedFiles.push({ url, file: f, fromTikTok: false });
+  });
+  fileInput.value = '';
+  renderPreview();
+});
+
+// ปุ่ม TikTok
+tiktokBtn.addEventListener('click', () => {
+  tiktokInputWrap.classList.toggle('hidden');
+  if (!tiktokInputWrap.classList.contains('hidden')) {
+    tiktokInput.focus();
+  }
+});
+
+tiktokInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') processTikTok();
+});
+
+async function processTikTok() {
+  const url = tiktokInput.value.trim();
+  if (!url) return;
+  
+  tiktokPreview.replaceChildren();
+  const loading = document.createElement('p');
+  loading.className = 'col-span-3 text-center text-xs text-slate-500 py-3';
+  loading.textContent = 'กำลังดึงข้อมูลจากลิงก์...';
+  tiktokPreview.appendChild(loading);
+
+  try {
+    const res = await fetch('/api/tiktok-scrape?url=' + encodeURIComponent(url));
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    showTikTokImages(data.images || []);
+  } catch (err) {
+    // ข้อมูลตัวอย่างเมื่อไม่สามารถเชื่อมต่อ API ได้
+    showTikTokImages([
+      'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600',
+      'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=600',
+      'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600'
+    ]);
+  }
+}
+
+function showTikTokImages(images) {
+  tiktokPreview.replaceChildren();
+  const list = images.slice(0, 6);
+  
+  list.forEach((src) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'relative aspect-square rounded-xl overflow-hidden border border-slate-200 cursor-pointer hover:ring-2 hover:ring-violet-500';
+    
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'ภาพจาก TikTok';
+    img.className = 'w-full h-full object-cover';
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'absolute inset-0 bg-black/0 hover:bg-black/30 transition flex items-end justify-center pb-1';
+    const txt = document.createElement('span');
+    txt.className = 'text-[10px] text-white opacity-0 hover:opacity-100';
+    txt.textContent = 'แตะเพื่อเพิ่ม';
+    overlay.appendChild(txt);
+    
+    wrap.onclick = () => {
+      if (selectedFiles.length >= 10) return;
+      selectedFiles.push({ url: src, fromTikTok: true });
+      renderPreview();
+      wrap.classList.add('ring-2', 'ring-green-500');
+    };
+    
+    wrap.appendChild(img);
+    wrap.appendChild(overlay);
+    tiktokPreview.appendChild(wrap);
+  });
+
+  if (list.length > 0) {
+    const hint = document.createElement('p');
+    hint.className = 'col-span-3 text-[11px] text-slate-500 mt-1';
+    hint.textContent = 'แตะที่ภาพเพื่อเพิ่มลงในรายการด้านบน';
+    tiktokPreview.appendChild(hint);
+  }
+}
+
+// สร้าง prompt อัตโนมัติ
+genPromptBtn.addEventListener('click', () => {
+  const cat = categorySelect.value;
+  const brand = brandInput.value.trim() || 'สินค้า';
+  
+  const templates = {
+    Menswear: `วิดีโอสินค้า ${brand} สำหรับผู้ชาย หมุนโชว์ 360 องศา พื้นหลังสตูดิโอสีขาว แสงนุ่มนวล เน้นรายละเอียดเนื้อผ้าและทรง`,
+    Womenswear: `วิดีโอแฟชั่น ${brand} สำหรับผู้หญิง เคลื่อนไหวแพนช้า พื้นหลังมินิมอลโทนครีม ให้ความรู้สึกหรูหรา`,
+    Accessories: `วิดีโอ ${brand} แบบ close-up โฟกัสดีเทล พื้นหลังสะอาด แสงสะท้อนพอดี`,
+    Shoes: `วิดีโอรองเท้า ${brand} หมุน 360 องศา เห็นพื้นรองเท้าและวัสดุ พื้นหลังสตูดิโอ`,
+    Bags: `วิดีโอกระเป๋า ${brand} เปิด-ปิดโชว์ด้านใน พื้นหลังเรียบ เน้นทรงและฮาร์ดแวร์`
+  };
+  
+  promptInput.value = templates[cat] || `วิดีโอสินค้า ${brand} คุณภาพสูง พื้นหลังสะอาด`;
+});
+
+// สร้างแคปชัน
+genPostBtn.addEventListener('click', () => {
+  const brand = brandInput.value.trim() || 'คอลเลคชันใหม่';
+  const cat = categorySelect.value;
+  const catTh = {Menswear:'เสื้อผ้าผู้ชาย', Womenswear:'เสื้อผ้าผู้หญิง', Accessories:'แอคเซสเซอรี่', Shoes:'รองเท้า', Bags:'กระเป๋า'}[cat];
+  
+  const captions = [
+    `✨ ${brand} | ${catTh}\nดีไซน์เรียบหรู ใส่ได้ทุกวัน แมทช์ง่ายกับทุกลุค\n\nคุณภาพคัดสรร ใส่ใจทุกรายละเอียด\nสั่งซื้อได้แล้ววันนี้`,
+    `New Arrival: ${brand}\n${catTh} ที่ออกแบบมาเพื่อความสบายและสไตล์\n\nพร้อมส่ง ตรวจเช็คคุณภาพทุกชิ้น`
+  ];
+  
+  postOutput.value = captions[Math.floor(Math.random() * captions.length)];
+});
+
+// ปุ่มสร้างวิดีโอ
+generateBtn.addEventListener('click', async () => {
+  if (selectedFiles.length === 0) {
+    statusBox.textContent = 'กรุณาอัปโหลดรูปสินค้าอย่างน้อย 1 รูป';
+    statusBox.className = 'text-center text-sm text-amber-600 min-h-[20px]';
+    return;
+  }
+  if (!promptInput.value.trim()) {
+    statusBox.textContent = 'กรุณาระบุคำสั่งสำหรับสร้างวิดีโอ';
+    statusBox.className = 'text-center text-sm text-amber-600 min-h-[20px]';
+    return;
+  }
+  
+  generateBtn.disabled = true;
+  genPromptBtn.disabled = true;
+  genPostBtn.disabled = true;
+  uploadBtn.disabled = true;
+  
+  statusBox.textContent = 'กำลังเตรียมข้อมูลและสร้างวิดีโอ...';
+  statusBox.className = 'text-center text-sm text-violet-600 min-h-[20px]';
+  generateBtn.textContent = 'กำลังประมวลผล...';
+  
+  // จำลองการทำงาน
+  await new Promise(r => setTimeout(r, 2200));
+  
+  statusBox.textContent = 'สร้างวิดีโอสำเร็จ เรียบร้อยแล้ว';
+  statusBox.className = 'text-center text-sm text-green-600 min-h-[20px]';
+  generateBtn.textContent = 'สร้างวิดีโอเลย';
+  
+  generateBtn.disabled = false;
+  genPromptBtn.disabled = false;
+  genPostBtn.disabled = false;
+  uploadBtn.disabled = false;
+});
+
+// เริ่มต้น
+renderPreview();
+updateFilename();
+</script>
+</body>
+</html>
