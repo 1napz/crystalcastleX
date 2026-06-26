@@ -1,0 +1,9 @@
+- name: Commit changes
+  run: |
+    git add .
+    if git diff --staged --quiet; then
+      echo "No changes to commit"
+    else
+      git commit -m "Auto update bookmarks $(date)"
+      git push
+    fi
