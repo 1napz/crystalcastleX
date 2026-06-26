@@ -1,0 +1,30 @@
+<header>
+  <h1>Crystal Castle — Product Upload</h1>
+  <nav>
+    <a href="artifacts.html">📂 ผลงาน</a>
+    <button id="logoutBtn">🚪 ออกจากระบบ</button>
+  </nav>
+</header>
+
+<main>
+  <!-- Upload Section -->
+  <section class="upload-card">
+    <h2>📷 อัปโหลดรูปสินค้า</h2>
+    <input type="file" id="fileUpload" multiple accept="image/png, image/jpeg">
+    <div id="previewArea">ยังไม่มีรูป</div>
+    <small>รองรับ JPG, PNG สูงสุด 10 รูป</small>
+  </section>
+
+  <!-- TikTok Section -->
+  <section class="tiktok-card">
+    <h2>🔗 ลิงก์ TikTok</h2>
+    <input type="url" id="tiktokUrl" placeholder="https://www.tiktok.com/@username/video/...">
+  </section>
+
+  <!-- Stepper -->
+  <section class="stepper">
+    <div class="active">Step 1: Upload</div>
+    <div>Step 2: TikTok</div>
+    <div>Step 3: Generate</div>
+  </section>
+</main>

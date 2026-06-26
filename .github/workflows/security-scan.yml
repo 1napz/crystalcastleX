@@ -1,0 +1,33 @@
+# .github/workflows/security-scan.yml
+name: Security Scan with Microsoft Defender
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, python
+
+      - name: Perform CodeQL Scan
+        uses: github/codeql-action/analyze@v3
+
+      - name: Upload Results to Microsoft Defender
+        run: |
+          echo "🔒 Uploading scan results to Microsoft Defender..."
+          # ตัวอย่างการเชื่อมต่อ (ต้องใช้ token/secret ที่ตั้งค่าไว้ใน repo secrets)
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.DEFENDER_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d @codeql-results.json \
+            https://defender.microsoft.com/api/code-to-cloud/upload

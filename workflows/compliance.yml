@@ -1,0 +1,10 @@
+name: Compliance
+on:
+  push:
+    branches: [main]
+
+jobs:
+  call-shared-audit:
+    uses: my-org/.github-shared/.github/workflows/repo-audit.yml@v1
+    permissions:
+      contents: write

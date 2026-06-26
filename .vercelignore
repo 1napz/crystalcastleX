@@ -1,0 +1,20 @@
+# Logs
+*.log
+
+# Tests & coverage
+tests/
+__tests__/
+coverage/
+
+# Documentation (keep README)
+docs/
+*.md
+!README.md
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Build cache (Vercel builds fresh)
+.next/cache

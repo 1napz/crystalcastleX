@@ -1,0 +1,61 @@
+name: CI/CD Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build project
+        run: npm run build
+
+      - name: Check .vercelignore
+        run: |
+          if [ ! -f ".vercelignore" ]; then
+            echo "❌ Missing .vercelignore file"
+            exit 1
+          fi
+          echo "✅ .vercelignore exists"
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy to Vercel
+        run: |
+          npm install -g vercel
+          vercel deploy --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}

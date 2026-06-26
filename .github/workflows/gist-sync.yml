@@ -1,0 +1,26 @@
+name: "Gist Sync"
+
+on:
+  push:
+    branches: [main, master]
+    paths: ['README.md']
+  workflow_dispatch:
+
+jobs:
+  gist-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mirror README.md to Gist
+        uses: Shresht7/Gist-Mirror@879b1f29639b9addbd97a1cb7e52d06e84e54b44   # pinned SHA for v1
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+        with:
+          gists: |
+            - id: ${{ secrets.MY_GIST }}
+              description: "Crystal Castle README (auto-synced)"
+              files:
+                - README.md

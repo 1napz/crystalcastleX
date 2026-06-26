@@ -1,0 +1,33 @@
+name: Action Review
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Parse workflow files
+        run: |
+          for file in $(find .github/workflows -name "*.yml"); do
+            echo "Checking $file"
+            if grep -q "@v1" "$file"; then
+              echo "::set-output name=outdated::true"
+            fi
+          done
+
+      - name: Auto-merge if outdated
+        if: steps.parse.outputs.outdated == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              merge_method: "squash"
+            })
