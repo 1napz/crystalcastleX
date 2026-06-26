@@ -1,0 +1,51 @@
+name: AI Video Pipeline
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ai-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Generate Caption (Gemini/Groq)
+        run: |
+          echo "Generating bilingual captions..."
+          node scripts/generateCaption.js input.jpg > logs/caption.json
+
+      - name: Generate Video (Fal API v2)
+        run: |
+          echo "Calling Fal API v2 image-to-video..."
+          node scripts/generateVideo.js logs/caption.json > logs/video.json
+
+      - name: Generate Voiceover
+        run: |
+          echo "Creating bilingual voiceover..."
+          node scripts/generateVoiceover.js logs/caption.json > logs/audio.json
+
+      - name: Apply Branding Overlay
+        run: |
+          echo "Overlaying watermark/logo..."
+          node scripts/applyBranding.js logs/video.json logs/audio.json > logs/final.json
+
+      - name: Write Compliance Log
+        run: |
+          echo '{
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S)",
+            "event": "AI Video Pipeline",
+            "status": "✅ Passed",
+            "caption": "logs/caption.json",
+            "video": "logs/video.json",
+            "audio": "logs/audio.json",
+            "branding": "logs/final.json"
+          }' >> logs/ui_log.json
+
+      - name: Notify Reviewer (LINE/Telegram)
+        run: |
+          curl -X POST https://notify-api.line.me/api/notify \
+            -H "Authorization: Bearer ${{ secrets.LINE_NOTIFY_TOKEN }}" \
+            -F "message=CrystalCastle AI Video ✅ Completed"

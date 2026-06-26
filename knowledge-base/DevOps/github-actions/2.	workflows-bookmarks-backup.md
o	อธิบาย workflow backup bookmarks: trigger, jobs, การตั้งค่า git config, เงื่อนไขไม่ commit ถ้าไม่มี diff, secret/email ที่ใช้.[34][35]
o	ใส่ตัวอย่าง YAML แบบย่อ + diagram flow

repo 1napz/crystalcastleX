@@ -1,0 +1,3 @@
+2.	workflows-bookmarks-backup.md
+o	อธิบาย workflow backup bookmarks: trigger, jobs, การตั้งค่า git config, เงื่อนไขไม่ commit ถ้าไม่มี diff, secret/email ที่ใช้.[34][35]
+o	ใส่ตัวอย่าง YAML แบบย่อ + diagram flow

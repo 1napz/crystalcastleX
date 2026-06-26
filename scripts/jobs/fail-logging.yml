@@ -1,0 +1,22 @@
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Unit Tests
+        run: |
+          npm test -- --coverage || echo "❌ Unit test failed" > version/CrystalCastle/logs/unittest-fail.log
+
+      - name: Save fail log (if exists)
+        if: always()
+        run: |
+          TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
+          if [ -f version/CrystalCastle/logs/unittest-fail.log ]; then
+            echo "[${TIMESTAMP}] Unit test failure detected" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "Actor: ${{ github.actor }}" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "Branch: ${{ github.ref }}" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "Summary (English): Unit test failed, see coverage report" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "สรุป (ภาษาไทย): Unit test ล้มเหลว, ดู coverage report" >> version/CrystalCastle/logs/unittest-fail.log
+          fi

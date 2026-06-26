@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CrystalCastle Board Flow</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <h2>CrystalCastle Board Flow (Realtime)</h2>
+  <div id="diagram">
+    <pre class="mermaid">
+      flowchart TD
+        A[Contributor] --> B[Pull Request]
+        B --> C[Board]
+        C --> D[Reviewer/Admin]
+        D --> E{Status: Waiting}
+    </pre>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+
+    // ฟังก์ชันดึงสถานะ PR จาก GitHub API
+    async function getPRStatus() {
+      const response = await fetch("https://api.github.com/repos/1napz/crystalcastle/pulls/42");
+      const data = await response.json();
+      return data.state; // เช่น "open", "closed"
+    }
+
+    // ฟังก์ชันอัปเดต diagram
+    function updateDiagram(status) {
+      const diagram = `
+        flowchart TD
+          A[Contributor] --> B[Pull Request]
+          B --> C[Board]
+          C --> D[Reviewer/Admin]
+          D --> E{Status: ${status}}
+      `;
+      document.getElementById("diagram").innerHTML =
+        `<pre class="mermaid">${diagram}</pre>`;
+      mermaid.init(undefined, document.querySelectorAll(".mermaid"));
+    }
+
+    // Refresh ทุก 5 วินาที
+    setInterval(async () => {
+      const status = await getPRStatus();
+      updateDiagram(status);
+    }, 5000);
+  </script>
+</body>
+</html>

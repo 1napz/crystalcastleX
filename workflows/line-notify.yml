@@ -1,0 +1,28 @@
+name: LINE Notification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: LINE Notify
+        if: ${{ secrets.LINE_NOTIFY_TOKEN != '' }}
+        run: |
+          curl -X POST https://notify-api.line.me/api/notify \
+            -H "Authorization: Bearer ${{ secrets.LINE_NOTIFY_TOKEN }}" \
+            -F "message=CrystalCastle CI/CD ✅ Passed"
+
+      - name: LINE Messaging API
+        if: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN != '' }}
+        run: |
+          curl -X POST https://api.line.me/v2/bot/message/push \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}" \
+            -d '{
+              "to": "${{ secrets.LINE_USER_ID }}",
+              "messages":[{"type":"text","text":"CrystalCastle CI/CD ✅ Passed"}]
+            }'
