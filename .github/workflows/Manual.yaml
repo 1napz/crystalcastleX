@@ -1,0 +1,7 @@
+name: Manual Playwright Test
+on:
+  workflow_dispatch: # เปิดโหมดให้กดรันเองได้จากหน้าเว็บ GitHub
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 1 * * *' # รันอัตโนมัติทุกเช้า 8 โมง (เวลาไทย)

@@ -1,0 +1,1 @@
+- run: git add ${{ steps.ai.outputs.result }}

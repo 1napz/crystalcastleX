@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Coverage & reports
+coverage/
+reports/
+
+# Public assets
+public/
+*.min.js
+
+# Vercel artifacts
+.vercel/

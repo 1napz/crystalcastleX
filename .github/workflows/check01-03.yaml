@@ -1,0 +1,3 @@
+- run: |
+    FILENAME="${{ steps.ai.outputs.text }}"
+    echo "$CONTENT" > "$FILENAME"

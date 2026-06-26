@@ -1,0 +1,34 @@
+name: Language Enforcement
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'knowledge_hub/**'
+      - 'pending_review/**'
+
+jobs:
+  check-language:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Verify Bilingual Sections
+        run: |
+          for file in $(find docs knowledge_hub pending_review -name "*.md"); do
+            if ! grep -q "### English" "$file" || ! grep -q "### ภาษาไทย" "$file"; then
+              echo "$file missing bilingual sections"
+              exit 1
+            fi
+          done
+          echo "All docs contain bilingual sections"
+
+      - name: Post Reviewer Comment (Bilingual)
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: language-check
+          message: |
+            Language check passed  
+            Please ensure all reviewer notes and artifacts include both English and Thai sections  
+            กรุณาตรวจสอบให้แน่ใจว่าเอกสาร Reviewer Notes และ Artifact มีทั้งภาษาอังกฤษและภาษาไทย

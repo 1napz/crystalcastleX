@@ -1,0 +1,30 @@
+name: Post-Merge CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  post-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build Docker image
+        run: docker build -t crystalcastle:latest .
+
+      - name: Deploy
+        run: ./scripts/deploy.sh
+
+      - name: Update docs
+        run: npm run docs:build
+
+      - name: Notify team
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: '{"text":"✅ Merge complete & deployed!"}'
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK }}

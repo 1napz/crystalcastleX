@@ -1,0 +1,62 @@
+name: CrystalCastle CI (Clean & Notify)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests with coverage
+        id: tests
+        run: |
+          npm test -- --coverage --json --outputFile=test-results.json
+          PASSED=$(jq '.numPassedTests' test-results.json)
+          FAILED=$(jq '.numFailedTests' test-results.json)
+          TOTAL=$(jq '.numTotalTests' test-results.json)
+          echo "SUMMARY=${PASSED} passed, ${FAILED} failed, ${TOTAL} total" >> $GITHUB_ENV
+          LINE=$(grep -Po 'All files.*\K\d+(?=%)' coverage/lcov-report/index.html | head -1)
+          echo "COVERAGE=${LINE}% line coverage" >> $GITHUB_ENV
+
+      - name: Build project
+        run: npm run build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+      # --- ระบบแจ้งเตือน (Notifications) ---
+
+      - name: Notify LINE
+        if: always()
+        env:
+          LINE_TOKEN: ${{ secrets.LINE_TOKEN }}
+        run: |
+          STATUS="${{ job.status }}"
+          if [ "$STATUS" == "success" ]; then
+            MSG="✅ CrystalCastle build success!%0D%0A📊 Coverage: ${{ env.COVERAGE }}%0D%0A📝 Summary: ${{ env.SUMMARY }}"
+          else
+            MSG="❌ CrystalCastle build FAILED!%0D%0Aโปรดตรวจสอบ Error log ใน GitHub Actions"
+          fi
+          curl -X POST -H "Authorization: Bearer $LINE_TOKEN" -F "message=$MSG" https://notify-api.line.me/api/notify
+
+      - name: Notify Slack/Discord
+        if: always()
+        run: |
+          echo "Sending status to Slack/Discord..."
+        # (ส่วนนี้ใช้สคริปต์เดิมที่คุณมีสำหรับ Slack/Discord ได้เลยครับ)
