@@ -1,0 +1,70 @@
+name: 🔖 Auto Labeler
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+  issues:
+    types: [opened, edited]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply labels based on title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request || context.payload.issue;
+            if (!pr) return;
+
+            const title = pr.title.toLowerCase();
+
+            // 🔧 Bug
+            if (title.includes("fix") || title.includes("bug")) {
+              github.rest.issues.addLabels({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ["bug"]
+              });
+            }
+
+            // ✨ Feature
+            if (title.includes("feat") || title.includes("feature")) {
+              github.rest.issues.addLabels({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ["feature"]
+              });
+            }
+
+            // 📚 Documentation
+            if (title.includes("docs") || title.includes("doc")) {
+              github.rest.issues.addLabels({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ["documentation"]
+              });
+            }
+
+            // 🔐 Security
+            if (title.includes("security") || title.includes("alert")) {
+              github.rest.issues.addLabels({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ["security"]
+              });
+            }
+
+            // ⚙️ CI/CD
+            if (title.includes("ci") || title.includes("workflow")) {
+              github.rest.issues.addLabels({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ["ci/cd"]
+              });
+            }

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrystalCastle — AI Gateway Deploy Review</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen p-6">
+
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-3xl font-bold text-center bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
+      CrystalCastle — AI Gateway Deploy Review
+    </h1>
+    <div class="flex justify-center gap-4 mt-4">
+      <select class="bg-gray-800 text-sm px-3 py-2 rounded">
+        <option>Provider: All</option>
+        <option>Groq</option>
+        <option>Gemini</option>
+        <option>OpenAI</option>
+      </select>
+      <select class="bg-gray-800 text-sm px-3 py-2 rounded">
+        <option>Severity: All</option>
+        <option>Critical</option>
+        <option>Major</option>
+        <option>Minor</option>
+        <option>Info</option>
+      </select>
+      <input type="date" class="bg-gray-800 text-sm px-3 py-2 rounded">
+    </div>
+  </header>
+
+  <!-- Checklist Panel -->
+  <section class="mb-10">
+    <h2 class="text-xl font-bold mb-4">✅ Reviewer Checklist</h2>
+    <table class="w-full border-collapse bg-gray-900 rounded-lg overflow-hidden">
+      <thead class="bg-gray-800">
+        <tr>
+          <th class="p-3 text-left">Test Case</th>
+          <th class="p-3 text-left">Status</th>
+          <th class="p-3 text-left">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-gray-700">
+          <td class="p-3">Groq response</td>
+          <td class="p-3 text-green-400">✅ Pass</td>
+          <td class="p-3">Normal request successful</td>
+        </tr>
+        <tr class="border-b border-gray-700">
+          <td class="p-3">Gemini failover</td>
+          <td class="p-3 text-green-400">✅ Pass</td>
+          <td class="p-3">Auto-switch confirmed</td>
+        </tr>
+        <tr class="border-b border-gray-700">
+          <td class="p-3">OpenAI fallback</td>
+          <td class="p-3 text-red-400">❌ Fail</td>
+          <td class="p-3">Timeout error</td>
+        </tr>
+        <tr class="border-b border-gray-700">
+          <td class="p-3">Cache (60s TTL)</td>
+          <td class="p-3 text-green-400">✅ Pass</td>
+          <td class="p-3">Cached response returned</td>
+        </tr>
+        <tr>
+          <td class="p-3">Cost tracking</td>
+          <td class="p-3 text-red-400">❌ Fail</td>
+          <td class="p-3">Token usage missing</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Provider Usage Graphs (placeholder) -->
+  <section class="mb-10">
+    <h2 class="text-xl font-bold mb-4">📈 Provider Usage</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-gray-900 p-4 rounded-lg text-center">Bar Chart — Token Usage</div>
+      <div class="bg-gray-900 p-4 rounded-lg text-center">Line Chart — Latency Trends</div>
+      <div class="bg-gray-900 p-4 rounded-lg text-center">Pie Chart — Routing %</div>
+    </div>
+  </section>
+
+  <!-- Severity Log Table -->
+  <section class="mb-10">
+    <h2 class="text-xl font-bold mb-4">⚠️ Severity Logs</h2>
+    <table class="w-full border-collapse bg-gray-900 rounded-lg overflow-hidden">
+      <thead class="bg-gray-800">
+        <tr>
+          <th class="p-3 text-left">Timestamp</th>
+          <th class="p-3 text-left">Provider</th>
+          <th class="p-3 text-left">Error</th>
+          <th class="p-3 text-left">Severity</th>
+          <th class="p-3 text-left">Reviewer Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-gray-700">
+          <td class="p-3">2026-05-07 13:05</td>
+          <td class="p-3">Groq</td>
+          <td class="p-3">500 Internal Error</td>
+          <td class="p-3 text-red-400">Critical</td>
+          <td class="p-3">Failover triggered</td>
+        </tr>
+        <tr class="border-b border-gray-700">
+          <td class="p-3">2026-05-07 13:07</td>
+          <td class="p-3">Gemini</td>
+          <td class="p-3">Latency > 5s</td>
+          <td class="p-3 text-orange-400">Major</td>
+          <td class="p-3">Acceptable fallback</td>
+        </tr>
+        <tr>
+          <td class="p-3">2026-05-07 13:10</td>
+          <td class="p-3">OpenAI</td>
+          <td class="p-3">Timeout</td>
+          <td class="p-3 text-red-400">Critical</td>
+          <td class="p-3">Needs investigation</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Footer -->
+  <footer class="mt-10 text-center text-sm text-gray-400">
+    <p>Reviewer Checklist Status: ✅ 6/8 Passed</p>
+    <p>Approval Decision: ❌ Block deploy until cost tracking + OpenAI fallback fixed</p>
+    <p class="mt-2">EN: Deployment blocked — fix cost tracking and OpenAI fallback.<br>TH: หยุดการ Deploy — ต้องแก้ไขการบันทึกค่าใช้จ่ายและการ Failover ไปยัง OpenAI</p>
+  </footer>
+
+</body>
+</html>
