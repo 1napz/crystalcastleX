@@ -1,0 +1,34 @@
+Here’s a structured Reviewer Feedback Template you can add to your PRs in crystalcastle. It gives collaborators a clear, standardized way to leave comments — whether approving, requesting changes, or suggesting improvements.  
+
+---
+
+📋 Reviewer Feedback Template
+
+- Approval  
+  - ✅ Code changes meet requirements.  
+  - ✅ CI/CD pipeline passes without errors.  
+  - ✅ Documentation is clear and aligned.  
+  - Comment: “Looks good to me — approved.”  
+
+- Request Changes  
+  - ❌ Issues found in schema validation or pipeline.  
+  - ❌ Dashboard logic breaks existing components.  
+  - ❌ Documentation missing or unclear.  
+  - Comment: “Please fix [specific issue] before approval.”  
+
+- Suggestions  
+  - 💡 Possible optimizations in code readability.  
+  - 💡 UI/UX improvements for dashboard layout.  
+  - 💡 Additional notes for README clarity.  
+  - Comment: “Consider [suggestion] to improve maintainability.”  
+
+---
+
+✅ Why this helps
+- Keeps reviewer comments consistent and actionable.  
+- Separates blocking issues (request changes) from non‑blocking suggestions.  
+- Makes approvals faster by giving reviewers a clear structure.  
+
+---
+
+Would you like me to now prepare a Reviewer summary template that consolidates all feedback into a single structured summary for each PR, so maintainers can quickly see the overall review status?

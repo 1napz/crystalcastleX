@@ -1,0 +1,79 @@
+# =========================
+# Android
+# =========================
+*.apk
+*.aab
+*.ap_
+*.dex
+*.ai-context.md
+local.properties
+captures/
+
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Keystore
+*.jks
+*.keystore
+*.md
+# Logs
+*.log
+
+# =========================
+# Node.js
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Vercel
+# =========================
+.vercel/
+
+# =========================
+# Turbo / Next.js
+# =========================
+.next/
+out/
+dist/
+.turbo/
+
+# =========================
+# Cache
+# =========================
+.cache/
+.tmp/
+.temp/
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Coverage
+# =========================
+coverage/
+
+# =========================
+# AI Generated / Captures
+# =========================
+generated/
+outputs/
+screenshots/

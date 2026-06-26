@@ -1,0 +1,16 @@
+name: Auto Label PR
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # ✅ อยู่ในระดับ job
+    steps:
+      - uses: actions/labeler@v4
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}        # ✅ indent ถูกต้อง
+          configuration-path: .github/labeler.yml

@@ -1,0 +1,40 @@
+- name: 🔍 Verify Repo Latest
+  run: |
+    set -e
+
+    echo "Checking repo state..."
+
+    VERSION=$(node -p "require('./package.json').version")
+
+    CHANGELOG_VERSION=$(grep -m1 '^## ' CHANGELOG.md \
+      | sed 's/## //' \
+      | sed 's/^v//')
+
+    if [ "$VERSION" != "$CHANGELOG_VERSION" ]; then
+      echo "❌ Version mismatch"
+      echo "package.json=$VERSION"
+      echo "CHANGELOG.md=$CHANGELOG_VERSION"
+      exit 1
+    fi
+
+    REQUIRED_FILES=(
+      "generateVideo.js"
+      "generateVoiceover.js"
+      "logs"
+    )
+
+    for FILE in "${REQUIRED_FILES[@]}"; do
+      if [ ! -e "$FILE" ]; then
+        echo "❌ Missing: $FILE"
+        exit 1
+      fi
+    done
+
+    NPM_OUTPUT=$(npm ls 2>&1 || true)
+
+    if echo "$NPM_OUTPUT" | grep -E "(invalid|extraneous|missing)"; then
+      echo "❌ Dependency issue detected"
+      exit 1
+    fi
+
+    echo "✅ Repo verified as latest"

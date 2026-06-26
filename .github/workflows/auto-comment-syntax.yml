@@ -1,0 +1,44 @@
+name: Auto Reviewer Comment (Workflow Syntax Error)
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Scan Workflow Files for Syntax Error
+        id: scan
+        run: |
+          if grep -R "if!" .github/workflows/; then
+            echo "error_found=true" >> $GITHUB_ENV
+          else
+            echo "error_found=false" >> $GITHUB_ENV
+          fi
+
+      - name: Post Reviewer Comment
+        if: env.error_found == 'true'
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 🛑 Workflow Syntax Error Detected
+            Reviewer Bot found a syntax error in workflow YAML:
+
+            ```
+            if! git diff --quiet package-lock.json;
+            ```
+
+            ### 🇹🇭 ภาษาไทย
+            - ต้องแก้ไขเป็น `if ! git diff --quiet package-lock.json;` (มีช่องว่างระหว่าง `if` และ `!`)
+            - ตรวจสอบขั้นตอนอื่น ๆ ที่ใช้ shell script เพื่อให้แน่ใจว่า syntax ถูกต้อง
+
+            ### 🇬🇧 English
+            - It must be corrected to `if ! git diff --quiet package-lock.json;` (space required between `if` and `!`)
+            - Review other shell script steps to ensure syntax correctness

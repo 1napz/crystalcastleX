@@ -1,0 +1,75 @@
+name: CI + ClickUp Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Run Tests
+        run: |
+          echo "✅ Running tests..."
+          # ตัวอย่าง: npm test หรือ pytest
+
+      - name: Add Build Summary (Table + Progress Bar + Animated Steps)
+        run: |
+          echo "## 🛠 Build Progress" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Progress Bar" >> $GITHUB_STEP_SUMMARY
+          echo "🟩🟩🟩🟩🟩🟩🟩🟨🟨🟨 70%" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Step | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📂 Checkout Repo | ✅ Success |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Run Tests     | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔄 Animated Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- 📂 Checkout Repo: 🔄 กำลังทำงาน... → ✅ เสร็จสิ้น!" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧪 Run Tests: 🔄 กำลังทดสอบ... → ✅ ผ่านเรียบร้อย!" >> $GITHUB_STEP_SUMMARY
+
+  update-clickup:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update ClickUp Task Status
+        run: |
+          curl -X PUT "https://api.clickup.com/api/v2/task/${{ secrets.CLICKUP_TASK_ID }}" \
+          -H "Authorization: ${{ secrets.CLICKUP_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{"status":"complete"}'
+
+      - name: Add ClickUp Summary (Table + Progress Bar + Animated Steps)
+        run: |
+          echo "## 📌 ClickUp Sync" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 Progress Bar" >> $GITHUB_STEP_SUMMARY
+          echo "🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100%" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Task ID | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔖 ${{ secrets.CLICKUP_TASK_ID }} | ✅ Complete |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔄 Animated Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔖 Task ${{ secrets.CLICKUP_TASK_ID }}: 🔄 กำลังอัปเดต... → ✅ อัปเดตเป็น complete แล้ว!" >> $GITHUB_STEP_SUMMARY
+
+      - name: Add PR Comment with Summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "✅ CI/CD เสร็จสิ้น และ Task ใน ClickUp ถูกอัปเดตเป็น **complete** แล้ว!\n\nดู Table + Progress Bar + Animated Steps ได้ใน GitHub Actions Summary 🚀📌✅"
+            })

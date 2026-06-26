@@ -1,0 +1,12 @@
+      - name: Write log file
+        run: |
+          mkdir -p logs
+          {
+            echo "Run ID: ${{ github.run_id }}"
+            echo "Actor: ${{ github.actor }}"
+            echo "Event: ${{ github.event_name }}"
+            echo "Ref: ${{ github.ref }}"
+            echo "Commit: ${{ github.sha }}"
+            echo "Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          } >> logs/run.log
+          cat logs/run.log

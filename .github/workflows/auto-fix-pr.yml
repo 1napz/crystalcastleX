@@ -1,0 +1,82 @@
+name: Auto Fix PR (AI)
+
+on:
+  workflow_run:
+    workflows: ["CI"]   # เปลี่ยนให้ตรง
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  autofix:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (target branch)
+        uses: actions/checkout@v4
+        with:
+          ref: main            # หรือ Crystalcastle
+          fetch-depth: 0
+
+      - name: Download logs
+        uses: actions/download-artifact@v4
+        with:
+          name: workflow-logs
+          path: logs/
+        continue-on-error: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm install openai
+
+      - name: Generate fix (AI)
+        run: node scripts/ai-generate-fix.js
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Create branch
+        run: |
+          git config user.name "ai-fix-bot"
+          git config user.email "bot@users.noreply.github.com"
+          BRANCH="ai-fix-${{ github.run_id }}"
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+          git checkout -b $BRANCH
+
+      - name: Apply patch
+        run: |
+          if [ -f fix.patch ]; then
+            git apply fix.patch || (echo "Patch failed" && exit 1)
+          else
+            echo "No patch generated"; exit 0
+          fi
+
+      - name: Commit changes
+        run: |
+          git add -A
+          git commit -m "🤖 AI auto-fix based on CI failure" || echo "no changes"
+
+      - name: Push branch
+        run: git push origin $BRANCH
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.BRANCH }}
+          base: main   # หรือ Crystalcastle
+          title: "🤖 Auto Fix: CI Failure"
+          body: |
+            ## 🤖 AI Suggested Fix
+
+            - Source: CI failure
+            - Commit: ${{ github.event.workflow_run.head_sha }}
+
+            Please review before merge.
+          labels: ai-fix, needs-review

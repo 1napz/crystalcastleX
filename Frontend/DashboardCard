@@ -1,0 +1,10 @@
+index.html
+   └── dashboard.js
+         ├── DataLoader
+         │     ├── ai-key-performance.json
+         │     ├── license-status.json
+         │     └── token-status.json
+         ├── Renderer
+         │     └── DashboardCard (props: title, status, metric)
+         └── EventHandlers
+               └── User interactions (filters, refresh)

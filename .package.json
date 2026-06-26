@@ -1,0 +1,22 @@
+{
+  "name": "@ZyntroMedia/agent-hub",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build"
+    {
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "vc:dev": "vc dev"
+  },
+  "dependencies": {
+    "ai": "^3.4.0",
+    "next": "^14.2.0",
+    "react": "^18.3.0"
+  }
+  }
+  }
+}
