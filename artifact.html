@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@snapzreview — ผลงาน</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="/speed-insights.js" defer></script>
+</head>
+<body class="bg-gray-950 text-white min-h-screen">
+  <div class="max-w-4xl mx-auto p-6">
+    <header class="flex justify-between items-center mb-8">
+      <a href="/" class="text-gray-400 hover:text-white">← กลับ</a>
+      <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">@snapzreview</h1>
+      <a href="/artifacts.html" class="text-gray-400 hover:text-white">ทั้งหมด</a>
+    </header>
+    <div id="artifactContainer" class="bg-gray-900 rounded-2xl p-6">
+      <!-- โหลดจาก API /api/artifacts -->
+    </div>
+  </div>
+  <script>
+    async function loadArtifact() {
+      const id = new URLSearchParams(window.location.search).get('id');
+      const res = await fetch(`/api/artifacts?id=${id || ''}`);
+      const data = await res.json();
+      const container = document.getElementById('artifactContainer');
+      if (data.artifact) {
+        const a = data.artifact;
+        container.innerHTML = `
+          <video src="${a.video_url}" controls class="w-full rounded-xl mb-4"></video>
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-lg font-bold">${a.filename || ''}</p>
+              <p class="text-gray-400 text-sm">${a.prompt || ''}</p>
+            </div>
+            <a href="${a.video_url}" download class="bg-purple-600 px-4 py-2 rounded-lg text-sm">⬇️ ดาวน์โหลด</a>
+          </div>
+        `;
+      } else {
+        container.innerHTML = '<p class="text-gray-400">ไม่พบผลงาน</p>';
+      }
+    }
+    loadArtifact();
+  </script>
+</body>
+</html>

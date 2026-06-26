@@ -1,0 +1,39 @@
+# .coderabbit.yaml
+language: "th"  # ภาษาไทยสำหรับการตอบกลับ
+reviews:
+  profile: "assertive"  # เริ่มต้นด้วยโหมดผ่อนคลาย ลดการแจ้งเตือนที่ไม่จำเป็น
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false      # ปิดบทกวี ลดความรกในการรีวิว
+  review_status: true
+  review_details: true
+  auto_review:
+    enabled: true
+    drafts: true
+  path_filters:     # กำหนดข้ามโฟลเดอร์ที่ไม่ต้องการตรวจสอบ
+    - "!docs/"
+    - "!public/"
+    - "!dist/"
+    - "!.next/"
+    - "!*.lock"
+  path_instructions: # กำหนดคำแนะนำเฉพาะสำหรับพาธต่างๆ
+    - path: "api/**/*.js"
+      instructions: |
+        - ตรวจสอบการจัดการข้อผิดพลาด (try-catch)
+        - ต้องมีการตรวจสอบค่าที่รับเข้ามา (input validation)
+        - ตรวจสอบสิทธิ์และบทบาทก่อนดำเนินการ
+        - ใช้ HTTP status codes ที่เหมาะสม
+        - ตรวจสอบการใช้ Environment Variables ที่ถูกต้อง
+    - path: "product.js"
+      instructions: |
+        - ตรวจสอบการเรียกใช้ API (เลือกใช้ `fetch` กับ AbortController)
+        - ตรวจสอบการจัดการ state และ event handlers
+        - หลีกเลี่ยงการใส่ API Keys หรือ secrets ในฝั่ง client
+        - ตรวจสอบการแสดงสถานะการทำงาน (loading, error, success)
+    - path: "**/*.test.js"
+      instructions: |
+        - ตรวจสอบความครอบคลุมในการทดสอบ (test coverage)
+        - ตรวจสอบกรณีขอบ (edge cases)
+        - ตรวจสอบความสามารถในการอ่านและการทำงานของระบบทดสอบ
+chat:
+  auto_reply: true

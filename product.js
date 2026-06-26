@@ -1,0 +1,636 @@
+// product.js — @snapzreview AI Video Studio
+// เวอร์ชันสมบูรณ์ รองรับการอัปโหลดรูป, สร้าง Prompt, สร้างวิดีโอ, และ Slideshow ฟรี
+
+const $ = (id) => document.getElementById(id);
+
+// DOM Elements
+const fileInput = $('fileInput');
+const uploadBtn = $('uploadBtn');
+const previewGrid = $('previewGrid');
+const filenameInput = $('filenameInput');
+const promptInput = $('promptInput');
+const genPromptBtn = $('genPromptBtn');
+const genIntroBtn = $('genIntroBtn');
+const genCTABtn = $('genCTABtn');
+const genThumbnailBtn = $('genThumbnailBtn');
+const statusText = $('statusText');
+const categorySelect = $('categorySelect');
+const brandInput = $('brandInput');
+const dateInput = $('dateInput');
+const promptStatus = $('promptStatus');
+const copyPromptBtn = $('copyPromptBtn');
+const undoPromptBtn = $('undoPromptBtn');
+const genPostBtn = $('genPostBtn');
+const postOutput = $('postOutput');
+const copyPostBtn = $('copyPostBtn');
+const generateBtn = $('generateBtn');
+const videoEngineSelect = $('videoEngineSelect');
+const engineInfo = $('engineInfo');
+
+// State
+let selectedFiles = [];
+let lastUploadedFile = null;
+let lastUploadedUrl = null;
+let videoAbortController = null;
+let promptAbortController = null;
+let postAbortController = null;
+let promptHistory = [];
+
+// ========== Toast ==========
+function showToast(msg, type = 'info') {
+  const toast = document.createElement('div');
+  const colors = { info: 'bg-blue-600', error: 'bg-red-600', success: 'bg-green-600' };
+  toast.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl text-white text-sm shadow-lg ${colors[type] || colors.info}`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// ========== Status ==========
+function showStatus(message, type = 'info') {
+  if (!statusText) return;
+  
+  let icon = '';
+  let colorClass = '';
+  
+  switch (type) {
+    case 'success':
+      icon = '🎉';
+      colorClass ='text-emerald-700 bg-emerald-50 border border-emerald-200';
+      break;
+    case 'error':
+      icon = '❌';
+      colorClass = 'text-red-700 bg-red-50 border border-red-200';
+      break;
+    case 'loading':
+      icon = '⏳';
+      colorClass = 'text-violet-700 bg-violet-50 border border-violet-200';
+      break;
+    default:
+      icon = 'ℹ️';
+      colorClass = 'text-slate-700 bg-slate-50 border border-slate-200';
+  }
+  
+  statusText.innerHTML = `
+    <div class="flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl ${colorClass} shadow-sm text-sm font-medium">
+      <span>${icon}</span>
+      <span>${message}</span>
+    </div>
+  `;
+  statusText.classList.remove('hidden');
+  
+  if (type !== 'loading') {
+    setTimeout(() => statusText.classList.add('hidden'), 9500);
+  }
+}
+
+// ========== Utility ==========
+function debounce(fn, delay) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+function checkDuplicateName(name) {
+  const saved = JSON.parse(localStorage.getItem('filenames') || '[]');
+  return saved.includes(name);
+}
+
+function saveFilename(name) {
+  const saved = JSON.parse(localStorage.getItem('filenames') || '[]');
+  if (!saved.includes(name)) {
+    saved.push(name);
+    localStorage.setItem('filenames', JSON.stringify(saved));
+  }
+}
+
+function updateFilename() {
+  const now = new Date();
+  const yyyymmdd = now.getFullYear().toString() +
+    String(now.getMonth() + 1).padStart(2, '0') +
+    String(now.getDate()).padStart(2, '0');
+  if (dateInput) dateInput.value = yyyymmdd;
+  const category = categorySelect?.value || 'Product';
+  const brand = (brandInput?.value.trim().replace(/\s+/g, '') || 'Brand').slice(0, 20);
+  const count = selectedFiles.length;
+  filenameInput.value = `${yyyymmdd}-${category}-${brand}-${count}img`;
+}
+
+// ========== Render Preview ==========
+function renderPreview() {
+  if (!previewGrid) return;
+  
+  previewGrid.querySelectorAll('img').forEach(img => {
+    if (img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
+  });
+  previewGrid.innerHTML = '';
+  
+  if (selectedFiles.length === 0) {
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 bg-slate-50';
+    emptyDiv.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4-4 4-4 4 4M12 12v-2M12 8v-2M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/></svg><span class="text-[11px] mt-1">ยังไม่มีรูป</span>`;
+    previewGrid.appendChild(emptyDiv);
+    updateFilename();
+    return;
+  }
+  
+  selectedFiles.forEach((fileObj, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'relative aspect-square bg-slate-100 rounded-xl overflow-hidden group';
+    const img = document.createElement('img');
+    img.src = fileObj.url;
+    img.alt = 'Product image';
+    img.className = 'w-full h-full object-cover';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'absolute top-1 right-1 w-5 h-5 bg-black/60 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition';
+    btn.textContent = '×';
+    btn.onclick = () => {
+      URL.revokeObjectURL(fileObj.url);
+      selectedFiles.splice(idx, 1);
+      renderPreview();
+    };
+    wrap.appendChild(img);
+    wrap.appendChild(btn);
+    previewGrid.appendChild(wrap);
+  });
+  updateFilename();
+}
+
+// ========== Upload ==========
+uploadBtn?.addEventListener('click', () => fileInput.click());
+
+fileInput?.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files || []);
+  if (selectedFiles.length + files.length > 10) {
+    showToast('อัปโหลดได้สูงสุด 10 รูป', 'error');
+    return;
+  }
+  files.forEach(f => {
+    if (!f.type.startsWith('image/')) {
+      showToast('กรุณาเลือกไฟล์รูปภาพเท่านั้น', 'error');
+      return;
+    }
+    if (f.size > 6 * 1024 * 1024) {
+      showToast('ไฟล์ต้องไม่เกิน 6MB', 'error');
+      return;
+    }
+    selectedFiles.push({ url: URL.createObjectURL(f), file: f });
+  });
+  fileInput.value = '';
+  renderPreview();
+});
+
+// ========== Generate Prompt ==========
+async function generatePrompt() {
+  if (selectedFiles.length === 0) {
+    showStatus('กรุณาอัปโหลดรูปก่อนสร้าง Prompt', 'error');
+    return;
+  }
+  
+  const productName = brandInput?.value.trim() || 'สินค้า';
+  const category = categorySelect?.value || 'general';
+  
+  if (genPromptBtn) genPromptBtn.disabled = true;
+  if (promptStatus) promptStatus.classList.remove('hidden');
+  showStatus('🧠 กำลังสร้าง Prompt ด้วย AI...', 'loading');
+  
+  if (promptAbortController) promptAbortController.abort();
+  promptAbortController = new AbortController();
+  
+  try {
+    const response = await fetch('/api/prompt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productName, category }),
+      signal: promptAbortController.signal,
+    });
+    
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'สร้าง Prompt ไม่สำเร็จ');
+    
+    const newPrompt = data.prompt;
+    if (newPrompt) {
+      if (promptInput.value) promptHistory.push(promptInput.value);
+      promptInput.value = newPrompt;
+      if (promptStatus) promptStatus.classList.add('hidden');
+      showStatus('✨ สร้าง Prompt สำเร็จ!', 'success');
+    } else {
+      throw new Error('ไม่ได้รับ Prompt');
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    showStatus(`❌ ${err.message}`, 'error');
+    if (promptStatus) promptStatus.classList.add('hidden');
+  } finally {
+    if (genPromptBtn) genPromptBtn.disabled = false;
+    promptAbortController = null;
+  }
+}
+
+// ========== Generate Post ==========
+async function generatePost() {
+  if (selectedFiles.length === 0) {
+    showStatus('กรุณาอัปโหลดรูปก่อน', 'error');
+    return;
+  }
+  
+  const productName = brandInput?.value.trim() || 'สินค้า';
+  const category = categorySelect?.value || 'general';
+  const currentPrompt = promptInput.value.trim() || '';
+  
+  if (genPostBtn) genPostBtn.disabled = true;
+  showStatus('📝 กำลังสร้างแคปชั่นและ hashtag...', 'loading');
+  
+  if (postAbortController) postAbortController.abort();
+  postAbortController = new AbortController();
+  
+  try {
+    const response = await fetch('/api/post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productName, category, prompt: currentPrompt }),
+      signal: postAbortController.signal,
+    });
+    
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'สร้างโพสต์ไม่สำเร็จ');
+    
+    if (postOutput) {
+      postOutput.value = data.caption || data.post || '';
+      postOutput.classList.remove('hidden');
+    }
+    showStatus('✅ สร้างแคปชั่นสำเร็จ!', 'success');
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    showStatus(`❌ ${err.message}`, 'error');
+  } finally {
+    if (genPostBtn) genPostBtn.disabled = false;
+    postAbortController = null;
+  }
+}
+
+// ========== Copy to Clipboard ==========
+function copyToClipboard(elementId) {
+  const element = $(elementId);
+  if (element && element.value) {
+    navigator.clipboard.writeText(element.value);
+    showToast('คัดลอกแล้ว!', 'success');
+  }
+}
+
+function undoPrompt() {
+  if (promptHistory.length > 0) {
+    const previousPrompt = promptHistory.pop();
+    promptInput.value = previousPrompt;
+    showToast('เลิกทำสำเร็จ', 'info');
+  } else {
+    showToast('ไม่มีประวัติให้เลิกทำ', 'info');
+  }
+}
+
+// ========== Generate Video ==========
+async function generateVideo() {
+  if (videoAbortController) videoAbortController.abort();
+  videoAbortController = new AbortController();
+  
+  if (selectedFiles.length === 0) {
+    showStatus('กรุณาอัปโหลดรูปสินค้าก่อน', 'error');
+    return;
+  }
+  if (!promptInput.value.trim()) {
+    showStatus('กรุณาใส่ Prompt ก่อนสร้างวิดีโอ', 'error');
+    return;
+  }
+  
+  const customFilename = filenameInput?.value.trim() || `video-${Date.now()}`;
+  if (checkDuplicateName(customFilename)) {
+    if (!confirm(`ชื่อ ${customFilename} เคยใช้แล้ว จะสร้างทับไหม?`)) return;
+  }
+  
+  const selectedEngine = videoEngineSelect?.value || 'fal';
+  
+  generateBtn.disabled = true;
+  showStatus('📤 กำลังอัปโหลดรูปสินค้า...', 'loading');
+  
+  try {
+    const file = selectedFiles[0].file;
+    let imageUrl;
+    
+    if (lastUploadedFile === file && lastUploadedUrl) {
+      imageUrl = lastUploadedUrl;
+      showStatus('📦 ใช้รูปที่อัปโหลดแล้ว', 'info');
+    } else {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('filename', customFilename);
+      
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        signal: videoAbortController.signal,
+      });
+      if (!uploadRes.ok) throw new Error('อัปโหลดรูปไม่สำเร็จ');
+      const data = await uploadRes.json();
+      imageUrl = data.url;
+      lastUploadedFile = file;
+      lastUploadedUrl = imageUrl;
+    }
+    
+    showStatus(`⚡ กำลังสร้างวิดีโอด้วย ${selectedEngine}...`, 'loading');
+    
+    const genRes = await fetch('/api/generate-video', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image_url: imageUrl,
+        prompt: promptInput.value.trim(),
+        filename: customFilename,
+        engine: selectedEngine,
+      }),
+      signal: videoAbortController.signal,
+    });
+    
+    const data = await genRes.json();
+    if (!genRes.ok) throw new Error(data.error || 'สร้างวิดีโอไม่สำเร็จ');
+    
+    const videoUrl = data.videoUrl || data.taskId;
+    if (!videoUrl) throw new Error('ไม่ได้รับลิงก์วิดีโอ');
+    
+    showStatus(`🎉 สร้างวิดีโอสำเร็จแล้ว!`, 'success');
+    saveFilename(customFilename);
+    
+    if (videoUrl.startsWith('http')) {
+      const a = document.createElement('a');
+      a.href = videoUrl;
+      a.target = '_blank';
+      a.download = `${customFilename}.mp4`;
+      a.click();
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      showStatus('⏹️ ยกเลิกการสร้างแล้ว', 'info');
+      return;
+    }
+    showStatus(`❌ เกิดข้อผิดพลาด: ${err.message}`, 'error');
+  } finally {
+    generateBtn.disabled = false;
+    videoAbortController = null;
+  }
+}
+
+// ========== Generate Intro (Slideshow) ==========
+async function generateIntro() {
+  if (selectedFiles.length === 0) {
+    showStatus('กรุณาอัปโหลดรูปก่อน', 'error');
+    return;
+  }
+  const brand = brandInput?.value.trim() || 'สินค้า';
+  const filename = filenameInput?.value || 'intro';
+  
+  showStatus('🎞️ กำลังสร้าง Intro ด้วยเอฟเฟกต์ Fade-in...', 'loading');
+  
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1920;
+    const ctx = canvas.getContext('2d');
+    
+    const chunks = [];
+    const stream = canvas.captureStream(30);
+    const mimeType = MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
+    const recorder = new MediaRecorder(stream, { mimeType });
+    
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.${mimeType === 'video/webm' ? 'webm' : 'mp4'}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showStatus('✅ Intro พร้อมดาวน์โหลดแล้ว!', 'success');
+    };
+    
+    recorder.start();
+    
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const img = new Image();
+      img.src = selectedFiles[i].url;
+      await new Promise(resolve => {
+        img.onload = () => {
+          for (let frame = 0; frame < 30; frame++) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = frame / 30;
+            drawCoverImage(ctx, img, canvas);
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 60px "Noto Sans Thai", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.shadowBlur = 20;
+            ctx.fillText(brand, canvas.width / 2, canvas.height - 200);
+            ctx.shadowBlur = 0;
+          }
+          resolve();
+        };
+        img.onerror = resolve;
+      });
+      await new Promise(r => setTimeout(r, 500));
+    }
+    recorder.stop();
+  } catch (err) {
+    showStatus('สร้าง Intro ไม่สำเร็จ', 'error');
+  }
+}
+
+// ========== Generate CTA ==========
+async function generateCTA() {
+  if (selectedFiles.length === 0) {
+    showStatus('กรุณาอัปโหลดรูปก่อน', 'error');
+    return;
+  }
+  const brand = brandInput?.value.trim() || 'สินค้า';
+  const filename = filenameInput?.value || 'cta';
+  
+  showStatus('🔥 กำลังสร้าง CTA Call-to-Action...', 'loading');
+  
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1920;
+    const ctx = canvas.getContext('2d');
+    
+    const chunks = [];
+    const stream = canvas.captureStream(30);
+    const mimeType = MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
+    const recorder = new MediaRecorder(stream, { mimeType });
+    
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.${mimeType === 'video/webm' ? 'webm' : 'mp4'}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showStatus('✅ CTA พร้อมดาวน์โหลดแล้ว!', 'success');
+    };
+    
+    recorder.start();
+    
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const img = new Image();
+      img.src = selectedFiles[i].url;
+      await new Promise(resolve => {
+        img.onload = () => {
+          drawCoverImage(ctx, img, canvas);
+          resolve();
+        };
+        img.onerror = resolve;
+      });
+      await new Promise(r => setTimeout(r, 1000));
+    }
+    
+    ctx.fillStyle = '#1e1e2e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 80px "Noto Sans Thai", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🔥 สั่งซื้อเลย!', canvas.width / 2, canvas.height / 2 - 100);
+    ctx.font = '50px "Noto Sans Thai", sans-serif';
+    ctx.fillText('@snapzreview', canvas.width / 2, canvas.height / 2 + 100);
+    
+    await new Promise(r => setTimeout(r, 2000));
+    recorder.stop();
+  } catch (err) {
+    showStatus('สร้าง CTA ไม่สำเร็จ', 'error');
+  }
+}
+
+// ========== Generate Thumbnail ==========
+async function generateThumbnail() {
+  if (selectedFiles.length === 0) {
+    showStatus('กรุณาอัปโหลดรูปก่อน', 'error');
+    return;
+  }
+  
+  const brand = brandInput?.value.trim() || 'สินค้า';
+  const filename = filenameInput?.value || 'thumbnail';
+  
+  showStatus('🎨 กำลังสร้าง Thumbnail...', 'loading');
+  
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1920;
+    const ctx = canvas.getContext('2d');
+    
+    const img = new Image();
+    img.src = selectedFiles[0].url;
+    await new Promise((resolve, reject) => {
+      img.onload = () => {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        drawCoverImage(ctx, img, canvas);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 70px "Noto Sans Thai", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.shadowBlur = 30;
+        ctx.fillText(brand, canvas.width / 2, canvas.height - 250);
+        ctx.font = '50px "Noto Sans Thai", sans-serif';
+        ctx.fillText('@snapzreview', canvas.width / 2, canvas.height - 150);
+        ctx.shadowBlur = 0;
+        resolve();
+      };
+      img.onerror = () => reject(new Error('โหลดรูปไม่สำเร็จ'));
+    });
+    
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}-thumbnail.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showStatus('✅ Thumbnail พร้อมดาวน์โหลดแล้ว!', 'success');
+    }, 'image/png');
+  } catch (err) {
+    showStatus('สร้าง Thumbnail ไม่สำเร็จ', 'error');
+  }
+}
+
+// ========== Helper ==========
+function drawCoverImage(ctx, img, canvas) {
+  const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+  const w = img.width * scale;
+  const h = img.height * scale;
+  const x = (canvas.width - w) / 2;
+  const y = (canvas.height - h) / 2;
+  ctx.drawImage(img, x, y, w, h);
+}
+
+// ========== Dropdown Handler ==========
+if (videoEngineSelect && engineInfo) {
+  videoEngineSelect.addEventListener('change', function(event) {
+    const value = event.target.value;
+    const descriptions = {
+      'openai': '✨ OpenAI Sora — วิดีโอสมจริง ความยาวสูงสุด 60 วินาที',
+      'runway': '🎬 Runway Gen-2 — ควบคุมการเคลื่อนไหวละเอียด',
+      'pika': '🎨 Pika Labs — อนิเมชันสวย',
+      'fal': '🚀 FAL Kling — คุณภาพระดับมืออาชีพ',
+      'magic': '✨ Magic Hour — ฟรี 400 เครดิต/วัน',
+      '': 'กรุณาเลือก Video Engine'
+    };
+    engineInfo.textContent = descriptions[value] || '';
+  });
+  videoEngineSelect.dispatchEvent(new Event('change'));
+}
+
+// ========== Event Listeners ==========
+genPromptBtn?.addEventListener('click', debounce(generatePrompt, 500));
+genPostBtn?.addEventListener('click', debounce(generatePost, 500));
+copyPromptBtn?.addEventListener('click', () => copyToClipboard('promptInput'));
+copyPostBtn?.addEventListener('click', () => copyToClipboard('postOutput'));
+undoPromptBtn?.addEventListener('click', undoPrompt);
+generateBtn?.addEventListener('click', debounce(generateVideo, 800));
+genIntroBtn?.addEventListener('click', debounce(generateIntro, 800));
+genCTABtn?.addEventListener('click', debounce(generateCTA, 800));
+genThumbnailBtn?.addEventListener('click', debounce(generateThumbnail, 800));
+
+// Auto-save prompt draft
+promptInput?.addEventListener('input', debounce(() => {
+  localStorage.setItem('promptDraft', promptInput.value);
+}, 1000));
+
+// ========== Initialize ==========
+document.addEventListener('DOMContentLoaded', () => {
+  renderPreview();
+  updateFilename();
+  
+  // Load saved prompt draft
+  const savedDraft = localStorage.getItem('promptDraft');
+  if (savedDraft && promptInput && !promptInput.value) {
+    promptInput.value = savedDraft;
+  }
+  
+  // Load saved category and brand
+  if (categorySelect && localStorage.getItem('lastCategory')) {
+    categorySelect.value = localStorage.getItem('lastCategory');
+  }
+  if (brandInput && localStorage.getItem('lastBrand')) {
+    brandInput.value = localStorage.getItem('lastBrand');
+  }
+  
+  categorySelect?.addEventListener('change', () => {
+    localStorage.setItem('lastCategory', categorySelect.value);
+  });
+  brandInput?.addEventListener('change', () => {
+    localStorage.setItem('lastBrand', brandInput.value);
+  });
+  
+  console.log('✅ product.js โหลดสำเร็จ — พร้อมใช้งาน');
+});

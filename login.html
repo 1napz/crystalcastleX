@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - Crystal Castle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Noto Sans Thai', system-ui, -apple-system, sans-serif; }
+    </style>
+    <script src="/speed-insights.js" defer></script>
+</head>
+<body class="bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
+        
+        <!-- Logo & Title -->
+        <div class="text-center mb-8">
+            <div class="text-6xl mb-4 animate-pulse">🏰</div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Crystal Castle</h1>
+            <p class="text-gray-400 mt-2 text-sm">เข้าสู่ระบบเพื่อสร้างวิดีโอ AI</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-700">
+            
+            <!-- Email Input -->
+            <div class="mb-4">
+                <label class="text-gray-400 text-sm mb-1 block">อีเมลของคุณ</label>
+                <input type="email" id="email" 
+                       placeholder="example@email.com" 
+                       value="nobizzmaru@gmail.com"
+                       class="w-full p-3 rounded-xl bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            </div>
+            
+            <!-- ปุ่ม Magic Link -->
+            <button id="magicLinkBtn" 
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-xl font-medium transition duration-200 flex items-center justify-center gap-2">
+                📧 ส่งลิงก์เข้าสู่ระบบ (Magic Link)
+            </button>
+            
+            <!-- Divider -->
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-xs">
+                    <span class="px-2 bg-gray-800 text-gray-500">หรือ</span>
+                </div>
+            </div>
+            
+            <!-- ปุ่ม Admin Bypass (สำหรับ Developer) -->
+            <button id="adminBtn" 
+                    class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-xl font-medium transition duration-200 flex items-center justify-center gap-2">
+                👑 เข้าสู่ระบบแบบ Admin (ไม่ต้องส่งอีเมล)
+            </button>
+            
+            <!-- Features -->
+            <div class="text-center text-gray-500 text-xs mt-6 space-y-1">
+                <p>✨ สร้างวิดีโอสินค้าด้วย AI</p>
+                <p>🎬 FAL Kling / Magic Hour</p>
+                <p>📝 AI เขียน Prompt และแคปชั่น</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <p class="text-center text-gray-600 text-xs mt-6">
+            Crystal Castle AI Video Generator
+        </p>
+        
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        // Supabase credentials
+        const SUPABASE_URL = 'https://wqkreaoqkunjhlzzdimd.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxa3JlYW9xa3VuamhsenpkaW1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NTUzNDksImV4cCI6MjA5MjQzMTM0OX0.CYzuXdieHoJnx1Eapoffv_wEgd7Sqtzx_RtZrdFhdbc'
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        // Admin emails (กำหนดเอง)
+        const ADMIN_EMAILS = ['nobizzmaru@gmail.com']
+
+        // ตรวจสอบว่าล็อกอินอยู่แล้วหรือไม่
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session) {
+                window.location.href = '/product.html'
+                return true
+            }
+            
+            // ตรวจสอบ Admin session ใน localStorage
+            const adminEmail = localStorage.getItem('admin_email')
+            if (adminEmail && ADMIN_EMAILS.includes(adminEmail)) {
+                window.location.href = '/product.html'
+                return true
+            }
+            return false
+        }
+
+        // Magic Link Login
+        async function loginWithMagicLink(email) {
+            const button = document.getElementById('magicLinkBtn')
+            const originalText = button.innerHTML
+            
+            button.disabled = true
+            button.innerHTML = '⏳ กำลังส่ง...'
+            
+            const { error } = await supabase.auth.signInWithOtp({ 
+                email,
+                options: { 
+                    emailRedirectTo: window.location.origin + '/product.html'
+                }
+            })
+            
+            button.disabled = false
+            button.innerHTML = originalText
+            
+            if (error) {
+                if (error.message.includes('rate limit')) {
+                    alert('⚠️ ส่งอีเมลบ่อยเกินไป (Rate limit)\nกรุณารอสักครู่ หรือใช้ปุ่ม Admin แทน')
+                } else {
+                    alert('❌ เกิดข้อผิดพลาด: ' + error.message)
+                }
+            } else {
+                alert('✅ ตรวจสอบอีเมลของคุณ\nเราส่งลิงก์เข้าสู่ระบบไปให้แล้ว (รวม Spam ด้วย)')
+            }
+        }
+
+        // Admin Bypass Login
+        function loginAsAdmin(email) {
+            if (ADMIN_EMAILS.includes(email)) {
+                localStorage.setItem('admin_email', email)
+                window.location.href = '/product.html'
+            } else {
+                alert('❌ อีเมลนี้ไม่มีสิทธิ์ Admin\nติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์')
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('magicLinkBtn').addEventListener('click', () => {
+            const email = document.getElementById('email').value.trim()
+            if (!email) {
+                alert('กรุณากรอกอีเมล')
+                return
+            }
+            loginWithMagicLink(email)
+        })
+
+        document.getElementById('adminBtn').addEventListener('click', () => {
+            const email = document.getElementById('email').value.trim()
+            if (!email) {
+                alert('กรุณากรอกอีเมล Admin')
+                return
+            }
+            loginAsAdmin(email)
+        })
+
+        // กด Enter ใน input email
+        document.getElementById('email').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const email = e.target.value.trim()
+                if (email) loginWithMagicLink(email)
+            }
+        })
+
+        // เรียกตรวจสอบ session
+        checkSession()
+    </script>
+</body>
+</html>
