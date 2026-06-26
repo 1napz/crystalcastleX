@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Castle — AI Video Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100">
+  <div class="max-w-4xl mx-auto p-6">
+    
+    <!-- แสดงชื่อไฟล์ปัจจุบัน -->
+    <div class="flex justify-center mb-6">
+      <div class="bg-gray-800/70 rounded-xl px-5 py-2.5 backdrop-blur-sm border border-gray-700">
+        <div class="flex items-center gap-3 text-sm">
+          <span class="text-gray-400">📄 หน้าปัจจุบัน:</span>
+          <code id="currentPage" class="bg-gray-900 px-3 py-1.5 rounded-lg text-purple-400 font-mono text-sm">index.html</code>
+          <button id="copyPageName" class="text-gray-500 hover:text-gray-300 transition text-xs px-2 py-1 rounded bg-gray-700/50">📋 คัดลอก</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ส่วนเนื้อหาที่เหลือของคุณ... -->
+    <h1 class="text-4xl font-bold text-center">CRYSTAL CASTLE</h1>
+    <!-- ... -->
+
+  </div>
+
+  <script>
+    function showCurrentPage() {
+      const path = window.location.pathname;
+      let filename = path.split('/').pop();
+      if (!filename || filename === '') filename = 'index.html';
+      const pageElement = document.getElementById('currentPage');
+      if (pageElement) {
+        pageElement.textContent = filename;
+        pageElement.title = `เส้นทางเต็ม: ${path}`;
+      }
+    }
+
+    const copyBtn = document.getElementById('copyPageName');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        const filename = document.getElementById('currentPage')?.textContent || '';
+        try {
+          await navigator.clipboard.writeText(filename);
+          copyBtn.textContent = '✅ คัดลอกแล้ว';
+          setTimeout(() => { copyBtn.textContent = '📋 คัดลอก'; }, 2000);
+        } catch (err) {
+          copyBtn.textContent = '❌ ไม่สำเร็จ';
+        }
+      });
+    }
+
+    showCurrentPage();
+  </script>
+</body>
+</html>
