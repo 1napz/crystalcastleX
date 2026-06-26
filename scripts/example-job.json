@@ -1,0 +1,24 @@
+const jobs = new Map();
+
+export async function createJob(data) {
+  const id = crypto.randomUUID();
+
+  jobs.set(id, { status: "processing" });
+
+  processJob(id, data);
+
+  return id;
+}
+
+async function processJob(id, data) {
+  try {
+    const result = await runAI(data);
+
+    jobs.set(id, {
+      status: "done",
+      result
+    });
+  } catch (e) {
+    jobs.set(id, { status: "error" });
+  }
+}

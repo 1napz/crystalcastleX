@@ -1,0 +1,13 @@
+<div class="p-4 bg-gray-800 text-white rounded-lg shadow-md mt-6">
+  <h2 class="text-lg font-semibold mb-4">🔑 Token Status</h2>
+  <ul class="text-sm space-y-1">
+    <li>Last Issued → <span id="token-issued">N/A</span></li>
+    <li>Issued By → <span id="token-by">N/A</span></li>
+    <li>Expiry Date → <span id="token-expiry">N/A</span></li>
+    <li>Status → <span id="token-status">N/A</span></li>
+  </ul>
+  <button onclick="redirectToToken()" 
+    class="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition">
+    🔑 Generate Token
+  </button>
+</div>

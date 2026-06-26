@@ -1,0 +1,35 @@
+name: Cross Repo Docs Sync
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+      - name: Sync Governance Docs
+        run: |
+          # Copy governance docs to temp folder
+          mkdir -p sync_docs
+          cp docs/governance/GovernanceFlow.md sync_docs/
+          cp docs/workflows/reviewer.flow.md sync_docs/
+
+      - name: Push to PureAgent-Dev
+        uses: ad-m/github-push-action@v0.8.0
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: 1napz/pure-agent-dev
+          branch: main
+          directory: sync_docs
+          commit_message: |
+            sync: update governance docs from CrystalCastle
+            ซิงค์: อัปเดตเอกสาร governance จาก CrystalCastle

@@ -1,0 +1,41 @@
+name: Chat-Merge-Request
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull Request Number'
+        required: true
+
+jobs:
+  request-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Approval
+        run: |
+          echo "⏳ Waiting for approval from Nattapong Pornlumfah..."
+          # ที่นี่สามารถเชื่อมกับระบบ Chat/Board เพื่อรอการตอบกลับ
+          # เช่น webhook หรือ API ที่บันทึกว่า 'อนุมัติ' หรือ 'ปฏิเสธ'
+      
+      - name: Validate Approver
+        run: |
+          if [ "${{ github.actor }}" != "1napz" ]; then
+            echo "❌ Merge denied: Only Nattapong Pornlumfah can approve."
+            exit 1
+          fi
+          echo "✅ Approval granted by Nattapong Pornlumfah"
+
+  merge-pr:
+    needs: request-approval
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge Pull Request
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ github.event.inputs.pr_number }},
+              merge_method: "squash"
+            })
