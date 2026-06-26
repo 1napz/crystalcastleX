@@ -1,0 +1,38 @@
+# .github/workflows/security-check.yml
+name: Security Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * *'  # รันทุกวันตอนเที่ยงคืน
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check for secrets in code
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        
+      - name: Check environment variables
+        run: |
+          # ตรวจสอบว่าไม่มี .env ในโค้ด
+          if [ -f ".env" ]; then
+            echo "❌ .env file found! Remove it immediately."
+            exit 1
+          fi
+          
+          # ตรวจสอบว่าไม่มี hardcoded keys
+          if grep -r "API_KEY\|SECRET\|TOKEN" --include="*.js" --include="*.ts" .; then
+            echo "⚠️ Warning: Possible hardcoded secrets found"
+          fi

@@ -1,0 +1,17 @@
+name: QA - AI Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ai-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: TC-001 LLM Keyword Validation
+        run: npm run test:ai-keyword
+
+      - name: TC-002 JSON Schema Validation
+        run: npm run test:ai-schema
