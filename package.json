@@ -1,0 +1,27 @@
+{
+  "name": "crystalcastle",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest"
+  },
+  "dependencies": {
+    "next": "15.5.15",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "autoprefixer": "^10.4.0",
+    "babel-jest": "^30.3.0",
+    "jest": "^30.3.0",
+    "jest-fetch-mock": "^3.0.3",
+    "postcss": "^8.5.10",
+    "tailwindcss": "^3.4.0"
+  }
+}

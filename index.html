@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@snapzreview — AI Video Studio</title>
+  <meta name="description" content="AI Video Studio: อัปโหลดรูป สร้าง Prompt ด้วย AI สร้างวิดีโออัตโนมัติ">
+  <meta property="og:title" content="@snapzreview — AI Video Studio">
+  <meta property="og:description" content="อัปโหลดรูป → Gen Prompt → สร้างวิดีโอ">
+  <meta property="og:image" content="https://crystalcastle.vercel.app/og-image.jpg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans Thai', sans-serif; }
+    .status-card { transition: all 0.2s ease; }
+    .status-card:hover { transform: translateY(-2px); }
+  </style>
+  <script src="/speed-insights.js" defer></script>
+</head>
+<body class="bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-gray-100 min-h-screen">
+<div class="max-w-4xl mx-auto p-6">
+
+  <header class="mb-10">
+    <div class="flex justify-between items-center mb-4">
+      <a href="/artifacts.html" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm px-4 py-2 rounded-full">📁 ผลงานทั้งหมด</a>
+      <a href="/login.html" class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-full">🔐 เข้าสู่ระบบ</a>
+    </div>
+    <div class="text-center">
+      <div class="inline-block p-4 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm mb-4">
+        <span class="text-6xl">🏰</span>
+      </div>
+      <h1 class="text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">@snapzreview</h1>
+      <p class="text-xl text-gray-400 mt-3">AI Video Studio — อัปโหลดรูป → Gen Prompt → สร้างวิดีโอ</p>
+    </div>
+  </header>
+
+  <div class="grid md:grid-cols-3 gap-5 mb-10">
+    <a href="/product.html" class="group bg-gradient-to-br from-purple-600 to-pink-600 p-[1.5px] rounded-2xl hover:scale-[1.02]">
+      <div class="bg-gray-900 rounded-2xl p-6 h-full">
+        <div class="text-4xl mb-3">🎬</div>
+        <h2 class="text-xl font-bold mb-2">เปิด Studio</h2>
+        <p class="text-gray-400 text-sm">อัปโหลดรูป → Gen Prompt (Groq) → สร้างวิดีโอ</p>
+        <p class="text-purple-400 text-xs mt-4">เข้าเลย →</p>
+      </div>
+    </a>
+    <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="text-3xl">📊</div>
+        <h2 class="text-xl font-bold">สถานะระบบ</h2>
+      </div>
+      <div id="statusList" class="space-y-2.5"></div>
+      <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-800">
+        <span id="lastCheck" class="text-xs text-gray-500"></span>
+        <button id="refreshStatusBtn" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1.5 rounded-full">🔄 รีเฟรช</button>
+      </div>
+    </div>
+    <a href="/artifact.html" class="group bg-gradient-to-br from-emerald-600 to-teal-600 p-[1.5px] rounded-2xl hover:scale-[1.02]">
+      <div class="bg-gray-900 rounded-2xl p-6 h-full">
+        <div class="text-4xl mb-3">📁</div>
+        <h2 class="text-xl font-bold mb-2">ผลงานของฉัน</h2>
+        <p class="text-gray-400 text-sm">ดูวิดีโอที่เคยสร้าง, คัดลอก Prompt</p>
+        <p class="text-emerald-400 text-xs mt-4">ดูเลย →</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="bg-gray-900/50 rounded-2xl p-6 border border-gray-800">
+    <h3 class="text-xl font-bold mb-5">🧭 วิธีใช้งาน</h3>
+    <div class="grid md:grid-cols-3 gap-5 text-sm">
+      <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold">1</div><p>เตรียมรูป ตั้งชื่อ <code class="bg-gray-800 px-1.5 py-0.5 rounded text-xs">YYYYMMDD-Category-Brand</code></p></div>
+      <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold">2</div><p>เข้า <strong>Studio</strong> → อัปโหลดรูป → เลือกเครื่องมือ</p></div>
+      <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold">3</div><p>ดาวน์โหลด หรือแชร์ลง TikTok/Shopee</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled rejection:', event.reason);
+    event.preventDefault();
+  });
+
+  async function checkStatus() {
+    const list = document.getElementById('statusList');
+    if (!list) return;
+    list.innerHTML = '';
+    const endpoints = [
+      { name: '🤖 Gen Prompt', path: '/api/prompt', method: 'POST', testBody: { prompt: 'test' } },
+      { name: '📝 Generate Post', path: '/api/post', method: 'POST', testBody: { prompt: 'test', brand: 'test', category: 'test' } },
+      { name: '🎬 FAL Kling', path: '/api/video', method: 'POST', testBody: { image_url: 'https://example.com/test.jpg', prompt: 'test' } },
+      { name: '✨ Magic Hour', path: '/api/magichour', method: 'POST', testBody: { image_url: 'https://example.com/test.jpg', prompt: 'test' } }
+    ];
+    for (const ep of endpoints) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-between p-2 bg-gray-800/50 rounded-lg';
+      div.innerHTML = `<span class="text-sm">${ep.name}</span><span>⏳</span>`;
+      list.appendChild(div);
+      try {
+        const res = await fetch(ep.path, {
+          method: ep.method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(ep.testBody),
+          signal: AbortSignal.timeout(5000)
+        });
+        const ok = res.ok || res.status === 405;
+        div.querySelector('span:last-child').innerHTML = ok ? '✅' : `❌ ${res.status}`;
+      } catch { div.querySelector('span:last-child').innerHTML = '❌'; }
+    }
+    document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString('th-TH');
+  }
+
+  document.getElementById('refreshStatusBtn').addEventListener('click', checkStatus);
+  checkStatus();
+  setInterval(checkStatus, 120000);
+</script>
+</body>
+</html>
