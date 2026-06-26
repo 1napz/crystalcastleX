@@ -1,0 +1,18 @@
+# Logs & OS files
+
+.DS_Store
+
+# Tests & coverage
+tests/
+coverage/
+
+
+
+# Build artifacts
+node_modules/
+dist/
+tmp/
+
+# Docs not needed in production
+docs/
+*.md

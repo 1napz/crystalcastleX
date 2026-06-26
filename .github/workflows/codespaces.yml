@@ -1,0 +1,13 @@
+name: Codespaces Prebuild
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  prebuild:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
