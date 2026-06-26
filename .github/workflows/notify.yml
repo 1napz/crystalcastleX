@@ -1,0 +1,28 @@
+name: CrystalCastle Notify System
+
+on:
+  schedule:
+    - cron: "0 9 * * *"   # Daily scan เวลา 9 โมงเช้า
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Run Security & Performance Scan
+        run: bash scripts/scan.sh
+
+      - name: Generate Notification
+        run: bash scripts/notify.sh
+
+      - name: Push Notification (LINE/Slack)
+        uses: some/notify-action@v1
+        with:
+          message: |
+            [CrystalCastle Noti] 🚨
+            Security Scan พบ API Key หมดอายุ
+            โปรด Rotate ภายใน 24 ชม.
+          channel: "slack"

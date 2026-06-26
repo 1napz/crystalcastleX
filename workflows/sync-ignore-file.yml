@@ -1,0 +1,13 @@
+jobs:
+  check-ignore-file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify ignore files
+        run: |
+          if git diff --name-only origin/main HEAD | grep -E ".gitignore|.eslintignore|.vercelignore"; then
+            echo "❌ Ignore file changed. Must go through PR review."
+            exit 1
+          else
+            echo "✅ No ignore file changes."
+          fi

@@ -1,0 +1,21 @@
+{
+  "project": "CrystalCastle",
+  "version": "1.0",
+  "docs": [
+    {
+      "id": "changelog",
+      "file": "CHANGELOG.md",
+      "type": "reference"
+    },
+    {
+      "id": "contributing",
+      "file": "CONTRIBUTING.md",
+      "type": "guide"
+    },
+    {
+      "id": "architecture",
+      "file": "ARCHITECTURE.md",
+      "type": "system"
+    }
+  ]
+}

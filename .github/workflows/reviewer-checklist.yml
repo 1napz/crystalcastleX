@@ -1,0 +1,27 @@
+# .github/workflows/reviewer-checklist.yml
+name: Reviewer Checklist Auto-Comment
+
+on:
+  pull_request:
+    types: [opened, reopened, edited]
+
+jobs:
+  add-checklist-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Add Reviewer Checklist Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const checklist = fs.readFileSync('reviewer.notes.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔍 Reviewer Checklist\n\n${checklist}`
+            });

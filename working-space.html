@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Playables SDK -->
+<script>// Playables SDK v1.0.0
+// Game lifecycle bridge: rAF-based game-ready detection + event communication
+(function() {
+  'use strict';
+
+  // Idempotency: skip if already initialized (e.g., server-side injection
+  // followed by client-side inject-javascript via the Bloks webview component).
+  if (window.playablesSDK) return;
+
+  var HANDLER_NAME = 'playablesGameEventHandler';
+  var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
+  var RAF_FRAME_THRESHOLD = 3;
+
+  var gameReadySent = false;
+  var firstInteractionSent = false;
+  var errorSent = false;
+  var frameCount = 0;
+  var originalRAF = window.requestAnimationFrame;
+
+  // --- Transport Layer ---
+
+  function hasIOSBridge() {
+    return !!(window.webkit &&
+              window.webkit.messageHandlers &&
+              window.webkit.messageHandlers[HANDLER_NAME]);
+  }
+
+  function hasAndroidBridge() {
+    return !!(window[ANDROID_BRIDGE_NAME] &&
+              typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function');
+  }
+
+  function isInIframe() {
+    return !!(window.parent && window.parent !== window);
+  }
+
+  function sendEvent(eventName, payload) {
+    var message = {
+      type: eventName,
+      payload: payload || {},
+      timestamp: Date.now()
+    };
+
+    if (hasIOSBridge()) {
+      try {
+        window.webkit.messageHandlers[HANDLER_NAME].postMessage(message);
+      } catch (e) { /* ignore */ }
+      return;
+    }
+
+    if (hasAndroidBridge()) {
+    try {
+      var p = payload || {};
+      p.__secureToken = window.__fbAndroidBridgeAuthToken || '';
+      p.timestamp = message.timestamp;
+      window[ANDROID_BRIDGE_NAME].postEvent(
+        eventName,
+        JSON.stringify(p)
+      );
+    } catch (e) { /* ignore */ }
+    return;
+  }
+
+    if (isInIframe()) {
+      try {
+        window.parent.postMessage(message, '*');
+      } catch (e) { /* ignore */ }
+      return;
+    }
+  }
+
+  // --- rAF Game-Ready Detection ---
+
+  function onFrame() {
+    if (gameReadySent) return;
+
+    frameCount++;
+    if (frameCount >= RAF_FRAME_THRESHOLD) {
+      gameReadySent = true;
+      sendEvent('game_ready', {
+        frame_count: frameCount,
+        detected_at: Date.now()
+      });
+      return;
+    }
+
+    originalRAF.call(window, onFrame);
+  }
+
+  if (originalRAF) {
+    window.requestAnimationFrame = function(callback) {
+      if (!gameReadySent) {
+        return originalRAF.call(window, function(timestamp) {
+          frameCount++;
+          if (frameCount >= RAF_FRAME_THRESHOLD && !gameReadySent) {
+            gameReadySent = true;
+            sendEvent('game_ready', {
+              frame_count: frameCount,
+              detected_at: Date.now()
+            });
+          }
+          callback(timestamp);
+        });
+      }
+      return originalRAF.call(window, callback);
+    };
+  }
+
+  // --- First User Interaction Detection ---
+
+  function setupFirstInteractionDetection() {
+    var events = ['touchstart', 'mousedown', 'keydown'];
+
+    function onFirstInteraction() {
+      if (firstInteractionSent) return;
+      firstInteractionSent = true;
+      sendEvent('user_interaction_start', null);
+
+      for (var i = 0; i < events.length; i++) {
+        document.removeEventListener(events[i], onFirstInteraction, true);
+      }
+    }
+
+    for (var i = 0; i < events.length; i++) {
+      document.addEventListener(events[i], onFirstInteraction, true);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection);
+  } else {
+    setupFirstInteractionDetection();
+  }
+
+  // --- Auto Error Capture ---
+
+  window.addEventListener('error', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    sendEvent('error', {
+      message: event.message || 'Unknown error',
+      source: event.filename || '',
+      lineno: event.lineno || 0,
+      colno: event.colno || 0,
+      auto_captured: true
+    });
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    var reason = event.reason;
+    sendEvent('error', {
+      message: (reason instanceof Error) ? reason.message : String(reason),
+      type: 'unhandled_promise_rejection',
+      auto_captured: true
+    });
+  });
+
+  // --- Public API ---
+
+  window.playablesSDK = {
+    complete: function(score) {
+      sendEvent('game_ended', {
+        score: score,
+        completed: true
+      });
+    },
+
+    error: function(message) {
+      if (errorSent) return;
+      errorSent = true;
+      sendEvent('error', {
+        message: message || 'Unknown error',
+        auto_captured: false
+      });
+    },
+
+    sendEvent: function(eventName, payload) {
+      if (!eventName || typeof eventName !== 'string') return;
+      sendEvent(eventName, payload);
+    }
+  };
+
+  // Kick off rAF detection in case no game code calls rAF immediately
+  if (originalRAF) {
+    originalRAF.call(window, onFrame);
+  }
+})();</script>
+<script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrystalCastle Viral Content System – 30-Day Learning Checklist</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  * { -webkit-font-smoothing: antialiased; }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+  input[type="checkbox"] { accent-color: #0891b2; }
+  @media print {
+    body { background: white !important; }
+    .no-print { display: none !important; }
+    header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .print-shadow-none { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+    .page-break { break-inside: avoid; }
+    @page { margin: 12mm; size: A4; }
+  }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="bg-slate-900 text-white relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-cyan-500 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-teal-400 rounded-full blur-3xl"></div>
+    </div>
+    <div class="relative max-w-[1200px] mx-auto px-6 py-8 md:py-10">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center font-bold text-slate-900">CC</div>
+            <span class="text-xs uppercase tracking-widest text-cyan-300 font-medium">CrystalCastle OS</span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Viral Content System – 30-Day Learning Checklist</h1>
+          <p class="text-slate-300 mt-1">Map tools to agents, learn by doing.</p>
+        </div>
+        <div class="flex items-center gap-2 no-print">
+          <button onclick="window.print()" class="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur rounded-lg text-sm font-medium transition border border-white/10 flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print
+          </button>
+          <button id="resetBtn" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-medium transition border border-white/10">Reset</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[1200px] mx-auto px-4 md:px-6 py-6 md:py-8">
+    <!-- Weekly Goals -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 print-shadow-none page-break mb-6">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <h2 class="font-semibold text-slate-900">1. Weekly Learning Goals</h2>
+        </div>
+        <span class="text-xs text-slate-500 hidden md:block">Complete one row per week</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-600">
+            <tr>
+              <th class="text-left px-5 py-3 font-semibold w-[110px]">Week</th>
+              <th class="text-left px-4 py-3 font-semibold">Focus</th>
+              <th class="text-left px-4 py-3 font-semibold">Key Skills to Learn</th>
+              <th class="text-left px-4 py-3 font-semibold">Deliverable</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50/50">
+              <td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-md bg-teal-50 text-teal-700 text-xs font-medium border border-teal-200">Week 1</span></td>
+              <td class="px-4 py-3.5 font-medium text-slate-900">Plan & Setup</td>
+              <td class="px-4 py-3.5 text-slate-600">Supabase + pgvector, Director Agent architecture, Telegram bot, prompt foundations</td>
+              <td class="px-4 py-3.5 text-slate-700">Director bot sends daily brief</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50">
+              <td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-md bg-cyan-50 text-cyan-700 text-xs font-medium border border-cyan-200">Week 2</span></td>
+              <td class="px-4 py-3.5 font-medium text-slate-900">Create & Produce</td>
+              <td class="px-4 py-3.5 text-slate-600">Gemini 2.5 + Veo prompting, HeyGen avatars, ElevenLabs/Play.ht voice, Runway/Luma/Kling, CapCut</td>
+              <td class="px-4 py-3.5 text-slate-700">Publish 3–5 VLM videos</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50">
+              <td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200">Week 3</span></td>
+              <td class="px-4 py-3.5 font-medium text-slate-900">Optimize & Grow</td>
+              <td class="px-4 py-3.5 text-slate-600">TrendScout (Groq + Shopee API), TubeBuddy/VidIQ, AnswerThePublic, OpusClip automation</td>
+              <td class="px-4 py-3.5 text-slate-700">1 video → 10 nano-clips, CTR +20%</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50">
+              <td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-medium border border-indigo-200">Week 4</span></td>
+              <td class="px-4 py-3.5 font-medium text-slate-900">Scale</td>
+              <td class="px-4 py-3.5 text-slate-600">Full pipeline automation, cost tracking, Telegram alerts, Supabase logging, scheduling</td>
+              <td class="px-4 py-3.5 text-slate-700">System live: ≤$0.50/video, 1/day</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Agent Mapping -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 print-shadow-none page-break mb-6">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"></path><rect x="4" y="12" width="8" height="8" rx="2"></rect><path d="M8 12v-2a4 4 0 0 1 8 0v2"></path><rect x="12" y="4" width="8" height="8" rx="2"></rect></svg>
+        </div>
+        <h2 class="font-semibold text-slate-900">2. Agent-Tool Mapping</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-600">
+            <tr>
+              <th class="text-left px-5 py-3 font-semibold w-[160px]">Agent</th>
+              <th class="text-left px-4 py-3 font-semibold">Primary Tools</th>
+              <th class="text-left px-4 py-3 font-semibold w-[240px]">Learning Task</th>
+              <th class="text-left px-4 py-3 font-semibold w-[180px]">Success Metric</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr>
+              <td class="px-5 py-4 align-top">
+                <div class="font-medium text-slate-900">Director Agent</div>
+                <div class="text-xs text-slate-500">Orchestrator</div>
+              </td>
+              <td class="px-4 py-4">
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="px-2 py-1 bg-slate-900 text-white text-[11px] rounded-md">Supabase pgml</span>
+                  <span class="px-2 py-1 bg-slate-900 text-white text-[11px] rounded-md">Telegram</span>
+                </div>
+              </td>
+              <td class="px-4 py-4 text-slate-700">Connect DB, pull trends, send daily plan via Telegram</td>
+              <td class="px-4 py-4"><span class="mono text-xs text-teal-700 bg-teal-50 px-2 py-1 rounded border border-teal-200">7/7 daily briefs sent</span></td>
+            </tr>
+            <tr>
+              <td class="px-5 py-4 align-top">
+                <div class="font-medium text-slate-900">TrendScout</div>
+                <div class="text-xs text-slate-500">Research</div>
+              </td>
+              <td class="px-4 py-4">
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="px-2 py-1 bg-orange-500 text-white text-[11px] rounded-md">Shopee API</span>
+                  <span class="px-2 py-1 bg-slate-700 text-white text-[11px] rounded-md">Groq</span>
+                  <span class="px-2 py-1 bg-red-500 text-white text-[11px] rounded-md">TubeBuddy</span>
+                  <span class="px-2 py-1 bg-blue-600 text-white text-[11px] rounded-md">VidIQ</span>
+                  <span class="px-2 py-1 bg-violet-600 text-white text-[11px] rounded-md">AnswerThePublic</span>
+                </div>
+              </td>
+              <td class="px-4 py-4 text-slate-700">Scrape top 10 trends, rank by velocity & relevance</td>
+              <td class="px-4 py-4"><span class="mono text-xs text-teal-700 bg-teal-50 px-2 py-1 rounded border border-teal-200">3 trends &lt;24h old/day</span></td>
+            </tr>
+            <tr>
+              <td class="px-5 py-4 align-top">
+                <div class="font-medium text-slate-900">VLM-Army Playwright</div>
+                <div class="text-xs text-slate-500">Long-form</div>
+              </td>
+              <td class="px-4 py-4">
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="px-2 py-1 bg-blue-500 text-white text-[11px] rounded-md">Gemini</span>
+                  <span class="px-2 py-1 bg-slate-800 text-white text-[11px] rounded-md">HeyGen</span>
+                  <span class="px-2 py-1 bg-teal-600 text-white text-[11px] rounded-md">ElevenLabs</span>
+                  <span class="px-2 py-1 bg-purple-600 text-white text-[11px] rounded-md">Runway/Luma/Kling</span>
+                  <span class="px-2 py-1 bg-black text-white text-[11px] rounded-md">CapCut</span>
+                </div>
+              </td>
+              <td class="px-4 py-4 text-slate-700">Master prompt → script → avatar → edit workflow</td>
+              <td class="px-4 py-4"><span class="mono text-xs text-teal-700 bg-teal-50 px-2 py-1 rounded border border-teal-200">1 video &lt;15min</span></td>
+            </tr>
+            <tr>
+              <td class="px-5 py-4 align-top">
+                <div class="font-medium text-slate-900">Nano-Army Playwright</div>
+                <div class="text-xs text-slate-500">Shorts</div>
+              </td>
+              <td class="px-4 py-4">
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="px-2 py-1 bg-pink-600 text-white text-[11px] rounded-md">OpusClip</span>
+                  <span class="px-2 py-1 bg-amber-600 text-white text-[11px] rounded-md">Descript</span>
+                  <span class="px-2 py-1 bg-cyan-600 text-white text-[11px] rounded-md">Canva</span>
+                  <span class="px-2 py-1 bg-slate-700 text-white text-[11px] rounded-md">Supabase</span>
+                  <span class="px-2 py-1 bg-sky-600 text-white text-[11px] rounded-md">Telegram</span>
+                </div>
+              </td>
+              <td class="px-4 py-4 text-slate-700">Auto-clip, caption, thumbnail, post to all platforms</td>
+              <td class="px-4 py-4"><span class="mono text-xs text-teal-700 bg-teal-50 px-2 py-1 rounded border border-teal-200">5 clips / 1 video</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="grid lg:grid-cols-12 gap-6">
+      <!-- Left column -->
+      <div class="lg:col-span-5 space-y-6">
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 print-shadow-none page-break">
+          <div class="px-5 py-4 border-b border-slate-100">
+            <h2 class="font-semibold text-slate-900 flex items-center gap-2">
+              <span class="w-6 h-6 rounded bg-teal-500 text-white flex items-center justify-center text-xs font-bold">3</span>
+              Daily 60-Minute Routine
+            </h2>
+          </div>
+          <div class="p-5 space-y-3">
+            <label class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer border border-transparent hover:border-slate-200 transition">
+              <input type="checkbox" data-id="d1" class="mt-0.5 w-4 h-4 rounded">
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-slate-900">15 min – Research trends</span>
+                  <span class="text-xs text-slate-500 mono">TrendScout</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-0.5">Shopee, TikTok, YouTube – save 3 hooks</p>
+              </div>
+            </label>
+            <label class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer border border-transparent hover:border-slate-200 transition">
+              <input type="checkbox" data-id="d2" class="mt-0.5 w-4 h-4 rounded">
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-slate-900">20 min – Prompt writing</span>
+                  <span class="text-xs text-slate-500 mono">VLM</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-0.5">Rewrite 2 hooks + 1 full script in Gemini</p>
+              </div>
+            </label>
+            <label class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer border border-transparent hove

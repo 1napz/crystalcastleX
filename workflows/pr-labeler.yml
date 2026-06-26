@@ -1,0 +1,17 @@
+name: "Pull Request Labeler"
+on:
+  pull_request:
+    types: [opened, synchronize]  # ทำงานเมื่อเปิด PR หรือ push commit ใหม่
+
+jobs:
+  labeler:
+    permissions:
+      contents: read
+      pull-requests: write          # ต้องมีสิทธิ์เขียน label
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/labeler@v5
+        with:
+          configuration-path: .github/labeler.yml   # path ไฟล์ config
+          sync-labels: true                         # ลบ label ที่ไม่ตรงเงื่อนไขทิ้ง (optional)

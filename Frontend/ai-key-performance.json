@@ -1,0 +1,5 @@
+{
+  "dev": { "status": "pending", "requests": 120, "latency": 180, "errors": 2 },
+  "fallback": { "status": "critical", "requests": 45, "latency": 250, "errors": 8 },
+  "prd": { "status": "healthy", "requests": 980, "latency": 95, "errors": 1 }
+}

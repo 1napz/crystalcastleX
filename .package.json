@@ -1,0 +1,9 @@
+{
+  "name": "@ZyntroMedia/agent-hub",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build"
+  }
+}
