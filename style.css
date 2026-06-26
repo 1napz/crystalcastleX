@@ -1,0 +1,10 @@
+body { background-color: #0a0a0a; color: #e5e5e5; }
+.card { background-color: #171717; border: 1px solid #262626; }
+.tab-active { border-bottom: 2px solid #3b82f6; color: #fff; }
+.tab-inactive { color: #9ca3af; }
+.progress-bar { transition: width 0.3s ease; }
+.tool-btn { transition: all 0.2s; }
+.tool-btn:hover { transform: translateY(-2px); }
+.prompt-card { cursor: pointer; transition: all 0.2s; }
+.prompt-card:hover { border-color: #3b82f6; }
+.prompt-selected { border-color: #3b82f6; background-color: #1e3a8a20; }

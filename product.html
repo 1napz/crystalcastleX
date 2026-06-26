@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Castle - Product</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+   .container { max-width: 600px; margin: 40px auto; padding: 20px; }
+   .input-group { margin-bottom: 20px; }
+   .input-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+   .input-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+   .btn-save { width: 100%; padding: 12px; background: #000; color: #fff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+   .status-box { margin-top: 16px; padding: 12px; border-radius: 6px; background: #f5f5f5; }
+   #product-list { background:#f9f9f9; padding:12px; border-radius:8px; font-size:14px; max-height:250px; overflow-y:auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📦 Product Manager</h1>
+    <p>อัพรูป + เช็คซ้ำ + ตั้งชื่อไฟล์ + ดูรายการ</p>
+    <a href="mission-control.html" style="color: #666; font-size: 14px;">← กลับฐานบัญชาการ</a>
+
+    <div class="input-group">
+      <label>1. เลือกรูปสินค้า</label>
+      <input type="file" id="product-image" accept="image/*">
+      <img id="image-preview" style="display:none; max-width:100%; margin-top:12px; border-radius:8px;">
+    </div>
+
+    <div class="input-group">
+      <label>2. ตั้งชื่อไฟล์</label>
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <input type="text" id="input-category" placeholder="Category เช่น Skincare">
+        <input type="text" id="input-brand" placeholder="Brand เช่น Loreal">
+      </div>
+      <input type="text" id="input-filename" placeholder="YYYYMMDD-Category-Brand.jpg">
+    </div>
+
+    <button id="save-btn" class="btn-save">บันทึก Product</button>
+
+    <div id="status-box" class="status-box" style="display:none;">
+      <p id="status-text"></p>
+    </div>
+
+    <div class="input-group" style="margin-top:32px;">
+      <label>3. Product List - รายการที่บันทึกแล้ว</label>
+      <div id="product-list">ยังไม่มีไฟล์</div>
+      <button id="clear-btn" style="margin-top:8px; background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">ล้างทั้งหมด</button>
+    </div>
+  <script src="product.js"></script>
+</body>
+</html>
