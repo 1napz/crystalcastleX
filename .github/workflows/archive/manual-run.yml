@@ -1,0 +1,12 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print log
+        run: |
+          echo "🚀 Manual run triggered"
+          echo "Actor: ${{ github.actor }}"
+          echo "Time: $(date)"

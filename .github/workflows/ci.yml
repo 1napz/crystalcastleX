@@ -1,0 +1,160 @@
+yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# เพิ่ม Permissions ที่จำเป็นในการเขียนข้อมูลลง PR และการจัดการ Merge
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  ai-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run Smoke Tests
+        run: |
+          mkdir -p tests/ai/results
+          pytest tests/test_smoke_generation.py \
+            --junitxml=tests/ai/results/smoke-results.xml
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-test-results
+          path: tests/ai/results/
+          if-no-files-found: ignore
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  pr-description:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr.body || pr.body.trim() === "") {
+              const commits = await github.rest.pulls.listCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+
+              const commitList = commits.data
+                .map(c => `- $`{c.commit.message.split("\n")[0]}`)
+                .join("\n");
+
+              const template = `
+## 🚀 Pull Request
+
+### 📌 Summary / สรุป
+- EN: Auto-generated summary based on commit history
+- TH: สรุปอัตโนมัติจาก commit
+
+---
+
+### 🔄 Changes (Commits)
+`${commitList}
+
+---
+
+### ✅ Pre-Merge Checklist
+- [ ] Feature works as expected
+- [ ] Tests added/updated
+- [ ] Docs updated
+- [ ] AI cost validated
+
+---
+
+### 🔎 Issue Reference
+- Related: #<issue-number>
+
+---
+
+### 📝 Notes
+workflow already merged from crystalcastle/workflows to .github/workflows
+              `;
+
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                body: template
+              });
+            }
+
+  # ==========================================
+  # 🔥 ส่วนที่เพิ่มใหม่: Auto Approve & Auto Merge
+  # ==========================================
+  auto-pilot:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: [build, ai-test] # จะทำงานเมื่อเทสผ่านหมดแล้วเท่านั้น
+    env:
+      GH_TOKEN: $`{{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. สั่ง Auto-Approve จากระบบ (เสมือนบอทมารีวิวให้ผ่าน)
+      - name: Auto Approve PR
+        run: |
+          gh pr review `${{ github.event.pull_request.number }} --approve --body "🤖 System CI/CD: All checks passed. Auto-approving this PR."
+
+      # 2. สั่ง Auto-Merge (จะเปิดใช้แบบ Squash, Rebase หรือ Merge ธรรมดาก็ได้)
+      - name: Auto Merge PR
+        run: |
+          gh pr merge ${{ github.event.pull_request.number }} --squash --auto --body "🤖 System CI/CD: Automated merge after successful test suite."
