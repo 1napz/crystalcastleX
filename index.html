@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Castle — Mission Control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+  <div class="max-w-4xl mx-auto p-6">
+
+    <header class="text-center py-12">
+      <h1 class="text-5xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">CRYSTAL CASTLE</h1>
+      <p class="text-xl text-gray-400 mt-3">AI Content Factory — ภาพรวมระบบ</p>
+      <p class="text-sm text-gray-500 mt-1">อัปเดตล่าสุด: 22 เม.ย. 2026</p>
+    </header>
+
+    <!-- Quick Links -->
+    <div class="grid md:grid-cols-2 gap-4 mb-12">
+      <a href="/product.html" class="group bg-gradient-to-br from-purple-600 to-pink-600 p-[1px] rounded-2xl">
+        <div class="bg-gray-900 rounded-2xl p-6 h-full group-hover:bg-gray-800 transition">
+          <div class="text-3xl mb-3">🎬</div>
+          <h2 class="text-xl font-bold mb-2">เครื่องเจียระไน Lite v1.3</h2>
+          <p class="text-gray-400 text-sm">อัปรูป → Gen Prompt (Groq) → สร้างวิดีโอ → Generate Post</p>
+          <p class="text-purple-400 text-xs mt-3">เปิดเลย →</p>
+        </div>
+      </a>
+
+      <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+        <div class="text-3xl mb-3">📊</div>
+        <h2 class="text-xl font-bold mb-2">สถานะระบบ</h2>
+        <ul class="text-sm space-y-1 text-gray-400">
+          <li>✅ /api/ai/prompt/groq — ทำงาน</li>
+          <li>✅ /api/ai/post/groq — ทำงาน</li>
+          <li>✅ /api/ai/generate/magichour — ทำงาน</li>
+          <li>✅ /api/upload — ทำงาน</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- README Style -->
+    <div class="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+      <h3 class="text-2xl font-bold mb-6">🧭 วิธีใช้งาน</h3>
+
+      <div class="space-y-6 text-gray-300">
+        <div>
+          <h4 class="font-bold text-white mb-2">1. เตรียมรูป</h4>
+          <p class="text-sm">ตั้งชื่อไฟล์ตาม format: <code class="bg-gray-800 px-2 py-1 rounded">YYYYMMDD-Category-Brand</code></p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white mb-2">2. เข้าเครื่องเจียระไน</h4>
+          <p class="text-sm">กดปุ่มด้านบน → อัปรูป → กด "✨ Gen Prompt" (AI จะเขียน prompt ให้) → เลือก Engine</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white mb-2">3. ได้วิดีโอ + แคปชั่น</h4>
+          <p class="text-sm">ระบบจะสร้างวิดีโอ 5 วินาที และ Generate Post สำหรับ Facebook/IG อัตโนมัติ</p>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-gray-800">
+        <h4 class="font-bold mb-3">🔧 Engines</h4>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="bg-gray-800 p-3 rounded-lg">
+            <strong class="text-purple-400">FAL Kling</strong>
+            <p class="text-gray-400 text-xs mt-1">คุณภาพสูง, ต้องมีเครดิต</p>
+          </div>
+          <div class="bg-gray-800 p-3 rounded-lg">
+            <strong class="text-green-400">Magic Hour</strong>
+            <p class="text-gray-400 text-xs mt-1">ฟรี, ทดสอบได้ทันที</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center text-gray-600 text-xs mt-12 pb-6">
+      Crystal Castle AI Factory • Built on Vercel + Groq
+    </footer>
+  </div>
+</body>
+</html>
