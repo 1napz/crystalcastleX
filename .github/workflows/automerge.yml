@@ -1,0 +1,29 @@
+name: 🤖 AutoMerge
+
+on:
+  pull_request:
+    types: [labeled, opened, edited, synchronize]
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: AutoMerge PRs
+        uses: pascalgn/automerge-action@v0.15.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          mergeMethod: squash
+          requiredLabels: "automerge"
+          requiredStatusChecks: "lint,test,build,security"
+          deleteBranchAfterMerge: true
+
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "text": "✅ PR #${{ github.event.pull_request.number }} merged automatically!"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

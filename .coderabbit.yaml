@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: en
+
+reviews:
+  profile: chill
+  request_changes_workflow: true
+
+  path_filters:
+    - "**/*.py"
+    - "**/*.js"
+
+  auto_review:
+    enabled: true
+
+  tools:
+    eslint: true
+    flake8: true
+
+chat:
+  auto_reply: true

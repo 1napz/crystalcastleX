@@ -1,0 +1,36 @@
+name: Auto Rollback on CI Failure
+
+on:
+  workflow_run:
+    workflows: ["Lint Check"]
+    types:
+      - completed
+
+jobs:
+  rollback:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Get last commit
+        run: |
+          git log -1 --pretty=format:"%H" > last_commit.txt
+
+      - name: Create rollback branch
+        run: |
+          git checkout -b auto-rollback-${{ github.run_id }}
+
+      - name: Revert last commit
+        run: |
+          git revert HEAD --no-edit
+
+      - name: Push rollback branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git push origin HEAD

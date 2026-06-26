@@ -1,0 +1,27 @@
+name: Local Backup
+
+on:
+  workflow_dispatch:   # Manual trigger only (safe, controlled)
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Create Backup Archive
+        run: |
+          mkdir -p backup
+          tar --exclude='./.git' --exclude='./backup' \
+            -czf backup/crystalcastle-$(date +'%Y%m%d').tar.gz .
+
+      - name: Verify Archive
+        run: ls -lh backup/
+
+      - name: Upload Backup Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-backup
+          path: backup/
+          retention-days: 90

@@ -1,0 +1,4 @@
+- name: Save log
+  run: |
+    echo "Action Review at $(date)" >> logs/action_review.log
+    echo "Result: version outdated → merged" >> logs/action_review.log

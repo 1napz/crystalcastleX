@@ -1,0 +1,20 @@
+# Logs & OS files
+*.log
+.DS_Store
+
+# Tests & coverage
+tests/
+coverage/
+
+# Local env
+.env.local
+.env.development
+
+# Build artifacts
+node_modules/
+dist/
+tmp/
+
+# Docs not needed in production
+docs/
+*.md

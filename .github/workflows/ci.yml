@@ -1,0 +1,49 @@
+name: CrystalCastle CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  merge_group:
+    types: [ checks_requested ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Notify Slack (Success)
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: "#crystalcastle-review"
+          slack-message: |
+            :white_check_mark: CI/CD checks passed
+            📌 Pull Request passed merge queue checks
+            🚀 Ready to merge
+
+      - name: Notify Slack (Failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: "#crystalcastle-review"
+          slack-message: |
+            :no_entry: CI/CD checks failed
+            📌 Pull Request blocked in merge queue
+            ⚠️ Owner must fix issues before merge

@@ -1,0 +1,9 @@
+- name: Write UI Log
+  run: |
+    echo '{
+      "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S)",
+      "event": "CI/CD Run",
+      "status": "✅ Passed",
+      "latency_ms": 950,
+      "screenshot": "https://example.com/screenshot.png"
+    }' >> logs/ui_log.json
