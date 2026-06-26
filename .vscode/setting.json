@@ -1,0 +1,64 @@
+{
+  // ---------- Editor ----------
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.wordWrap": "on",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // สำหรับไฟล์ HTML/JS ใช้ Prettier
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // ---------- Tailwind CSS ----------
+  "tailwindCSS.includeLanguages": {
+    "html": "html",
+    "javascript": "javascript"
+  },
+  "tailwindCSS.emmetCompletions": true,
+
+  // ---------- ไฟล์และ Search ----------
+  "files.exclude": {
+    "node_modules": true,
+    ".next": true,
+    ".vercel": true,
+    "supabase/.temp": true
+  },
+  "search.exclude": {
+    "package-lock.json": true,
+    "**/node_modules": true,
+    ".next": true,
+    "supabase/.temp": true
+  },
+
+  // ---------- Terminal ----------
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+
+  // ---------- Copilot ----------
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false
+  },
+  "github.copilot.chat.localeOverride": "auto",
+
+  // ---------- Extensions ที่แนะนำ ----------
+  "recommendations": [
+    "bradlc.vscode-tailwindcss",
+    "github.copilot",
+    "github.copilot-chat",
+    "esbenp.prettier-vscode"
+  ]
+}
