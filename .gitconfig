@@ -1,0 +1,88 @@
+# ============================================
+# Git Configuration for Crystal Castle Dev
+# ============================================
+
+[user]
+    # 🔥 สำคัญ: ใช้อีเมลเดียวกับ GitHub
+    name = 1napz
+    email = nobizzmaru@gmail.com
+
+[core]
+    # ใช้ VSCode เป็น default editor (สำคัญสำหรับ Codespaces)
+    editor = code --wait
+    # ทำให้ case-sensitive (สำหรับ Linux/macOS)
+    ignorecase = false
+    # autocrlf = input (สำหรับ Linux/macOS)
+    autocrlf = input
+
+[alias]
+    # คำสั่งลัดที่ใช้บ่อย
+    st = status
+    co = checkout
+    br = branch
+    ci = commit
+    lg = log --oneline --graph --all --decorate
+    unstage = reset HEAD --
+    last = log -1 HEAD
+    tree = log --graph --oneline --all
+    # ดูไฟล์ที่เปลี่ยนล่าสุด
+    diff-last = diff HEAD~1 HEAD
+    # ดู history แบบสวยงาม
+    hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+
+[init]
+    # ใช้ main เป็น default branch (ตรงกับ GitHub)
+    defaultBranch = main
+
+[push]
+    # push เฉพาะ branch ปัจจุบัน
+    default = simple
+    # auto setup remote tracking
+    autoSetupRemote = true
+
+[pull]
+    # rebase เมื่อ pull (history สวย)
+    rebase = true
+
+[merge]
+    # ใช้ VSCode แก้ conflict
+    tool = vscode
+
+[mergetool "vscode"]
+    cmd = code --wait $MERGED
+
+[diff]
+    # ใช้ VSCode ดู diff
+    tool = vscode
+
+[difftool "vscode"]
+    cmd = code --wait --diff $LOCAL $REMOTE
+
+[color]
+    # ให้ Git แสดงสีสัน
+    ui = auto
+    branch = auto
+    diff = auto
+    status = auto
+
+[credential]
+    # ใช้ GitHub credential helper (สำหรับ Codespaces)
+    helper = cache --timeout=3600
+
+[github]
+    # ตั้ง user 默认为 GitHub
+    user = 1napz
+
+# ============================================
+# ตัวช่วยเพิ่มเติม (Optional)
+# ============================================
+
+[alias]
+    # แสดง branch ปัจจุบัน + status
+    s = status -sb
+    # แสดง log แบบสั้น
+    l = log --oneline -10
+    # แสดงทุก branch
+    branches = branch -a
+    # แสดง remote ทั้งหมด
+    remotes = remote -v
