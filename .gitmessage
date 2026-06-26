@@ -1,0 +1,159 @@
+Below is a **production-ready setup** you can drop into `crystalcastle` to enforce commit consistency automatically.
+
+---
+
+# 🧾 1. `.gitmessage` Template (CLI Commit Standard)
+
+Create this file in your repo:
+
+```bash
+# .gitmessage
+
+<type>(<scope>): <short description>
+
+# ─────────────────────────────────────────────
+# Types:
+# feat      → new feature
+# fix       → bug fix
+# refactor  → code restructuring
+# docs      → documentation changes
+# ui        → UI/UX updates
+# ci        → CI/CD changes
+# chore     → maintenance
+# test      → test updates
+# perf      → performance improvements
+# security  → security fixes
+
+# ─────────────────────────────────────────────
+# Scope examples:
+# auth, api, ui, pipeline, automation, template
+
+# ─────────────────────────────────────────────
+# Examples:
+# feat(auth): add google oauth login
+# fix(api): resolve null response crash
+# docs(template): improve task structure
+```
+
+---
+
+## ⚙️ Enable it globally in repo
+
+```bash
+git config commit.template .gitmessage
+```
+
+---
+
+# 🤖 2. GitHub Commit Lint (Automated Enforcement)
+
+Install:
+
+```bash
+npm install --save-dev @commitlint/config-conventional @commitlint/cli
+```
+
+---
+
+## 📄 `commitlint.config.js`
+
+```js
+module.exports = {
+  extends: ["@commitlint/config-conventional"],
+  rules: {
+    "type-enum": [
+      2,
+      "always",
+      [
+        "feat",
+        "fix",
+        "refactor",
+        "docs",
+        "ui",
+        "ci",
+        "chore",
+        "test",
+        "perf",
+        "security"
+      ]
+    ],
+    "scope-case": [2, "always", "lower-case"],
+    "subject-case": [2, "never", ["sentence-case", "start-case"]],
+    "subject-max-length": [2, "always", 72]
+  }
+};
+```
+
+---
+
+# 🪝 3. Husky Hook (Block Bad Commits)
+
+Install Husky:
+
+```bash
+npm install --save-dev husky
+npx husky install
+```
+
+Enable hooks:
+
+```bash
+npx husky add .husky/commit-msg "npx --no -- commitlint --edit $1"
+```
+
+---
+
+# 🚀 4. GitHub Action (CI Enforcement)
+
+Create:
+
+```bash
+.github/workflows/commit-lint.yml
+```
+
+```yaml
+name: Commit Lint
+
+on: [pull_request]
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: wagoid/commitlint-github-action@v6
+```
+
+---
+
+# 🤖 5. AI Auto-Commit Format (for your automation system)
+
+If you generate commits via scripts or bots:
+
+```bash
+feat(ai): generate TikTok video script pipeline
+fix(bot): handle API timeout retry logic
+chore(automation): sync product metadata feed
+```
+
+---
+
+# 🧠 Optional Upgrade (High-Level)
+
+If you want to go **enterprise-grade**, I can extend this with:
+
+### 🔥 Advanced additions
+
+* Semantic version bump automation (release tagging)
+* Auto changelog generator (`standard-version`)
+* AI commit message generator from diff (`git diff → commit message`)
+* Branch naming rules (`feat/auth-google-login`)
+* PR template tied to commit types
+
+---
+
+If you want next step, I can turn this into a **fully automated GitHub workflow system for crystalcastle (CI + release + AI commits + changelog)**.

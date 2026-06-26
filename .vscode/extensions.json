@@ -1,0 +1,44 @@
+{
+    "recommendations": [
+        // Debugging
+            "msjsdiag.debugger-for-chrome",
+                "unity.unity-debug",
+
+                    // Formatting & Linting
+                        "esbenp.prettier-vscode",
+                            "editorconfig.editorconfig",
+                                "dbaeumer.vscode-eslint",
+                                    "timonwong.shellcheck",
+                                        "foxundermoon.shell-format",
+                                            "redhat.vscode-yaml",
+
+                                                // Language Support
+                                                    "ms-vscode.vscode-typescript-next",
+                                                        "dsznajder.es7-react-js-snippets",
+                                                            "bradlc.vscode-tailwindcss",
+                                                                "yzhang.markdown-all-in-one",
+
+                                                                    // Git & Quality
+                                                                        "eamodio.gitlens",
+                                                                            "streetsidesoftware.code-spell-checker",
+                                                                                "github.vscode-github-actions",
+                                                                                    "github.vscode-pull-request-github",
+
+                                                                                        // Docker & Remote
+                                                                                            "ms-azuretools.vscode-docker",
+                                                                                                "ms-vscode-remote.remote-containers",
+
+                                                                                                    // API Testing & Docs
+                                                                                                        "humao.rest-client",
+                                                                                                            "42crunch.vscode-openapi",
+
+                                                                                                                // Utilities
+                                                                                                                    "christian-kohler.npm-intellisense",
+                                                                                                                        "formulahendry.auto-rename-tag",
+                                                                                                                            "usernamehw.errorlens"
+                                                                                                                              ],
+                                                                                                                                "unwantedRecommendations": [
+                                                                                                                                    "ms-vscode.vscode-typescript"
+                                                                                                                                      ]
+                                                                                                                                      }
+}

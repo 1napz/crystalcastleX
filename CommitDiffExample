@@ -1,0 +1,14 @@
+diff --git a/.github/workflows/release.yml b/.github/workflows/notuse/release.yml
+similarity index 100%
+rename from .github/workflows/release.yml
+rename to .github/workflows/notuse/release.yml
+
+diff --git a/.github/workflows/stale.yml b/.github/workflows/notuse/stale.yml
+similarity index 100%
+rename from .github/workflows/stale.yml
+rename to .github/workflows/notuse/stale.yml
+
+diff --git a/.github/workflows/dispatchflow.yml b/.github/workflows/notuse/dispatchflow.yml
+similarity index 100%
+rename from .github/workflows/dispatchflow.yml
+rename to .github/workflows/notuse/dispatchflow.yml

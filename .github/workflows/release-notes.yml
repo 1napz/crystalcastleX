@@ -1,0 +1,25 @@
+name: Release Notes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate release notes
+        run: node scripts/generate-release.js
+
+      - name: Commit release notes
+        run: |
+          git config user.name "release-bot"
+          git config user.email "bot@crystalcastle.dev"
+
+          git add docs/RELEASE_NOTES.md
+          git commit -m "docs: update release notes" || exit 0
+          git push

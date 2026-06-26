@@ -1,0 +1,66 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build project
+        run: npm run build
+
+  apply-label:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Apply PR label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const newLabel = process.env.LABEL || "license-compliant";
+            const opposite =
+              newLabel === "license-compliant"
+                ? "license-violation"
+                : "license-compliant";
+
+            // ลบ label ฝั่งตรงข้ามออกก่อน
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name: opposite
+              });
+            } catch (e) {
+              console.log(`No '${opposite}' label found to remove.`);
+            }
+
+            // เพิ่ม label ใหม่
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [newLabel]
+            });

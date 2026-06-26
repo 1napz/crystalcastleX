@@ -1,0 +1,37 @@
+name: Compare and Comment
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          path: base
+
+      - name: Checkout head branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          path: head
+
+      - name: Run diff
+        run: |
+          git --no-pager diff --stat base head > diff_report.txt
+          cat diff_report.txt
+
+      - name: Upload diff report
+        uses: actions/upload-artifact@v4
+        with:
+          name: diff-report
+          path: diff_report.txt
+
+      - name: Comment on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: diff_report.txt

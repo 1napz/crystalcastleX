@@ -1,0 +1,25 @@
+# Reminder System Workflow Quiz
+
+1. Which component is responsible for sending notifications?
+- A) Scheduler
+- B) Noti System
+- C) Database
+- D) Logger
+
+2. What file stores notification history?
+- A) notify.yml
+- B) notify.sh
+- C) notify_history.json
+- D) reviewer_checklist.md
+
+3. What happens if a critical issue is found?
+- A) Continue release
+- B) Block release
+- C) Ignore issue
+- D) Send only a warning
+
+---
+Answer Key:
+1-B
+2-C
+3-B

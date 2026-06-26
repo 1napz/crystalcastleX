@@ -1,0 +1,39 @@
+name: Snapshot Processor
+
+on:
+  push:
+    paths:
+      - "pending_review/*.md"
+
+jobs:
+  process-snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Parse Snapshot
+        run: |
+          mkdir -p snapshot_output
+          for file in pending_review/*.md; do
+            echo "## Summary for $file" >> snapshot_output/summary.md
+            grep -E '^#|^##|^- ' $file >> snapshot_output/summary.md
+          done
+
+      - name: Evaluate Content
+        run: |
+          if grep -q "workflow" snapshot_output/summary.md; then
+            mv $file docs/governance/
+          elif grep -q "reviewer" snapshot_output/summary.md; then
+            mv $file docs/worker/reviewer/
+          else
+            echo "Keep in pending_review/"
+          fi
+
+      - name: Commit Changes
+        run: |
+          git config --global user.name "workflow-bot"
+          git config --global user.email "workflow@bot"
+          git add .
+          git commit -m "Auto-processed snapshot into summary and moved if relevant"
+          git push

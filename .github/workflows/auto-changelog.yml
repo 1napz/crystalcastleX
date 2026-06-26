@@ -1,0 +1,56 @@
+name: Auto Changelog & Quality Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'knowledge/**'
+      - 'docs/**'
+      - 'README.md'
+      - 'CHANGELOG.md'
+
+# 🔧 FIX 1: ปลดล็อกสิทธิ์ระดับสูงสุดให้ Runner สามารถเขียนไฟล์และบันทึกประวัติกลับเข้า Repo ได้
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build-and-changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 🔧 FIX 2: ปรับแต่งขั้นตอน Checkout (Step 2:1 เจ้าปัญหา)
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # ดึงประวัติทั้งหมดเพื่อให้สคริปต์คำนวณ Changelog ได้ถูกต้อง ไม่งอแง
+          fetch-depth: 0
+          # หากมีการใช้ Submodules ให้เปิดตัวจัดเต็มแบบ Recursive ทันที
+          submodules: 'recursive'
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # 🔧 FIX 3: ขั้นตอนรันสคริปต์ล็อกอัตโนมัติ พร้อมตัดตอนห้ามไม่ให้ทริกเกอร์บิลด์ซ้ำซ้อนด้วย [skip ci]
+      - name: Generate and Commit Changelog
+        run: |
+          echo "🚀 Generating updated changelog..."
+          # (สคริปต์รันตัวเองของคุณ เช่น npm run changelog หรือ custom script)
+
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+
+          if [ -n "$(git status --porcelain CHANGELOG.md package.json)" ]; then
+            git add CHANGELOG.md package.json
+            git commit -m "chore: automated release updates v1.1.0 [skip ci]"
+            git push origin main
+          else
+            echo "✨ No structural changes detected, skipping commit."
+          fi

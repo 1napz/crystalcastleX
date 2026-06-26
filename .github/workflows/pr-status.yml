@@ -1,0 +1,30 @@
+name: Generate PR Status Report
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *' # รันทุก 6 ชั่วโมง
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  generate-pr-status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch open PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p version/CrystalCastle/logs
+          gh pr list --state open --json number,title,state \
+            > version/CrystalCastle/logs/pr_status.json
+
+      - name: Append CI/CD fail counts
+        run: |
+          FAIL_COUNT=$(grep -r "❌" version/CrystalCastle

@@ -1,0 +1,51 @@
+name: Changelog
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  changelog:
+    name: Generate Changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Changelog
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          preset: 'conventionalcommits'
+          output-file: 'CHANGELOG.md'
+          release-count: 0 # Keep full history in the file
+          skip-on-empty: 'false'
+          skip-git-push: 'true' # Don't push directly, create a PR instead
+          git-author-name: 'github-actions[bot]'
+          git-author-email: 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Create Pull Request
+        if: steps.changelog.outputs.skipped == 'false'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(release): update changelog [skip ci]'
+          branch: 'chore/update-changelog'
+          delete-branch: true
+          title: 'chore(release): update changelog'
+          body: |
+            Automated changelog update based on conventional commits.
+            
+            ### Changelog
+            ${{ steps.changelog.outputs.clean_changelog }}
+          labels: 'automated-pr, changelog'

@@ -1,0 +1,359 @@
+name: 📦 Auto File Compress & Manage
+
+on:
+  schedule:
+    # รันทุกวัน 02:00 UTC (09:00 น. ไทย)
+    - cron: '0 2 * * *'
+
+  push:
+    branches: [main, staging]
+    paths:
+      - 'assets/**'
+      - 'uploads/**'
+      - 'public/**'
+
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      target_folder:
+        description: 'Folder to compress'
+        required: false
+        default: 'assets'
+      compression_level:
+        description: 'Compression level (1-9)'
+        required: false
+        default: '6'
+      dry_run:
+        description: 'Dry run (no actual changes)'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+  OUTPUT_DIR: 'compressed_output'
+  LOG_FILE: 'compress_report.log'
+
+jobs:
+  # ============================================
+  # JOB 1: SCAN & ANALYZE FILES
+  # ============================================
+  scan-files:
+    name: 🔍 Scan & Analyze Files
+    runs-on: ubuntu-latest
+    outputs:
+      has_large_files: ${{ steps.scan.outputs.has_large_files }}
+      total_size: ${{ steps.scan.outputs.total_size }}
+      file_count: ${{ steps.scan.outputs.file_count }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔎 Scan Files
+        id: scan
+        run: |
+          echo "========================================"
+          echo "🔍 ZYNTRO FILE SCANNER"
+          echo "========================================"
+
+          # Count files and sizes
+          TOTAL_SIZE=$(du -sb --exclude=.git. | cut -f1)
+          FILE_COUNT=$(find. -type f \
+           ! -path './.git/*' \
+           ! -path './node_modules/*' \
+            | wc -l)
+
+          # Check for large files (>1MB)
+          LARGE_FILES=$(find. -type f -size +1M \
+           ! -path './.git/*' \
+           ! -path './node_modules/*' \
+            | wc -l)
+
+          HAS_LARGE=$([ "$LARGE_FILES" -gt 0 ] && echo "true" || echo "false")
+
+          echo "Total Size: $TOTAL_SIZE bytes"
+          echo "File Count: $FILE_COUNT"
+          echo "Large Files: $LARGE_FILES"
+
+          # Set outputs
+          echo "has_large_files=$HAS_LARGE" >> $GITHUB_OUTPUT
+          echo "total_size=$TOTAL_SIZE" >> $GITHUB_OUTPUT
+          echo "file_count=$FILE_COUNT" >> $GITHUB_OUTPUT
+
+          # List large files
+          echo ""
+          echo "📋 Large files found:"
+          find. -type f -size +1M \
+           ! -path './.git/*' \
+           ! -path './node_modules/*' \
+            -exec ls -lh {} \; | sort -k5 -rh | head -20
+
+      - name: 📊 File Type Summary
+        run: |
+          echo "File types breakdown:"
+          find. -type f \
+           ! -path './.git/*' \
+           ! -path './node_modules/*' \
+            | sed 's/.*\.//' | sort | uniq -c | sort -rn | head -15
+
+  # ============================================
+  # JOB 2: COMPRESS IMAGES
+  # ============================================
+  compress-images:
+    name: 🖼️ Compress Images
+    runs-on: ubuntu-latest
+    needs: scan-files
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Image Tools
+        run: |
+          npm install -g sharp-cli imagemin-cli
+          sudo apt-get install -y optipng jpegoptim webp
+
+      - name: 🖼️ Compress PNG Files
+        run: |
+          echo "Compressing PNG files..."
+          find. -name "*.png" \
+           ! -path './.git/*' \
+           ! -path './node_modules/*' | while read img; do
+            BEFORE=$(stat -c%s "$img")
+            optipng -o5 -quiet "$img"
+            AFTER=$(stat -c%s "$img")
+            SAVED=$(( (BEFORE - AFTER) * 100 / BEFORE ))
+            echo "✓ $img - saved ${SAVED}%"
+          done
+
+      - name: 📸 Compress JPEG Files
+        run: |
+          echo "Compressing JPEG files..."
+          find. \( -name "*.jpg" -o -name "*.jpeg" \) \
+           ! -path './.git/*' \
+           ! -path './node_modules/*' | while read img; do
+            BEFORE=$(stat -c%s "$img")
+            jpegoptim --max=85 --quiet "$img"
+            AFTER=$(stat -c%s "$img")
+            echo "✓ $img - $(stat -c%s "$img") bytes"
+          done
+
+      - name: 🎨 Convert to WebP
+        run: |
+          echo "Converting to WebP..."
+          find. \( -name "*.jpg" -o -name "*.png" \) \
+           ! -path './.git/*' \
+           ! -path './node_modules/*' | while read img; do
+            WEBP="${img%.*}.webp"
+            cwebp -q 80 -quiet "$img" -o "$WEBP"
+            echo "✓ Created: $WEBP"
+          done
+
+      - name: Upload Compressed Images
+        uses: actions/upload-artifact@v4
+        with:
+          name: compressed-images-${{ github.run_number }}
+          path: |
+            **/*.png
+            **/*.jpg
+            **/*.webp
+          retention-days: 7
+
+  # ============================================
+  # JOB 3: COMPRESS FILES & ARCHIVES
+  # ============================================
+  compress-files:
+    name: 📦 Compress Files & Archives
+    runs-on: ubuntu-latest
+    needs: scan-files
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Compression Tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y p7zip-full zip brotli
+
+      - name: 📦 Create 7z Archive
+        run: |
+          mkdir -p ${{ env.OUTPUT_DIR }}
+          DATE=$(date "+%Y%m%d_%H%M%S")
+
+          # Compress assets folder
+          if [ -d "assets" ]; then
+            7z a -t7z -mx=7 \
+              "${{ env.OUTPUT_DIR }}/assets_${DATE}.7z" \
+             ./assets/ \
+              -xr'!*.git'
+            echo "✓ assets compressed"
+          fi
+
+          # Compress public folder
+          if [ -d "public" ]; then
+            7z a -t7z -mx=7 \
+              "${{ env.OUTPUT_DIR }}/public_${DATE}.7z" \
+             ./public/ \
+              -xr'!*.git'
+            echo "✓ public compressed"
+          fi
+
+          # Size report
+          echo ""
+          echo "📊 Archive sizes:"
+          ls -lh ${{ env.OUTPUT_DIR }}/
+
+      - name: 🗜️ Compress with Brotli (for web)
+        run: |
+          find. -name "*.js" -o -name "*.css" \
+           ! -path './node_modules/*' | while read f; do
+            brotli --best -f -o "${f}.br"
+            echo "✓ Brotli: ${f}.br"
+          done
+
+      - name: 📋 Compression Report
+        run: |
+          echo "========================================"
+          echo "📊 COMPRESSION REPORT"
+          echo "========================================"
+          echo "Date: $(date)"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo ""
+          echo "Output files:"
+          find ${{ env.OUTPUT_DIR }} -type f \
+            -exec ls -lh {} \; 2>/dev/null || echo "No output files"
+          echo "========================================"
+
+      - name: Upload Archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: file-archives-${{ github.run_number }}
+          path: ${{ env.OUTPUT_DIR }}/
+          retention-days: 30
+
+  # ============================================
+  # JOB 4: CLEAN REPOSITORY
+  # ============================================
+  clean-repo:
+    name: 🧹 Clean Repository
+    runs-on: ubuntu-latest
+    needs: [compress-images, compress-files]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🗑️ Remove Duplicate Files
+        run: |
+          echo "Finding duplicate files..."
+          # Install fdupes
+          sudo apt-get install -y fdupes
+
+          # Find duplicates (report only)
+          fdupes -r. \
+            --exclude=.git \
+            --exclude=node_modules \
+            -S | tee duplicates_report.txt
+
+          echo "Duplicate report saved"
+
+      - name: 🧹 Clean Temp Files
+        run: |
+          echo "Cleaning temp files..."
+
+          # Remove common temp files
+          find. -type f \( \
+            -name "*.tmp" \
+            -o -name "*.temp" \
+            -o -name "*.bak" \
+            -o -name "*.swp" \
+            -o -name ".DS_Store" \
+            -o -name "Thumbs.db" \
+          \)! -path './.git/*' \
+            -exec rm -v {} \;
+
+          echo "✓ Temp files removed"
+
+      - name: 📊 Repository Size Report
+        run: |
+          echo "========================================"
+          echo "📊 REPOSITORY SIZE REPORT"
+          echo "========================================"
+
+          # Total size
+          echo "Total: $(du -sh. --exclude=.git | cut -f1)"
+
+          # Top 10 largest files
+          echo ""
+          echo "Top 10 largest files:"
+          find. -type f \
+           ! -path './.git/*' \
+           ! -path './node_modules/*' \
+            -exec du -sh {} \; | sort -rh | head -10
+
+          echo "========================================"
+
+  # ============================================
+  # JOB 5: NOTIFY & REPORT
+  # ============================================
+  notify:
+    name: 📢 Send Report
+    runs-on: ubuntu-latest
+    needs: [scan-files, compress-images, compress-files, clean-repo]
+    if: always()
+
+    steps:
+      - name: 📝 Summary Report
+        run: |
+          echo "## 📦 Auto Compress Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Date | $(date) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Files Scanned | ${{ needs.scan-files.outputs.file_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Large Files | ${{ needs.scan-files.outputs.has_large_files }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Jobs Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Scan: ${{ needs.scan-files.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Images: ${{ needs.compress-images.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Files: ${{ needs.compress-files.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Clean: ${{ needs.clean-repo.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📱 Slack Notification (optional)
+        if: ${{ env.SLACK_WEBHOOK_URL!= '' }}
+        uses: slackapi/slack-github-action@v1.26.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        with:
+          payload: |
+            {
+              "text": "✅ Auto Compress Complete",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*📦 Auto Compress Report*\nBranch: `${{ github.ref_name }}`\nFiles: ${{ needs.scan-files.outputs.file_count }}\nStatus: Success"
+                  }
+                }
+              ]
+            }
