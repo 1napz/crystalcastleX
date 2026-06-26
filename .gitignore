@@ -1,0 +1,29 @@
+# config with secrets
+config.js
+
+# env - ห้ามหลุดเด็ดขาด
+.env
+.env.*
+!.env.example
+
+# dependencies
+node_modules/
+
+# Vercel
+.vercel
+.now
+
+# logs
+npm-debug.log*
+yarn-*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# build output
+dist/
+build/
+.next/
+out/
