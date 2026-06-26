@@ -1,0 +1,24 @@
+{
+  "name": "crystalcastle",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "docs": "jsdoc -c jsdoc.json",
+    "docs:generate": "jsdoc -c jsdoc.json"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@supabase/supabase-js": "^2.104.1",
+    "@supabase/ssr": "^0.10.2",
+    "groq-sdk": "^1.1.2"
+  },
+  "devDependencies": {
+    "jsdoc": "^4.0.2"
+  }
+}
