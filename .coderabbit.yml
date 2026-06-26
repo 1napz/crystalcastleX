@@ -1,0 +1,16 @@
+reviews:
+  pre_merge_checks:
+    custom_checks:
+      - name: npm audit evidence
+        mode: warning
+        instructions: >
+          PR must include evidence of a recent npm audit run (CI link or pasted output),
+          and no unresolved high/critical vulnerabilities.
+      - name: bilingual release notes
+        mode: warning
+        instructions: >
+          When behavior changes, update docs/release-notes.md in both English and Thai.
+      - name: repository folder convention
+        mode: warning
+        instructions: >
+          Keep implementation in src/, tests in tests/, and documentation in docs/.

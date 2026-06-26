@@ -1,0 +1,22 @@
+# ─── Logs & OS files / ไฟล์ Log และไฟล์ระบบ ───
+*.log
+.DS_Store
+
+# ─── Tests & coverage / ไฟล์ทดสอบและ Coverage ───
+tests/
+coverage/
+
+# ─── Local configs / การตั้งค่าท้องถิ่น ───
+.env.local
+.env.development
+
+# ─── Build artifacts / ไฟล์ที่สร้างจาก Build ───
+.next/cache/
+node_modules/
+
+# ─── Documentation / เอกสารที่ไม่จำเป็นต้อง Deploy ───
+docs/
+*.md
+
+# ─── Temporary files / ไฟล์ชั่วคราว ───
+tmp/

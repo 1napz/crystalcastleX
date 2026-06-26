@@ -1,0 +1,35 @@
+# .github/workflows/backup-db.yml
+name: Backup Database
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # รันทุกวันตอนตี 2
+  workflow_dispatch:  # รัน manual ได้
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Backup Supabase
+        uses: supabase/backup-action@v2
+        with:
+          supabase_url: ${{ secrets.SUPABASE_URL }}
+          supabase_key: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          backup_path: ./backups
+          
+      - name: Upload to GitHub Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: ./backups/
+          retention-days: 7
+          
+      - name: Send notification
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Backup completed successfully"
+          else
+            echo "❌ Backup failed"
+          fi

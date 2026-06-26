@@ -1,0 +1,47 @@
+# CrystalCastle Governance Config
+early_access: true
+
+slack_agent:
+  channel: "#crystalcastle-review"
+  scopes:
+    - name: crystalcastle-pr-review
+      repos: ["1napz/crystalcastle"]
+      spend_limit: 100
+      connections:
+        - github
+        - jira
+        - notion
+
+ai_engines:
+  - id: openai
+    provider: openai
+    api_key: "${{ secrets.OPENAI_API_KEY }}"
+    models:
+      - gpt-4
+      - gpt-4o-mini
+    usage:
+      - reviewer-comments
+      - autofix-suggestions
+      - bilingual-docs
+spend_limit: 0
+
+governance_rules:
+  - id: bilingual-docs
+    description: "PR ต้องมีเอกสาร bilingual (TH/EN)"
+    notify: slack
+
+  - id: artifacts-cleanup
+    description: "Artifacts ต้องถูกลบ/Archive หลังรีวิวเสร็จ"
+    notify: slack
+
+  - id: frontend-watch
+    description: "แจ้งเตือนเมื่อมีการแก้ไขใน frontend/"
+    notify: slack
+
+  - id: compliance-summary
+    description: "Sync compliance-summary.json เข้ากับ dashboard"
+    notify: slack
+
+  - id: reviewer-status
+    description: "Track reviewer status (Started/Busy/Completed/Blocked)"
+    notify: slack
