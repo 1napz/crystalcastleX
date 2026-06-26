@@ -1,0 +1,72 @@
+```gitignore
+# ==========================================
+# .vercelignore สำหรับ Crystal Castle
+# ==========================================
+
+# Dependencies (Vercel จะติดตั้งใหม่ให้เอง)
+node_modules/
+
+# Environment files (ห้ามขึ้น production)
+.env
+.env.*
+!.env.example
+
+# IDE และ OS metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Git และ GitHub workflows
+.git/
+.gitignore
+.github/
+.devcontainer/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Backup และ temp files
+*.tmp
+*.bak
+*.swp
+*~
+
+# ไฟล์ Markdown/เอกสารที่ไม่ต้องใช้ runtime (แต่ถ้าต้องการให้ดาวน์โหลดได้ก็สามารถลบบรรทัดนี้ทิ้ง)
+# *.md
+
+# ไฟล์ตัวอย่าง (ไม่ต้อง deploy)
+config.example.js
+SECURITY.md
+
+# ไฟล์เก่าที่ไม่ได้ใช้แล้ว (หรือเปลี่ยนชื่อแล้ว)
+home.html
+mission-control.html
+atrifact.html          # ชื่อสะกดผิด (artifact.html ถูกต้อง)
+```
+
+✅ คำอธิบายแต่ละส่วน
+
+บรรทัด ความหมาย
+node_modules/ ป้องกันไม่ให้อัปโหลด dependencies ขึ้น Vercel (Vercel จะติดตั้งใหม่ให้เอง)
+.env* ป้องกัน environment variables ไฟล์ (ปลอดภัย)
+.vscode/, .DS_Store ไฟล์ตั้งค่าส่วนตัว, ไม่เกี่ยวกับ production
+.git/, .github/ ไฟล์ version control, ไม่ต้อง deploy
+*.log ไฟล์ log จากการรัน local
+home.html, mission-control.html ไฟล์เก่าที่ไม่ได้ใช้แล้ว
+atrifact.html ไฟล์ที่สะกดผิด (artifact.html คือของจริง)
+
+🚀 วิธีใช้
+
+1. สร้างไฟล์ .vercelignore ใน root โปรเจกต์ (ที่เดียวกับ vercel.json)
+2. ก็อปปี้เนื้อหาด้านบนลงไป
+3. Commit และ Push ขึ้น GitHub
+4. Vercel จะอ่านไฟล์นี้และไม่ deploy ไฟล์/โฟลเดอร์ที่ระบุ
+
+ข้อควรระวัง: อย่าใส่ *.html หรือ api/ ลงใน .vercelignore เพราะจะทำให้หน้าเว็บหรือ API endpoints หายไป
+
+ถ้าต้องการปรับแต่งเพิ่มเติม (เช่น ต้องการ exclude เฉพาะบางไฟล์) บอกได้เลยครับ 😊
