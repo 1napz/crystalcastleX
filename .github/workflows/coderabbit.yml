@@ -1,0 +1,19 @@
+# .github/workflows/coderabbit.yml
+name: CodeRabbit Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  coderabbit-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run CodeRabbit Review
+        uses: coderabbitai/github-action@v1
+        with:
+          config: .coderabbit.yaml   # points to your config file
+          github_token: ${{ secrets.GITHUB_TOKEN }}

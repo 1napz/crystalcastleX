@@ -1,0 +1,11 @@
+name: Automated Code Review
+on: [pull_request]
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Linting
+        run: npm run lint
+      - name: Run Tests
+        run: npm test

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+.vercel/
+
+# Environment variables
+.env*
+env.*
+
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Testing
+coverage/
+.nyc_output
+test/
+
+# Temp
+tmp/
+temp/
+*.tmp
+
+# Mock files
+/mocks/local/
+*.mock.js
+
+
+**/dist/**

@@ -1,0 +1,802 @@
+Crystal Castle - Development & Production Standards
+
+Version: 1.0
+Last Updated: 2026-05-01
+Applies to: All contributors and deployments
+
+---
+
+📋 Table of Contents
+
+1. Development Environment Setup
+2. Coding Standards
+3. Git Workflow
+4. Environment Variables Policy
+5. API Development Rules
+6. Security Rules
+7. Testing Requirements
+8. Code Review Checklist
+9. Pre-Deployment Checklist
+10. Production Standards
+11. Monitoring & Alerting
+12. Incident Response
+13. Regular Audits
+
+---
+
+1. Development Environment Setup
+
+1.1 Local Setup
+
+```bash
+# Clone repository
+git clone https://github.com/1napz/crystalcastle.git
+cd crystalcastle
+
+# Install dependencies
+npm install
+
+# Copy environment file
+cp .env.example .env.local
+
+# Fill in required keys in .env.local
+# DO NOT share your .env.local with anyone
+
+# Start development server
+npm run dev
+```
+
+1.2 Required Tools
+
+Tool Version Purpose
+Node.js 18.x or higher Runtime
+npm 9.x or higher Package manager
+Git 2.x or higher Version control
+VS Code Latest Recommended IDE
+
+1.3 VS Code Extensions (Recommended)
+
+```json
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "github.copilot"
+  ]
+}
+```
+
+1.4 Development Workflow
+
+```text
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Create    │────▶│    Code &   │────▶│   Create    │
+│   Branch    │     │    Test     │     │     PR      │
+└─────────────┘     └─────────────┘     └─────────────┘
+                                              │
+                    ┌─────────────┐            │
+                    │   Deploy    │◀───────────┘
+                    │     to      │
+                    │  Production │
+                    └─────────────┘
+```
+
+---
+
+2. Coding Standards
+
+2.1 File Naming Convention
+
+```text
+✅ CORRECT:
+├── components/
+│   ├── ProductUpload.tsx       # PascalCase for React components
+│   ├── video-generator.ts      # kebab-case for utilities
+│   └── use-product-form.ts    # kebab-case for hooks
+├── lib/
+│   ├── config.ts
+│   └── api-handler.ts
+├── pages/
+│   └── api/
+│       └── generate-video.ts   # kebab-case for API routes
+
+❌ INCORRECT:
+├── components/
+│   ├── productUpload.tsx       # Wrong casing
+│   ├── VideoGenerator.tsx      # Should be PascalCase, not random
+│   └── Use_Product_Form.ts     # No underscores or random case
+├── "Pull Request Template.pdf" # No spaces in filenames
+```
+
+2.2 Code Style Rules
+
+```typescript
+// ✅ CORRECT: Use TypeScript when possible
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+}
+
+// ✅ CORRECT: Use const for non-reassignable variables
+const API_URL = process.env.API_URL;
+
+// ✅ CORRECT: Use descriptive variable names
+const isVideoGenerationComplete = true;  // Good
+const x = true;                           // Bad - not descriptive
+
+// ✅ CORRECT: Handle errors properly
+try {
+  await generateVideo(options);
+} catch (error) {
+  logger.error('Video generation failed', { error });
+  throw new AppError(500, 'Failed to generate video');
+}
+
+// ❌ INCORRECT: Swallow errors
+try {
+  await generateVideo(options);
+} catch (error) {
+  console.log('error');  // Not descriptive, no proper handling
+}
+
+// ❌ INCORRECT: Return 200 on errors
+return res.status(200).json({ success: false });  // Should be 4xx or 5xx
+```
+
+2.3 Comment Policy
+
+```typescript
+// ✅ CORRECT: Explain WHY, not WHAT
+// We cache this response for 5 minutes because
+// the AI model takes 30 seconds to generate,
+// and product data rarely changes within that window
+const CACHE_TTL = 300;
+
+// ❌ INCORRECT: Stating the obvious
+// Set cache TTL to 300
+const CACHE_TTL = 300;
+
+// ✅ CORRECT: TODO with owner and date
+// TODO(@john): Replace mock with real API by 2026-06-01
+
+// ❌ INCORRECT: Vague TODO
+// TODO: fix this later
+```
+
+2.4 Import Order
+
+```typescript
+// 1. React and Next.js imports
+import React, { useState, useEffect } from 'react';
+import { NextPage } from 'next';
+
+// 2. Third-party packages
+import { createClient } from '@supabase/supabase-js';
+
+// 3. Internal absolute imports (@/ alias)
+import config from '@/lib/config';
+import { logger } from '@/lib/utils/logger';
+import { generateVideo } from '@/lib/services/fal';
+
+// 4. Relative imports
+import { Button } from '../ui/button';
+import { useAuth } from './use-auth';
+
+// 5. Styles
+import styles from './product.module.css';
+```
+
+---
+
+3. Git Workflow
+
+3.1 Branch Naming
+
+```text
+feature/ADD_VIDEO_GENERATOR    # New features
+fix/FIX_CORS_HEADERS           # Bug fixes
+hotfix/FIX_API_KEY_LEAK        # Urgent production fixes
+refactor/CLEANUP_API_ROUTES    # Code refactoring
+docs/UPDATE_README             # Documentation
+security/PATCH_XSS_VULN        # Security patches
+```
+
+3.2 Commit Message Format
+
+```text
+type(scope): description
+
+[optional body]
+
+[optional footer]
+```
+
+Types:
+
+· feat: - New feature
+· fix: - Bug fix
+· security: - Security fix
+· refactor: - Code restructuring
+· docs: - Documentation
+· test: - Adding tests
+· chore: - Maintenance
+
+Examples:
+
+```text
+feat(video): add FAL Kling integration
+fix(api): resolve CORS header issue in video endpoint
+security(env): remove hardcoded Supabase keys from client bundle
+refactor(product): extract video logic to custom hook
+docs(readme): update environment variable setup guide
+test(product): add unit tests for useProductVideo hook
+```
+
+3.3 Pull Request Rules
+
+```yaml
+PR Requirements:
+  - ✅ Must pass all CI checks
+  - ✅ Must have at least 1 reviewer approval
+  - ✅ Must have no merge conflicts
+  - ✅ Must include test evidence (screenshots/logs)
+  - ✅ Must reference related issue number
+  - ✅ Must update documentation if API changes
+  - ❌ No direct commits to main branch
+  - ❌ No PR with failing tests
+  - ❌ No PR without description
+```
+
+3.4 PR Template
+
+```markdown
+## Description
+[Describe what this PR does]
+
+## Related Issue
+Closes #[issue-number]
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Security fix
+- [ ] Documentation update
+
+## Testing
+- [ ] Unit tests added/updated
+- [ ] Integration tests passed
+- [ ] Manual testing performed
+
+## Screenshots
+[If applicable, add screenshots]
+
+## Security Checklist
+- [ ] No hardcoded keys or secrets
+- [ ] API routes use proper error handling
+- [ ] Input validation implemented
+- [ ] Environment variables checked
+
+## Deployment Notes
+[Any special deployment instructions]
+```
+
+3.5 Branch Protection Rules
+
+```yaml
+Main Branch Protection:
+  require_pull_request: true
+  required_approvals: 1
+  dismiss_stale_reviews: true
+  require_status_checks: true
+  require_conversation_resolution: true
+  enforce_signed_commits: true
+  block_force_push: true
+  prevent_branch_deletion: true
+```
+
+---
+
+4. Environment Variables Policy
+
+4.1 Naming Convention
+
+```bash
+# ✅ CORRECT NAMING
+
+# Server-side only (NEVER exposed to browser)
+DATABASE_URL=postgresql://...
+FAL_API_KEY=fa-xxxxxxxxxxxxx
+GROQ_API_KEY=gsk_xxxxxxxxxxxxx
+GEMINI_API_KEY=xxxxxxxxxxxxx
+SUPABASE_SERVICE_ROLE_KEY=xxxxxxxxxxxxx
+
+# Client-safe (CAN be exposed to browser)
+NEXT_PUBLIC_APP_URL=https://yourdomain.com
+NEXT_PUBLIC_USE_MOCK=false
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbG...  # Anon key is designed to be public
+
+# ❌ INCORRECT NAMING
+
+# NEVER prefix server keys with NEXT_PUBLIC_
+NEXT_PUBLIC_FAL_API_KEY=fa-xxxxx          # THIS WILL LEAK TO BROWSER!
+NEXT_PUBLIC_DATABASE_URL=postgresql://... # THIS WILL LEAK TO BROWSER!
+NEXT_PUBLIC_GROQ_API_KEY=gsk_xxxxx        # THIS WILL LEAK TO BROWSER!
+```
+
+4.2 Required Environment Variables
+
+Development (.env.local)
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbG...
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
+
+# AI APIs (Server-side only)
+FAL_API_KEY=fa-xxxxxxxxxxxxx
+GROQ_API_KEY=gsk_xxxxxxxxxxxxx
+GEMINI_API_KEY=xxxxxxxxxxxxx
+
+# App Config
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_USE_MOCK=true  # Enable mock during development
+```
+
+Production (Vercel Environment Variables)
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbG...
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
+
+# AI APIs (Server-side only)
+FAL_API_KEY=fa-xxxxxxxxxxxxx
+GROQ_API_KEY=gsk_xxxxxxxxxxxxx
+GEMINI_API_KEY=xxxxxxxxxxxxx
+
+# App Config
+NEXT_PUBLIC_APP_URL=https://yourdomain.com
+NEXT_PUBLIC_USE_MOCK=false  # DISABLE mock in production!
+
+# Monitoring
+SENTRY_DSN=https://xxx@sentry.io/xxx
+```
+
+4.3 Key Rotation Schedule
+
+Key Type Rotation Frequency Responsibility
+Supabase Service Role Every 90 days DevOps Lead
+FAL API Key Every 90 days Backend Lead
+Groq API Key Every 90 days Backend Lead
+Gemini API Key Every 90 days Backend Lead
+Supabase Anon Key Every 180 days DevOps Lead
+
+---
+
+5. API Development Rules
+
+5.1 API Route Structure
+
+```typescript
+// ✅ CORRECT: Proper API route structure
+// pages/api/video/generate.ts
+
+import type { NextApiRequest, NextApiResponse } from 'next';
+import config from '@/lib/config';
+import { logger } from '@/lib/utils/logger';
+import { successResponse, errorResponse, AppError } from '@/lib/utils/api-handler';
+import { validateString, validateRequired } from '@/lib/utils/validation';
+import { generateVideoWithFal } from '@/lib/services/fal';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // 1. Method check
+  if (req.method !== 'POST') {
+    return errorResponse(new AppError(405, 'Method not allowed'));
+  }
+
+  try {
+    // 2. Input validation
+    validateRequired(req.body.imageUrl, 'imageUrl');
+    validateString(req.body.prompt, 'prompt', 500);
+
+    // 3. Log the request
+    logger.info('Video generation requested', {
+      promptLength: req.body.prompt.length,
+      hasImage: !!req.body.imageUrl,
+    });
+
+    // 4. Call service
+    const result = await generateVideoWithFal({
+      imageUrl: req.body.imageUrl,
+      prompt: req.body.prompt,
+    });
+
+    // 5. Log success
+    logger.info('Video generation completed', {
+      videoUrl: result.videoUrl,
+    });
+
+    // 6. Return success
+    return successResponse(result);
+
+  } catch (error) {
+    // 7. Log error
+    logger.error('Video generation failed', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+
+    // 8. Return error (will be 4xx or 5xx)
+    return errorResponse(error);
+  }
+}
+```
+
+5.2 API Rules
+
+```yaml
+API Development Rules:
+  - ✅ Always validate inputs first
+  - ✅ Always use structured logging
+  - ✅ Always return proper HTTP status codes
+  - ✅ Always use try-catch in handlers
+  - ✅ Use service layer, never call external APIs directly
+  - ✅ Rate limit all public endpoints
+  - ✅ Never expose internal errors to users in production
+  - ❌ Never return 200 for errors
+  - ❌ Never use NEXT_PUBLIC_ variables in API routes
+  - ❌ Never hardcode API keys
+  - ❌ Never trust user input without validation
+  - ❌ Never expose stack traces in production
+```
+
+5.3 Status Code Guide
+
+Code When to Use
+200 Successful GET, PUT, PATCH
+201 Successful POST (resource created)
+204 Successful DELETE
+400 Bad request - invalid input
+401 Unauthorized - no valid token
+403 Forbidden - no permission
+404 Resource not found
+429 Too many requests - rate limited
+500 Internal server error
+502 Bad gateway - external API failed
+503 Service unavailable - maintenance
+
+5.4 Response Format
+
+```typescript
+// ✅ CORRECT: Standard success response
+{
+  "success": true,
+  "data": {
+    "videoUrl": "https://...",
+    "duration": 30,
+    "provider": "fal"
+  }
+}
+
+// ✅ CORRECT: Standard error response
+{
+  "success": false,
+  "error": "Image URL is required"
+}
+
+// ❌ INCORRECT: Inconsistent format
+{
+  "status": "ok",           // Use success: true
+  "result": { ... },        // Use data: { ... }
+  "message": "done"         // Inconsistent
+}
+```
+
+---
+
+6. Security Rules
+
+6.1 API Key Handling
+
+```yaml
+CRITICAL RULES:
+  - 🔴 NEVER hardcode API keys in source code
+  - 🔴 NEVER commit .env.local or .env.production
+  - 🔴 NEVER use NEXT_PUBLIC_ prefix for secret keys
+  - 🔴 NEVER log API keys or tokens
+  - 🟡 Rotate keys immediately if accidentally exposed
+  - 🟡 Use different keys for development and production
+  - 🟢 Use environment variables for all keys
+  - 🟢 Validate keys exist on application startup
+```
+
+6.2 CORS Configuration
+
+```typescript
+// ✅ CORRECT: Restricted CORS
+const ALLOWED_ORIGINS = [
+  'https://yourdomain.com',
+  'https://www.yourdomain.com',
+  'http://localhost:3000',  // Development only
+];
+
+// ❌ INCORRECT: Open CORS
+res.setHeader('Access-Control-Allow-Origin', '*');  // DANGEROUS
+```
+
+6.3 Security Headers
+
+```typescript
+// Required security headers for ALL responses
+const SECURITY_HEADERS = {
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.fal.ai https://api.groq.com https://*.supabase.co;",
+};
+```
+
+6.4 Pre-Commit Security Check
+
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit
+# Automated security check before every commit
+
+echo "🔍 Running security checks..."
+
+# Check for hardcoded API keys
+if grep -r -E "sk-[a-zA-Z0-9]{20,}" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" .; then
+  echo "❌ ERROR: Hardcoded API key found!"
+  echo "Remove the key and use environment variables instead."
+  exit 1
+fi
+
+# Check for NEXT_PUBLIC_ with sensitive keys
+if grep -r -E "NEXT_PUBLIC_.*(KEY|SECRET|TOKEN)" --include="*.ts" --include="*.js" .; then
+  echo "⚠️  WARNING: NEXT_PUBLIC_ used with potential secret!"
+  echo "Review if this variable should be exposed to the client."
+fi
+
+# Check for console.log in production code
+if grep -r -E "console\.(log|warn)" --include="*.ts" --include="*.js" pages/ app/; then
+  echo "⚠️  WARNING: console.log statements found in production code."
+  echo "Consider using the logger utility instead."
+fi
+
+echo "✅ Security checks passed!"
+```
+
+---
+
+7. Testing Requirements
+
+7.1 Testing Pyramid
+
+```text
+        ┌──────────┐
+        │   E2E    │  ← 5% (Critical user flows)
+        │  Tests   │
+       ┌┴──────────┴┐
+       │ Integration │  ← 15% (API endpoints, services)
+       │    Tests    │
+      ┌┴─────────────┴┐
+      │   Unit Tests   │  ← 80% (Functions, hooks, utilities)
+      │                │
+      └────────────────┘
+```
+
+7.2 Unit Test Rules
+
+```typescript
+// ✅ CORRECT: Well-structured unit test
+// __tests__/lib/services/fal.test.ts
+
+import { generateVideoWithFal } from '@/lib/services/fal';
+
+describe('FAL Service', () => {
+  describe('generateVideoWithFal', () => {
+    it('should return mock video when mock mode is enabled', async () => {
+      // Arrange
+      process.env.NEXT_PUBLIC_USE_MOCK = 'true';
+      
+      // Act
+      const result = await generateVideoWithFal({
+        imageUrl: 'https://example.com/image.jpg',
+        prompt: 'Test prompt',
+      });
+      
+      // Assert
+      expect(result.isMock).toBe(true);
+      expect(result.videoUrl).toBeDefined();
+    });
+
+    it('should throw error when API key is missing', async () => {
+      // Arrange
+      process.env.NEXT_PUBLIC_USE_MOCK = 'false';
+      delete process.env.FAL_API_KEY;
+      
+      // Act & Assert
+      await expect(
+        generateVideoWithFal({
+          imageUrl: 'https://example.com/image.jpg',
+          prompt: 'Test prompt',
+        })
+      ).rejects.toThrow('FAL API key is not configured');
+    });
+
+    it('should successfully generate video with valid inputs', async () => {
+      // Test with mocked API response
+      // ...
+    });
+  });
+});
+```
+
+7.3 Test Coverage Requirements
+
+Category Minimum Coverage
+Lines 80%
+Branches 70%
+Functions 85%
+Statements 80%
+
+7.4 What to Test
+
+```yaml
+Must Test:
+  - ✅ All API endpoints (integration tests)
+  - ✅ All service layer functions (unit tests)
+  - ✅ All validation functions (unit tests)
+  - ✅ All custom hooks (unit tests)
+  - ✅ Critical user flows (E2E tests)
+  - ✅ Error handling paths
+  - ✅ Edge cases (empty input, max length, special characters)
+
+Nice to Test:
+  - UI component rendering
+  - Loading states
+  - Animation triggers
+  - Accessibility features
+```
+
+7.5 Pre-Push Test Script
+
+```json
+{
+  "scripts": {
+    "test": "jest --passWithNoTests",
+    "test:unit": "jest --testPathPattern='__tests__/unit'",
+    "test:integration": "jest --testPathPattern='__tests__/integration'",
+    "test:coverage": "jest --coverage",
+    "test:pre-push": "npm run test:unit && npm run lint && npm run type-check",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  }
+}
+```
+
+---
+
+8. Code Review Checklist
+
+8.1 Reviewer Must Check
+
+```markdown
+## Security Review
+- [ ] No hardcoded API keys, tokens, or passwords
+- [ ] No NEXT_PUBLIC_ prefix on server-side environment variables
+- [ ] API routes have proper input validation
+- [ ] CORS is properly restricted (not wildcard *)
+- [ ] Error responses don't leak internal details
+- [ ] Rate limiting is implemented on new endpoints
+- [ ] Authentication/authorization checks are in place
+
+## Code Quality Review
+- [ ] Code follows project naming conventions
+- [ ] Functions are small and do one thing (< 50 lines)
+- [ ] No duplicate code (DRY principle)
+- [ ] Complex logic has explanatory comments
+- [ ] Imports are organized (absolute > relative)
+- [ ] No console.log in production code (use logger)
+
+## Reliability Review
+- [ ] All API calls have proper error handling
+- [ ] External service calls have timeout and retry logic
+- [ ] Loading and error states are handled in UI
+- [ ] Edge cases are considered (null, empty, error)
+- [ ] Fallback behavior is defined for failures
+
+## Testing Review
+- [ ] Unit tests cover the new/modified code
+- [ ] Tests cover both success and failure paths
+- [ ] Mock data is realistic and not exposing secrets
+- [ ] Test descriptions clearly state what is being tested
+
+## Performance Review
+- [ ] No unnecessary re-renders in React components
+- [ ] Images are optimized
+- [ ] API calls are cached where appropriate
+- [ ] Bundle size is not significantly increased
+
+## Documentation Review
+- [ ] README updated if new features added
+- [ ] API changes are documented
+- [ ] Environment variables are documented in .env.example
+- [ ] Complex logic has inline comments
+```
+
+8.2 Automated Checks (CI/CD)
+
+```yaml
+# .github/workflows/ci.yml
+name: CI Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check for exposed secrets
+        run: |
+          # Scan for hardcoded API keys
+          ! grep -rE "sk-[a-zA-Z0-9]{20,}" --include="*.ts" --include="*.js" .
+          ! grep -rE "NEXT_PUBLIC_(FAL|GROQ|GEMINI|SUPABASE_SERVICE)_" --include="*.ts" --include="*.js" .
+      - name: Check .env files not committed
+        run: |
+          ! find . -name ".env" -o -name ".env.local" -o -name ".env.production" | grep .
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm ci
+      - run: npm run lint
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm ci
+      - run: npm run type-check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm ci
+      - run: npm test -- --coverage
+      - name: Check coverage thresholds
+        run: |
+          # Ensure coverage meets minimum thresholds
+          npx jest --coverage --coverageThreshold='{"global":{"lines":80,"branches":70,"functions":85,"statements":80}}'
+```
+
+---
+
+9. Pre-Deployment Checklist
+
+9.1 Before Every Deployment
+
+```markdown
+## Critical Checks (MUST PASS)
+- [ ] All tests passing (`npm test`)
+- [ ] Lint passing (`npm run lint`)
+- [ ] Type check
