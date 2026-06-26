@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Castle — AI Video Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans Thai', system-ui, -apple-system, sans-serif; }
+    .status-card { transition: all 0.2s ease; }
+    .status-card:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-gray-100 min-h-screen">
+<div class="max-w-4xl mx-auto p-6">
+
+  <!-- Header -->
+  <header class="mb-10">
+    <div class="flex justify-between items-center mb-4">
+      <a href="/artifacts.html" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm px-4 py-2 rounded-full transition flex items-center gap-2">
+        📁 ผลงานทั้งหมด
+      </a>
+      <div class="flex gap-2">
+        <a href="/login.html" class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-full transition flex items-center gap-2 shadow-lg shadow-purple-500/20">
+          🔐 เข้าสู่ระบบ
+        </a>
+      </div>
+    </div>
+    <div class="text-center">
+      <div class="inline-block p-4 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm mb-4">
+        <span class="text-6xl">🏰</span>
+      </div>
+      <h1 class="text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">CRYSTAL CASTLE</h1>
+      <p class="text-xl text-gray-400 mt-3">AI Video Studio — อัปโหลดรูป → Gen Prompt → สร้างวิดีโอ</p>
+      <p class="text-sm text-gray-500 mt-1">อัปเดตล่าสุด: 24 เม.ย. 2026</p>
+    </div>
+  </header>
+
+  <!-- dynamic filename -->
+  <div class="flex justify-center mb-6">
+    <div class="bg-gray-800/70 rounded-xl px-5 py-2.5 backdrop-blur-sm border border-gray-700">
+      <div class="flex items-center gap-3 text-sm">
+        <span class="text-gray-400">📄 หน้าปัจจุบัน:</span>
+        <code id="currentPage" class="bg-gray-900 px-3 py-1.5 rounded-lg text-purple-400 font-mono text-sm">index.html</code>
+        <button id="copyPageName" class="text-gray-500 hover:text-gray-300 transition text-xs px-2 py-1 rounded bg-gray-700/50">📋 คัดลอก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards ทางเข้า -->
+  <div class="grid md:grid-cols-3 gap-5 mb-10">
+    <a href="/product.html" class="group bg-gradient-to-br from-purple-600 to-pink-600 p-[1.5px] rounded-2xl transition-all hover:scale-[1.02]">
+      <div class="bg-gray-900 rounded-2xl p-6 h-full group-hover:bg-gray-800 transition">
+        <div class="text-4xl mb-3">🎬</div>
+        <h2 class="text-xl font-bold mb-2">เปิด Studio</h2>
+        <p class="text-gray-400 text-sm">อัปโหลดรูป → Gen Prompt (Groq) → สร้างวิดีโอด้วย Kling/Magic/CTA/Intro/Slideshow</p>
+        <p class="text-purple-400 text-xs mt-4 flex items-center gap-1">เข้าเลย →</p>
+      </div>
+    </a>
+
+    <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="text-3xl">📊</div>
+        <h2 class="text-xl font-bold">สถานะระบบ</h2>
+      </div>
+      <div id="statusList" class="space-y-2.5">
+        <div class="text-center text-gray-500 py-4">กำลังโหลด...</div>
+      </div>
+      <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-800">
+        <span id="lastCheck" class="text-xs text-gray-500">กำลังตรวจสอบ...</span>
+        <div class="flex gap-2">
+          <button id="refreshStatusBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs px-3 py-1.5 rounded-full transition flex items-center gap-1">
+            🔄 รีเฟรช
+          </button>
+          <a href="/api-check.html" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-full transition flex items-center gap-1">
+            🔍 ตรวจสอบ API
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ผลงานของฉัน -->
+    <a href="/artifact.html" class="group bg-gradient-to-br from-emerald-600 to-teal-600 p-[1.5px] rounded-2xl transition-all hover:scale-[1.02]">
+      <div class="bg-gray-900 rounded-2xl p-6 h-full group-hover:bg-gray-800 transition">
+        <div class="text-4xl mb-3">📁</div>
+        <h2 class="text-xl font-bold mb-2">ผลงานของฉัน</h2>
+        <p class="text-gray-400 text-sm">ดูวิดีโอทั้งหมดที่เคยสร้าง, คัดลอก Prompt นำกลับมาใช้ใหม่</p>
+        <p class="text-emerald-400 text-xs mt-4 flex items-center gap-1">ดูเลย →</p>
+      </div>
+    </a>
+  </div>
+
+  <!-- Groq API Logs Section (ใหม่) -->
+  <div class="bg-gray-900/50 rounded-2xl p-6 border border-gray-800 backdrop-blur-sm mb-10">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-xl font-bold flex items-center gap-2">
+        <span class="text-2xl">⚡</span> Groq API Logs
+      </h3>
+      <button id="refreshGroqLogsBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs px-4 py-2 rounded-full transition flex items-center gap-1">
+        🔄 Refresh
+      </button>
+    </div>
+    <div id="groqLogsList" class="space-y-1 max-h-64 overflow-y-auto">
+      <div class="text-center text-gray-500 py-4">กำลังโหลด...</div>
+    </div>
+  </div>
+
+  <!-- วิธีใช้งาน -->
+  <div class="bg-gray-900/50 rounded-2xl p-6 border border-gray-800 backdrop-blur-sm">
+    <h3 class="text-xl font-bold mb-5 flex items-center gap-2">
+      <span class="text-2xl">🧭</span> วิธีใช้งาน
+    </h3>
+    <div class="grid md:grid-cols-3 gap-5 text-sm">
+      <div class="flex gap-3">
+        <div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold shrink-0">1</div>
+        <p class="text-gray-300">เตรียมรูป <br>ตั้งชื่อ <code class="bg-gray-800 px-1.5 py-0.5 rounded text-xs">YYYYMMDD-Category-Brand</code></p>
+      </div>
+      <div class="flex gap-3">
+        <div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold shrink-0">2</div>
+        <p class="text-gray-300">เข้า <strong class="text-white">Studio</strong> → อัปโหลดรูป → เลือกเครื่องมือ (AI, Slideshow, Intro, CTA)</p>
+      </div>
+      <div class="flex gap-3">
+        <div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold shrink-0">3</div>
+        <p class="text-gray-300">ดาวน์โหลดวิดีโอ หรือแชร์ลง TikTok/Shopee เก็บผลงานไว้ใน <strong class="text-emerald-400">ผลงานของฉัน</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ========== แสดงชื่อไฟล์ปัจจุบัน ==========
+  function showCurrentPage() {
+    const path = window.location.pathname;
+    let filename = path.split('/').pop();
+    if (!filename || filename === '') filename = 'index.html';
+    const pageElement = document.getElementById('currentPage');
+    if (pageElement) {
+      pageElement.textContent = filename;
+      pageElement.title = `เส้นทาง: ${path}`;
+    }
+  }
+
+  const copyBtn = document.getElementById('copyPageName');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      const filename = document.getElementById('currentPage')?.textContent || '';
+      try {
+        await navigator.clipboard.writeText(filename);
+        copyBtn.textContent = '✅ คัดลอกแล้ว';
+        setTimeout(() => { copyBtn.textContent = '📋 คัดลอก'; }, 2000);
+      } catch (err) {
+        copyBtn.textContent = '❌ ไม่สำเร็จ';
+      }
+    });
+  }
+
+  // ========== ตรวจสอบสถานะ API ==========
+  6
+
+  async function checkStatus() {
+    const list = document.getElementById('statusList');
+    if (!list) return;
+    list.innerHTML = '';
+    
+    for (const ep of endpoints) {
+      const li = document.createElement('div');
+      li.className = 'flex justify-between items-center p-2.5 bg-gray-800/50 rounded-xl status-card';
+      li.innerHTML = `<span class="text-gray-300 text-sm">${ep.name}</span><span class="text-xs">⏳</span>`;
+      list.appendChild(li);
+      const statusSpan = li.querySelector('span:last-child');
+      
+      try {
+        let res;
+        if (ep.method === 'POST' && ep.testBody) {
+          res = await fetch(ep.path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ep.testBody),
+            signal: AbortSignal.timeout(6000)
+          });
+        } else {
+          res = await fetch(ep.path, { method: 'HEAD', signal: AbortSignal.timeout(4000) });
+        }
+        
+        const ok = res.ok || res.status === 405;
+        if (ok) {
+          statusSpan.innerHTML = '<span class="text-green-400 text-xs bg-green-400/10 px-2 py-0.5 rounded-full">✅ ใช้งานได้</span>';
+        } else {
+          statusSpan.innerHTML = `<span class="text-red-400 text-xs">❌ Error ${res.status}</span>`;
+        }
+      } catch(err) {
+        let errorMsg = err.message.slice(0, 40);
+        if (err.name === 'AbortError') errorMsg = 'หมดเวลา';
+        if (err.name === 'TypeError') errorMsg = 'ไม่พบ API';
+        statusSpan.innerHTML = `<span class="text-red-400 text-xs">❌ ${errorMsg}</span>`;
+      }
+    }
+    const timeSpan = document.getElementById('lastCheck');
+    if (timeSpan) timeSpan.textContent = `อัปเดต: ${new Date().toLocaleTimeString('th-TH')}`;
+  }
+
+  // ========== โหลด Groq Logs ==========
+  async function loadGroqLogs() {
+    const container = document.getElementById('groqLogsList');
+    if (!container) return;
+
+    try {
+      const res = await fetch('/api/get-logs', { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const data = await res.json();
+      const logs = data.logs || [];
+
+      if (logs.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-500 py-4">ยังไม่มี Logs</div>';
+        return;
+      }
+
+      container.innerHTML = logs.map(log => {
+        const time = new Date(log.created_at).toLocaleTimeString('th-TH');
+        return `
+          <div class="flex items-center justify-between p-2 bg-gray-800/50 rounded-lg text-sm">
+            <span class="text-purple-400 font-mono w-16">${log.latency_ms}ms</span>
+            <span class="text-gray-400 font-mono text-xs truncate flex-1 mx-2" title="${log.request_id || 'N/A'}">${log.request_id ? log.request_id.slice(0, 30) : 'N/A'}</span>
+            <span class="text-gray-500 text-xs">${time}</span>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      container.innerHTML = `<div class="text-center text-red-400 py-4">❌ โหลดไม่สำเร็จ: ${err.message}</div>`;
+    }
+  }
+
+  // ========== Event Listeners ==========
+  const refreshStatusBtn = document.getElementById('refreshStatusBtn');
+  if (refreshStatusBtn) refreshStatusBtn.addEventListener('click', checkStatus);
+
+  const refreshGroqBtn = document.getElementById('refreshGroqLogsBtn');
+  if (refreshGroqBtn) refreshGroqBtn.addEventListener('click', loadGroqLogs);
+
+  // ========== เริ่มต้น ==========
+  showCurrentPage();
+  checkStatus();
+  loadGroqLogs();
+
+  // รีเฟรชอัตโนมัติ
+  setInterval(checkStatus, 120000); // ทุก 2 นาที
+  setInterval(loadGroqLogs, 60000); // ทุก 1 นาที
+</script>
+</body>
+</html>
