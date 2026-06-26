@@ -1,0 +1,24 @@
+# ใช้ Python base image
+FROM python:3.11-slim
+
+# ติดตั้ง pdf2htmlEX และ dependencies
+RUN apt-get update && apt-get install -y \
+    pdf2htmlex \
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# ตั้งค่า working directory
+WORKDIR /app
+
+# คัดลอก requirements และติดตั้ง
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# คัดลอกโค้ดทั้งหมด
+COPY . .
+
+# Expose port
+EXPOSE 8000
+
+# รัน Flask app
+CMD ["python", "app.py"]

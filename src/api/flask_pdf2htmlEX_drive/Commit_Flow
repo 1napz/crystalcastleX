@@ -1,0 +1,8 @@
+# เพิ่มไฟล์ใหม่และแก้ไข
+git add app.py requirements.txt render.yaml .github/workflows/render-ci-cd.yml
+
+# เขียน commit message ที่ชัดเจน
+git commit -m "ci: add Render CI/CD workflow for Flask API"
+
+# push ขึ้น main
+git push origin main

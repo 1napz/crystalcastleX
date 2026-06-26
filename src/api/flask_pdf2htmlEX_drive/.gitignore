@@ -1,0 +1,30 @@
+# 🔐 Credentials & Environment
+service_account.json
+.env
+
+# 🐍 Python cache & compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# 📦 Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# 📝 Logs & temp files
+*.log
+*.tmp
+*.swp
+*.bak
+
+# 💻 OS-specific files
+.DS_Store
+Thumbs.db
+
+# 🛠️ IDE/editor configs
+.vscode/
+.idea/

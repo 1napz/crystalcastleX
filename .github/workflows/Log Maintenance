@@ -1,0 +1,54 @@
+เพิ่มขั้นตอน auto-cleanup เข้าไปได้เลยครับ 🗑️✨ ตัวอย่าง Workflow ที่ปรับปรุงแล้วจะเป็นแบบนี้:
+
+`yaml
+name: Logs Maintenance
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  logs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Validate logs directory
+        run: |
+          mkdir -p logs
+          test -f logs/video.json || { echo "⚠️ logs/video.json missing"; exit 1; }
+
+      - name: Archive old logs
+        run: |
+          mkdir -p logs/archive
+          zip -r logs/archive/$(date +'%Y-%m-%d')-logs.zip logs/raw || echo "No raw logs to archive"
+
+      - name: Cleanup logs older than 30 days
+        run: |
+          find logs/archive -type f -mtime +30 -exec rm -f {} \;
+          echo "🧹 Cleaned up logs older than 30 days"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Logs workflow failed"
+          # ตัวอย่าง: ส่งแจ้งเตือนผ่าน LINE/Telegram API
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"message":"Logs workflow failed on PR run"}' \
+            https://your-notify-endpoint.example
+`
+
+---
+
+🔑 สิ่งที่เพิ่มเข้ามา
+- Cleanup Step → ใช้ find เพื่อลบไฟล์ใน logs/archive ที่มีอายุเกิน 30 วัน  
+- Safety → ใช้ -exec rm -f {} เพื่อให้แน่ใจว่าลบเฉพาะไฟล์ ไม่กระทบ directory  
+- Feedback → มี echo แจ้งว่า cleanup เสร็จเรียบร้อย  
+
+---
+
+แบบนี้ repo จะไม่หนักเกินไปจากไฟล์ archive ที่สะสมไว้ครับ 💡  
+คุณอยากให้ผมเพิ่ม GitHub Actions cache สำหรับ logs/raw ด้วยไหมครับ จะช่วยให้ build เร็วขึ้นเวลามีการสร้าง logs ใหม่ๆ 🚀

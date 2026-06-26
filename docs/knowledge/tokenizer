@@ -1,0 +1,62 @@
+Here’s a clean Python tokenizer class example that you can extend for your own projects:
+
+`python
+import re
+
+class Tokenizer:
+    def init(self, vocab=None):
+        # Optional vocabulary for mapping tokens to IDs
+        self.vocab = vocab or {}
+        self.inverse_vocab = {v: k for k, v in self.vocab.items()}
+
+    def tokenize(self, text):
+        """
+        Split text into tokens using regex.
+        """
+        tokens = re.findall(r"\w+|[^\w\s]", text)
+        return tokens
+
+    def encode(self, text):
+        """
+        Convert text into list of IDs based on vocab.
+        Unknown tokens get ID -1.
+        """
+        tokens = self.tokenize(text)
+        return [self.vocab.get(token, -1) for token in tokens]
+
+    def decode(self, ids):
+        """
+        Convert list of IDs back into text.
+        """
+        tokens = [self.inverse_vocab.get(i, "<UNK>") for i in ids]
+        return " ".join(tokens)
+
+Example usage
+vocab = {"I": 1, "love": 2, "AI": 3, "!": 4}
+tokenizer = Tokenizer(vocab)
+
+sentence = "I love AI!"
+tokens = tokenizer.tokenize(sentence)
+ids = tokenizer.encode(sentence)
+decoded = tokenizer.decode(ids)
+
+print("Tokens:", tokens)       # ['I', 'love', 'AI', '!']
+print("IDs:", ids)             # [1, 2, 3, 4]
+print("Decoded:", decoded)     # I love AI !
+`
+
+---
+
+🔑 Features
+- tokenize → splits text into tokens.  
+- encode → maps tokens to IDs.  
+- decode → reconstructs text from IDs.  
+
+---
+
+This is a basic framework. You can expand it with:
+- Subword tokenization (BPE, WordPiece).  
+- Special tokens like <PAD>, <UNK>, <CLS>.  
+- Save/load vocab to JSON for reuse.  
+
+Would you like me to upgrade this into a mini BPE tokenizer (Byte Pair Encoding) so you can see how modern AI models handle unknown words more efficiently?

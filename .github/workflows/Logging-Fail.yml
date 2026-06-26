@@ -1,0 +1,51 @@
+name: Log Unit Test Failures
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Unit Tests
+        run: |
+          mkdir -p version/CrystalCastle/logs
+          npm test -- --coverage || echo "❌ Unit test failed" > version/CrystalCastle/logs/unittest-fail.log
+
+      - name: Save fail log (if exists)
+        if: always()
+        run: |
+          TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
+          if [ -f version/CrystalCastle/logs/unittest-fail.log ]; then
+            echo "[${TIMESTAMP}] Unit test failure detected" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "Actor: ${{ github.actor }}" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "Branch: ${{ github.ref }}" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "Summary (English): Unit test failed, see coverage report" >> version/CrystalCastle/logs/unittest-fail.log
+            echo "สรุป (ภาษาไทย): Unit test ล้มเหลว, ดู coverage report" >> version/CrystalCastle/logs/unittest-fail.log
+          fi
+
+      - name: Upload fail logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unittest-fail-logs
+          path: version/CrystalCastle/logs/
+          if-no-files-found: ignore

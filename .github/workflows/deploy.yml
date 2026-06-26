@@ -1,0 +1,107 @@
+จัดให้ตามคำขอครับ! ผมได้นำขั้นตอนการส่งแจ้งเตือนผ่าน **LINE Notify** และ **Telegram Bot** มาประกอบเข้าที่ส่วนท้ายของ Job `deploy` ในไฟล์ Monorepo ของคุณให้เรียบร้อยแล้วครับ
+
+ผมมีการปรับข้อความแจ้งเตือน (ตัวแปร `MSG`) เล็กน้อย เพื่อให้สอดคล้องกับการขึ้นระบบด้วย Vercel ครับ สามารถก๊อปปี้โค้ดด้านล่างนี้ไปใช้งานได้เลยครับ:
+
+### ✨ ไฟล์ `deploy.yml` (ฉบับอัปเดตพร้อมระบบแจ้งเตือน)
+
+```yaml
+name: Monorepo CI/CD with Vercel Remote Cache
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs on the same branch to save minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}   # move out of hardcode
+
+jobs:
+  ci:
+    name: Build & Test / ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false           # other apps still run if one fails
+      matrix:
+        app: [web, docs, admin]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2         # turbo needs HEAD^ for change detection
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci              # faster + strict lockfile in CI
+
+      - name: Lint
+        run: npx turbo run lint --filter=apps/${{ matrix.app }}
+
+      - name: Build
+        run: npx turbo run build --filter=apps/${{ matrix.app }}
+
+      - name: Test
+        run: npx turbo run test --filter=apps/${{ matrix.app }}
+
+  deploy:
+    name: Deploy → Vercel Production
+    runs-on: ubuntu-latest
+    needs: ci
+    # Only deploy merged commits to main, never on PRs
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        run: |
+          npx vercel \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} \
+            --prod \
+            --yes            # replaces deprecated --confirm
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # --- 🟢 ส่วนที่เพิ่มเข้ามา: แจ้งเตือนเมื่อ Deploy เสร็จสิ้น ---
+      - name: Send Notification
+        if: always() # ทำงานเสมอไม่ว่า Deploy จะผ่านหรือพัง
+        run: |
+          # เช็กสถานะของ Job Deploy
+          if [ "${{ job.status }}" = "success" ]; then
+            MSG="✅ Vercel Deploy Successful: Monorepo Apps"
+          else
+            MSG="❌ Vercel Deploy Failed: Monorepo Apps"
+          fi
+
+          # ส่งเข้า LINE Notify
+          curl -X POST -H "Authorization: Bearer ${{ secrets.LINE_TOKEN }}" \
+               -F "message=$MSG" \
+               https://notify-api.line.me/api/notify
+
+          # ส่งเข้า Telegram Bot
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
+               -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+               -d text="$MSG"
+```
+
+---
+
+### 📌 หมายเหตุการทำงานเพิ่มเติม
+เนื่องจากเราใส่บล็อกแจ้งเตือนนี้ไว้ใน Job `deploy` (ซึ่งมันมีเงื่อนไข `needs: ci` กำกับอยู่) ระบบจะทำงานตามลอจิกนี้ครับ:
+1. หากขั้นตอน **Build & Test (`ci`) ผ่านหมด** ระบบจะรันการ Deploy และส่งข้อความเข้ามือถือคุณว่า ✅ (สำเร็จ) หรือ ❌ (ถ้า Vercel มีปัญหา)
+2. หากขั้นตอน **Build & Test (`ci`) พังตั้งแต่แรก** Job `deploy` จะถูกข้าม (Skipped) ไปเลย ทำให้ไม่มีข้อความแจ้งเตือนเด้งไปกวนใจคุณครับ (ระบบถือว่ากรองโค้ดที่มีบั๊กออกไปตั้งแต่ด่านแรกแล้ว)

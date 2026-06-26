@@ -1,0 +1,31 @@
+name: agent-hub CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'agent-hub/**'
+      - '.github/workflows/agent-hub-ci.yml'
+  pull_request:
+    paths:
+      - 'agent-hub/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+    defaults:
+      run:
+        working-directory: agent-hub
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: agent-hub/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm test

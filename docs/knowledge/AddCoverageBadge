@@ -1,0 +1,54 @@
+To add a coverage badge to your README, you’ll connect your GitHub workflow’s coverage reports with a badge provider like Codecov or Coveralls. Since we already set up coverage reporting in your workflow, here’s how to integrate the badge:
+
+---
+
+🔧 Step 1: Upload Coverage to Codecov
+In your workflow, after running tests, add:
+
+`yaml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          failciif_error: true
+`
+
+- Create a secret CODECOV_TOKEN in your GitHub repo.  
+- This sends coverage results to Codecov’s dashboard.
+
+---
+
+📌 Step 2: Add Badge to README.md
+Once Codecov is connected, it provides a badge URL. Add this Markdown snippet at the top of your README:
+
+`markdown
+![codecov](https://codecov.io/gh/USERNAME/REPO)
+`
+
+Replace:
+- USERNAME → your GitHub username/org  
+- REPO → your repository name  
+- YOURTOKEN → the token provided by Codecov  
+
+---
+
+📂 Example README with Badges
+`markdown
+
+CrystalCastle
+
+![Build Status](https://github.com/USERNAME/REPO/actions)
+![Coverage Status](https://codecov.io/gh/USERNAME/REPO)
+![PyPI version](https://pypi.org/project/crystalcastle/)
+![License: MIT](https://opensource.org/licenses/MIT)
+`
+
+---
+
+🚀 Result
+- Badge updates automatically after each workflow run.  
+- Clicking the badge opens the Codecov dashboard with detailed coverage reports.  
+- Your README now shows real-time test coverage alongside build and version info.  
+
+Would you like me to also add a minimal single-line badge layout so all badges (build, coverage, PyPI, license) appear neatly in one row at the top of your README?

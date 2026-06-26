@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: flask-pdf-api
+    env: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    branch: main
+    envVars:
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /opt/render/secret/service_account.json
+      - key: FLASK_ENV
+        value: production
+    healthCheckPath: /convert

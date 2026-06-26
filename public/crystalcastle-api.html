@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrystalCastle Azure API — Preview</title>
+<meta name="color-scheme" content="dark">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: 'Noto Sans Thai', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  background: #050810;
+  overscroll-behavior: none;
+}
+.glass {
+  background: rgba(17, 25, 40, 0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.glass-strong {
+  background: rgba(10,15,25,0.85);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+.fade-in { animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Streaming cursor blink */
+.stream-cursor::after {
+  content: '▋';
+  display: inline-block;
+  color: #a78bfa;
+  animation: blink 0.7s step-end infinite;
+  margin-left: 1px;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Token progress bar */
+.token-bar {
+  height: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #7c3aed, #06b6d4);
+  transition: width 0.3s ease;
+}
+
+/* Stream toggle switch */
+.toggle-track {
+  width: 36px; height: 20px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle-track.on { background: rgba(124,58,237,0.5); border-color: rgba(124,58,237,0.6); }
+.toggle-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  position: absolute;
+  top: 2px; left: 2px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.toggle-track.on .toggle-thumb { transform: translateX(16px); }
+</style>
+</head>
+<body class="min-h-screen text-zinc-100 selection:bg-violet-500/30 selection:text-violet-200">
+
+<!-- Background -->
+<div class="fixed inset-0 -z-10">
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#050810] to-black"></div>
+  <div class="absolute top-[-20%] -left-[10%] w-[600px] h-[600px] bg-violet-600/20 rounded-full blur-[140px] animate-pulse"></div>
+  <div class="absolute bottom-[-20%] -right-[10%] w-[600px] h-[600px] bg-cyan-500/15 rounded-full blur-[140px] animate-pulse [animation-duration:7s]"></div>
+  <div class="absolute top-[30%] left-[50%] -translate-x-1/2 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[160px]"></div>
+</div>
+
+<div class="relative z-10 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="sticky top-0 z-20 border-b border-white/[0.05] glass-strong">
+    <div class="max-w-[920px] mx-auto px-4 sm:px-6 h-[68px] flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-violet-600/20 ring-1 ring-white/10">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-white">
+            <path d="M12 2L20 8.5V15.5L12 22L4 15.5V8.5L12 2Z" stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity="0.2"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-[17px] font-semibold tracking-tight leading-none">CrystalCastle</h1>
+          <p class="text-[11px] text-zinc-500 font-medium mt-[2px]">Azure API Preview</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="hidden sm:inline text-[11px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-400">/api/chat</span>
+        <span class="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">Preview</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 w-full max-w-[920px] mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
+
+    <!-- Status Card -->
+    <div class="glass rounded-[28px] p-5 sm:p-6 fade-in">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="relative">
+            <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-zinc-600 block"></span>
+            <span id="status-pulse" class="absolute inset-0 w-2.5 h-2.5 rounded-full bg-zinc-600/50 animate-ping hidden"></span>
+          </div>
+          <h2 class="text-[15px] font-medium text-zinc-200">สถานะระบบ</h2>
+        </div>
+        <button id="refresh-status" class="group flex items-center gap-1.5 text-[12px] text-zinc-500 hover:text-zinc-300 transition">
+          <svg class="w-3.5 h-3.5 group-active:rotate-180 transition-transform duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>
+          </svg>
+          รีเฟรช
+        </button>
+      </div>
+      <div class="grid grid-cols-3 gap-3 sm:gap-6">
+        <div>
+          <p class="text-[11px] text-zinc-500 mb-1.5 uppercase tracking-wide font-medium">สถานะ</p>
+          <p id="status-text" class="text-[14px] font-medium text-zinc-300">กำลังตรวจสอบ...</p>
+        </div>
+        <div>
+          <p class="text-[11px] text-zinc-500 mb-1.5 uppercase tracking-wide font-medium">Latency</p>
+          <p id="status-latency" class="text-[14px] font-medium mono text-zinc-300">—</p>
+        </div>
+        <div>
+          <p class="text-[11px] text-zinc-500 mb-1.5 uppercase tracking-wide font-medium">เวอร์ชัน</p>
+          <p id="status-version" class="text-[14px] font-medium mono text-zinc-300">—</p>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-between">
+        <p class="text-[11px] text-zinc-600 mono truncate">https://crystalcastle-api.azurewebsites.net</p>
+        <p id="status-updated" class="text-[11px] text-zinc-600 whitespace-nowrap ml-3">—</p>
+      </div>
+    </div>
+
+    <!-- Chat Card -->
+    <div class="glass rounded-[28px] p-5 sm:p-7 fade-in [animation-delay:100ms]">
+      <div class="flex items-start justify-between mb-5">
+        <div>
+          <h2 class="text-[18px] sm:text-[20px] font-semibold tracking-tight">ทดสอบ API</h2>
+          <p class="text-[13px] text-zinc-500 mt-1">ส่งข้อความไปยัง <span class="text-zinc-400 mono">/api/chat</span></p>
+        </div>
+
+        <!-- ─── Streaming Toggle ─── -->
+        <div class="flex items-center gap-2.5 mt-0.5">
+          <span class="text-[12px] text-zinc-400 select-none">Streaming</span>
+          <div id="stream-toggle" class="toggle-track on" role="switch" aria-checked="true" tabindex="0">
+            <div class="toggle-thumb"></div>
+          </div>
+          <span id="stream-label" class="text-[11px] mono text-violet-300 font-medium w-6">ON</span>
+        </div>
+      </div>
+
+      <form id="chat-form" class="relative">
+        <div class="relative group">
+          <textarea
+            id="message-input"
+            rows="3"
+            placeholder="พิมพ์ข้อความของคุณที่นี่..."
+            class="w-full min-h-[120px] max-h-[320px] resize-none rounded-2xl bg-black/40 border border-white/10 px-4 py-3.5 text-[15px] leading-relaxed placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+            autofocus
+          ></textarea>
+          <div class="absolute bottom-3 right-3 flex items-center gap-1.5 opacity-0 group-focus-within:opacity-100 transition-opacity">
+            <kbd class="px-1.5 py-0.5 text-[10px] bg-white/10 border border-white/10 rounded text-zinc-500">⌘</kbd>
+            <kbd class="px-1.5 py-0.5 text-[10px] bg-white/10 border border-white/10 rounded text-zinc-500">↵</kbd>
+          </div>
+        </div>
+
+        <!-- Example chips -->
+        <div class="flex flex-wrap gap-2 mt-3">
+          <button type="button" data-example="สวัสดีครับ CrystalCastle" class="example-chip text-[12px] px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-zinc-400 hover:text-zinc-200 transition">สวัสดีครับ</button>
+          <button type="button" data-example="แนะนำความสามารถของ API นี้หน่อย" class="example-chip text-[12px] px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-zinc-400 hover:text-zinc-200 transition">แนะนำ API</button>
+          <button type="button" data-example="ทดสอบการเชื่อมต่อ" class="example-chip text-[12px] px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-zinc-400 hover:text-zinc-200 transition">ทดสอบระบบ</button>
+        </div>
+
+        <div class="flex items-center justify-between mt-5">
+          <p class="text-[12px] text-zinc-600 hidden sm:block">กด Enter ขึ้นบรรทัดใหม่ • Ctrl+Enter เพื่อส่ง</p>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" id="stop-btn"
+              class="hidden h-[38px] px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-[13px] text-red-300 hover:text-red-200 transition items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+              หยุด
+            </button>
+            <button type="button" id="clear-btn"
+              class="h-[38px] px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[13px] text-zinc-400 hover:text-zinc-200 transition">
+              ล้าง
+            </button>
+            <button type="submit" id="send-btn"
+              class="group relative h-[38px] px-5 rounded-xl bg-white text-black font-medium text-[14px] hover:bg-zinc-200 active:bg-zinc-300 transition disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden">
+              <span class="relative z-10 flex items-center gap-1.5">
+                <span>ส่ง</span>
+                <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- ─── Response Panel ─── -->
+      <div id="response-container" class="hidden mt-6">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-5 h-5 rounded-lg bg-violet-500/20 border border-violet-500/30 flex items-center justify-center">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-violet-300">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-[13px] font-medium text-zinc-400 uppercase tracking-wide">การตอบกลับ</h3>
+
+          <!-- Stream badge -->
+          <span id="stream-badge" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/25 text-violet-300 mono">streaming</span>
+
+          <div id="response-status" class="ml-auto"></div>
+        </div>
+
+        <!-- Token progress bar (streaming only) -->
+        <div id="token-bar-wrap" class="hidden mb-2">
+          <div class="h-[3px] w-full rounded-full bg-white/5 overflow-hidden">
+            <div id="token-bar" class="token-bar" style="width:0%"></div>
+          </div>
+          <div class="flex justify-between mt-1">
+            <span class="text-[10px] text-zinc-600 mono" id="token-count">0 tokens</span>
+            <span class="text-[10px] text-zinc-600 mono" id="stream-speed"></span>
+          </div>
+        </div>
+
+        <div class="relative rounded-2xl overflow-hidden border border-white/10 bg-black/50">
+          <div class="absolute inset-0 bg-gradient-to-b from-violet-500/[0.03] to-transparent pointer-events-none"></div>
+          <div class="relative p-4 sm:p-5">
+            <div id="response-content"
+                 class="text-[14px] leading-[1.7] text-zinc-200 whitespace-pre-wrap break-words min-h-[24px]"></div>
+          </div>
+          <div class="relative flex items-center justify-between px-4 py-2.5 bg-white/[0.02] border-t border-white/5">
+            <div class="flex items-center gap-3">
+              <span id="response-time" class="text-[11px] mono text-zinc-500"></span>
+              <span id="response-size" class="text-[11px] mono text-zinc-600"></span>
+            </div>
+            <button id="copy-btn"
+              class="h-6 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-[11px] text-zinc-400 hover:text-zinc-200 transition flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              คัดลอก
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="grid sm:grid-cols-3 gap-3">
+      <div class="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-4 hover:bg-white/[0.04] transition">
+        <div class="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+        <div class="relative">
+          <p class="text-[11px] text-zinc-500 uppercase tracking-wide mb-1.5">Endpoint</p>
+          <p class="text-[13px] font-medium text-zinc-300 mono">/api/chat</p>
+          <p class="text-[11px] text-zinc-600 mt-0.5">POST · JSON · SSE</p>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-4 hover:bg-white/[0.04] transition">
+        <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+        <div class="relative">
+          <p class="text-[11px] text-zinc-500 uppercase tracking-wide mb-1.5">Streaming</p>
+          <p class="text-[13px] font-medium text-zinc-300">Server-Sent Events</p>
+          <p class="text-[11px] text-zinc-600 mt-0.5">text/event-stream</p>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-4 hover:bg-white/[0.04] transition">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+        <div class="relative">
+          <p class="text-[11px] text-zinc-500 uppercase tracking-wide mb-1.5">Auth</p>
+          <p class="text-[13px] font-medium text-zinc-300">Azure AD / API Key</p>
+          <p class="text-[11px] text-zinc-600 mt-0.5">Bearer token</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─── Config ────────────────────────────────────────────────────────────────
+const API_BASE = 'https://crystalcastle-api.azurewebsites.net';
+
+// ─── State ─────────────────────────────────────────────────────────────────
+let streamingEnabled = true;
+let abortController   = null;
+let isStreaming        = false;
+
+// ─── Elements ──────────────────────────────────────────────────────────────
+const streamToggle      = document.getElementById('stream-toggle');
+const streamLabel       = document.getElementById('stream-label');
+const form              = document.getElementById('chat-form');
+const input             = document.getElementById('message-input');
+const sendBtn           = document.getElementById('send-btn');
+const stopBtn           = document.getElementById('stop-btn');
+const clearBtn          = document.getElementById('clear-btn');
+const responseContainer = document.getElementById('response-container');
+const responseContent   = document.getElementById('response-content');
+const responseTime      = document.getElementById('response-time');
+const responseSize      = document.getElementById('response-size');
+const responseStatus    = document.getElementById('response-status');
+const copyBtn           = document.getElementById('copy-btn');
+const streamBadge       = document.getElementById('stream-badge');
+const tokenBarWrap      = document.getElementById('token-bar-wrap');
+const tokenBar          = document.getElementById('token-bar');
+const tokenCount        = document.getElementById('token-count');
+const streamSpeed       = document.getElementById('stream-speed');
+const statusDot         = document.getElementById('status-dot');
+const statusPulse       = document.getElementById('status-pulse');
+const statusText        = document.getElementById('status-text');
+const statusLatency     = document.getElementById('status-latency');
+const statusVersion     = document.getElementById('status-version');
+const statusUpdated     = document.getElementById('status-updated');
+const refreshStatus     = document.getElementById('refresh-status');
+
+// ─── Streaming Toggle ──────────────────────────────────────────────────────
+function setStreaming(on) {
+  streamingEnabled = on;
+  streamToggle.classList.toggle('on', on);
+  streamToggle.setAttribute('aria-checked', on);
+  streamLabel.textContent = on ? 'ON' : 'OFF';
+  streamLabel.className   = on
+    ? 'text-[11px] mono text-violet-300 font-medium w-6'
+    : 'text-[11px] mono text-zinc-500 font-medium w-6';
+}
+
+streamToggle.addEventListener('click', () => setStreaming(!streamingEnabled));
+streamToggle.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setStreaming(!streamingEnabled); }
+});
+
+// ─── Example chips ─────────────────────────────────────────────────────────
+document.querySelectorAll('.example-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    input.value = btn.dataset.example;
+    input.focus();
+  });
+});
+
+// ─── Keyboard shortcut: Ctrl+Enter ─────────────────────────────────────────
+input.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); form.requestSubmit(); }
+});
+
+// ─── Clear ─────────────────────────────────────────────────────────────────
+clearBtn.addEventListener('click', () => {
+  stopStream();
+  input.value = '';
+  responseContainer.classList.add('hidden');
+  input.focus();
+});
+
+// ─── Stop streaming ────────────────────────────────────────────────────────
+stopBtn.addEventListener('click', stopStream);
+
+function stopStream() {
+  if (abortController) { abortController.abort(); abortController = null; }
+  setLoadingState(false);
+}
+
+// ─── Copy ──────────────────────────────────────────────────────────────────
+copyBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(responseContent.textContent || '').then(() => {
+    copyBtn.textContent = '✓ คัดลอกแล้ว';
+    setTimeout(() => {
+      copyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>คัดลอก`;
+    }, 2000);
+  });
+});
+
+// ─── UI helpers ────────────────────────────────────────────────────────────
+function setLoadingState(loading) {
+  isStreaming = loading;
+  sendBtn.disabled = loading;
+  sendBtn.classList.toggle('opacity-40', loading);
+  stopBtn.classList.toggle('hidden', !loading);
+  stopBtn.classList.toggle('flex', loading);
+}
+
+function setStatusBadge(type, text) {
+  const colors = {
+    ok:      'bg-emerald-500/10 border-emerald-500/20 text-emerald-300',
+    error:   'bg-red-500/10 border-red-500/20 text-red-300',
+    info:    'bg-violet-500/10 border-violet-500/20 text-violet-300',
+  };
+  responseStatus.innerHTML = `<span class="text-[11px] px-2.5 py-1 rounded-full border ${colors[type] || colors.info}">${text}</span>`;
+}
+
+// ─── Token counter ─────────────────────────────────────────────────────────
+function approxTokens(text) {
+  // ~4 chars ≈ 1 token (rough estimate)
+  return Math.ceil(text.length / 4);
+}
+
+// ─── Status check ──────────────────────────────────────────────────────────
+async function checkStatus() {
+  statusText.textContent = 'กำลังตรวจสอบ...';
+  statusDot.className = 'w-2.5 h-2.5 rounded-full bg-zinc-600 block';
+  statusPulse.classList.add('hidden');
+
+  const t0 = Date.now();
+  try {
+    const res = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(8000) });
+    const ms  = Date.now() - t0;
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 block';
+      statusPulse.className = 'absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-400/50 animate-ping';
+      statusPulse.classList.remove('hidden');
+      statusText.textContent = 'ออนไลน์';
+      statusText.className   = 'text-[14px] font-medium text-emerald-300';
+      statusLatency.textContent = `${ms} ms`;
+      statusVersion.textContent = data.version || 'v1';
+    } else {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch (err) {
+    const ms = Date.now() - t0;
+    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-red-400 block';
+    statusPulse.classList.add('hidden');
+    statusText.textContent = 'ออฟไลน์';
+    statusText.className   = 'text-[14px] font-medium text-red-300';
+    statusLatency.textContent = `${ms} ms`;
+    statusVersion.textContent = '—';
+  }
+  statusUpdated.textContent = `อัปเดต ${new Date().toLocaleTimeString('th-TH')}`;
+}
+
+refreshStatus.addEventListener('click', checkStatus);
+checkStatus();
+
+// ─── Send ──────────────────────────────────────────────────────────────────
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const message = input.value.trim();
+  if (!message || isStreaming) return;
+
+  // Reset UI
+  responseContainer.classList.remove('hidden');
+  responseContent.textContent = '';
+  responseContent.classList.remove('stream-cursor');
+  responseTime.textContent  = '';
+  responseSize.textContent  = '';
+  tokenBarWrap.classList.add('hidden');
+  tokenBar.style.width = '0%';
+  tokenCount.textContent  = '0 tokens';
+  streamSpeed.textContent = '';
+  setStatusBadge('info', 'กำลังส่ง...');
+
+  if (streamingEnabled) {
+    streamBadge.classList.remove('hidden');
+    await sendStreaming(message);
+  } else {
+    streamBadge.classList.add('hidden');
+    await sendRegular(message);
+  }
+});
+
+// ─── Regular (non-streaming) ───────────────────────────────────────────────
+async function sendRegular(message) {
+  setLoadingState(true);
+  const t0 = Date.now();
+
+  try {
+    const res = await fetch(`${API_BASE}/api/chat`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ message }),
+      signal:  AbortSignal.timeout(30000),
+    });
+
+    const ms   = Date.now() - t0;
+    const data = await res.json();
+    const text = data.response || data.message || data.content || JSON.stringify(data, null, 2);
+
+    responseContent.textContent = text;
+    responseTime.textContent    = `${ms} ms`;
+    responseSize.textContent    = `${new Blob([text]).size} bytes`;
+    setStatusBadge(res.ok ? 'ok' : 'error', res.ok ? `${res.status} OK` : `${res.status} Error`);
+  } catch (err) {
+    responseContent.textContent = err.name === 'AbortError' ? 'หมดเวลา (timeout)' : `เกิดข้อผิดพลาด: ${err.message}`;
+    setStatusBadge('error', 'Error');
+  } finally {
+    setLoadingState(false);
+  }
+}
+
+// ─── Streaming via SSE / fetch stream ─────────────────────────────────────
+async function sendStreaming(message) {
+  abortController = new AbortController();
+  setLoadingState(true);
+
+  tokenBarWrap.classList.remove('hidden');
+  responseContent.classList.add('stream-cursor');
+
+  const t0        = Date.now();
+  let   fullText  = '';
+  let   chunkCount = 0;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/chat`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
+      body:    JSON.stringify({ message, stream: true }),
+      signal:  abortController.signal,
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const contentType = res.headers.get('content-type') || '';
+
+    // ── Handle SSE (text/event-stream) ──────────────────────────────────
+    if (contentType.includes('event-stream')) {
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let   buffer  = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // keep incomplete line
+
+        for (const line of lines) {
+          if (!line.startsWith('data:')) continue;
+          const raw = line.slice(5).trim();
+          if (raw === '[DONE]') break;
+
+          try {
+            const parsed = JSON.parse(raw);
+            // OpenAI-compatible delta
+            const delta  = parsed?.choices?.[0]?.delta?.content
+                        ?? parsed?.delta?.text
+                        ?? parsed?.content
+                        ?? parsed?.text
+                        ?? '';
+            if (delta) {
+              fullText += delta;
+              chunkCount++;
+              responseContent.textContent = fullText;
+              updateTokenUI(fullText, t0, chunkCount);
+              responseContent.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+          } catch { /* non-JSON SSE line, skip */ }
+        }
+      }
+
+    // ── Handle plain JSON streaming (newline-delimited) ─────────────────
+    } else {
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let   buffer  = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n');
+        buffer = parts.pop();
+
+        for (const part of parts) {
+          if (!part.trim()) continue;
+          try {
+            const obj   = JSON.parse(part);
+            const delta = obj.content || obj.text || obj.delta || '';
+            if (delta) {
+              fullText += delta;
+              chunkCount++;
+              responseContent.textContent = fullText;
+              updateTokenUI(fullText, t0, chunkCount);
+            }
+          } catch {
+            // treat as raw text chunk
+            fullText += part;
+            responseContent.textContent = fullText;
+          }
+        }
+      }
+
+      // flush remainder
+      if (buffer.trim()) {
+        fullText += buffer;
+        responseContent.textContent = fullText;
+      }
+    }
+
+    const ms = Date.now() - t0;
+    responseContent.classList.remove('stream-cursor');
+    responseTime.textContent = `${ms} ms`;
+    responseSize.textContent = `${new Blob([fullText]).size} bytes`;
+    updateTokenUI(fullText, t0, chunkCount, true);
+    setStatusBadge('ok', `200 OK · stream`);
+    streamBadge.classList.add('hidden');
+
+  } catch (err) {
+    responseContent.classList.remove('stream-cursor');
+    streamBadge.classList.add('hidden');
+
+    if (err.name === 'AbortError') {
+      if (fullText) {
+        // partial result — show what we got
+        responseContent.textContent = fullText + '\n\n[หยุดโดยผู้ใช้]';
+        setStatusBadge('info', 'หยุดแล้ว');
+      } else {
+        responseContent.textContent = 'ยกเลิกการส่ง';
+        setStatusBadge('info', 'ยกเลิก');
+      }
+    } else {
+      responseContent.textContent = `เกิดข้อผิดพลาด: ${err.message}`;
+      setStatusBadge('error', 'Error');
+    }
+  } finally {
+    setLoadingState(false);
+    abortController = null;
+  }
+}
+
+function updateTokenUI(text, t0, chunks, final = false) {
+  const tokens = approxTokens(text);
+  const secs   = (Date.now() - t0) / 1000;
+  const tps    = secs > 0 ? Math.round(tokens / secs) : 0;
+
+  // bar: cap visual at 1000 tokens = 100%
+  tokenBar.style.width  = Math.min(100, (tokens / 1000) * 100) + '%';
+  tokenCount.textContent = `~${tokens} tokens`;
+  streamSpeed.textContent = final
+    ? `เฉลี่ย ${tps} tok/s`
+    : `${tps} tok/s`;
+}
+</script>
+</body>
+</html>

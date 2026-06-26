@@ -1,0 +1,37 @@
+name: Log to Artifact
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  upload-logs:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Download logs
+        uses: actions/download-artifact@v4
+        with:
+          name: test-logs
+          path: logs/
+        continue-on-error: true
+
+      - name: Create fallback log if missing
+        run: |
+          mkdir -p logs
+          if [ ! -f logs/action_review.log ]; then
+            echo "No test logs found. Creating placeholder." > logs/action_review.log
+            echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> logs/action_review.log
+            echo "Workflow: ${{ github.event.workflow_run.name }}" >> logs/action_review.log
+            echo "Status: ${{ github.event.workflow_run.conclusion }}" >> logs/action_review.log
+          fi
+
+      - name: Upload log artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: action-review-log
+          path: logs/action_review.log
+          retention-days: 7

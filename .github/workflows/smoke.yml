@@ -1,0 +1,60 @@
+name: Smoke Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Build and start local stack
+        run: |
+          docker compose build
+          docker compose up -d
+
+      - name: Wait for service (status endpoint)
+        run: |
+          for i in {1..30}; do
+            echo "⏳ waiting ($i)..."
+            if curl -sSf http://localhost:8000/v1/status >/dev/null 2>&1; then
+              echo "✅ service up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "❌ service did not become healthy" && exit 1
+
+      - name: Install dev requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run smoke tests
+        env:
+          API_BASE: http://localhost:8000
+          X_API_KEY: local-dev-key
+        run: |
+          pytest -q tests/test_smoke_generation.py
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose down

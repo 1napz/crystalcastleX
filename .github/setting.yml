@@ -1,0 +1,12 @@
+environments:
+  - name: production
+    # กำหนดผู้ที่ต้องเข้ามาอนุมัติก่อนส่งโค้ดขึ้น Production
+    reviewers:
+      - type: Team
+        id: core-maintainers
+      - type: User
+        id: octocat
+    # บังคับให้เฉพาะบางกิ่งเท่านั้นที่สามารถDeployมาที่นี่ได้
+    deployment_branch_policy:
+      protected_branches: true
+      custom_branch_policies: false

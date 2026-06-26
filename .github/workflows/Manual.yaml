@@ -1,0 +1,72 @@
+name: 🧪 Manual Playwright Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_command:
+        description: "Playwright command"
+        required: true
+        default: "npx playwright test"
+      browser:
+        description: "Browser"
+        required: false
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+      debug:
+        description: "Run in debug mode"
+        required: false
+        type: boolean
+
+  push:
+    branches: [ main ]
+
+  schedule:
+    - cron: '0 1 * * *'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🎭 Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: 🚀 Run Playwright tests
+        run: |
+          CMD="${{ github.event.inputs.test_command }}"
+
+          if [ "${{ github.event.inputs.browser }}" != "" ]; then
+            CMD="$CMD --project=${{ github.event.inputs.browser }}"
+          fi
+
+          if [ "${{ github.event.inputs.debug }}" = "true" ]; then
+            CMD="$CMD --debug"
+          fi
+
+          echo "Running: $CMD"
+          eval $CMD
+
+      - name: 📤 Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

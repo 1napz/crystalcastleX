@@ -1,0 +1,16 @@
+{
+  "sections": [
+    {
+      "title": "Core",
+      "pages": ["CHANGELOG", "CONTRIBUTING", "CODEOFCONDUCT"]
+    },
+    {
+      "title": "Engineering",
+      "pages": ["ARCHITECTURE", "WORKFLOW", "STYLEGUIDE"]
+    },
+    {
+      "title": "Support",
+      "pages": ["TROUBLESHOOTING", "FAQ", "SECURITY"]
+    }
+  ]
+}

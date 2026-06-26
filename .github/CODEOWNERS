@@ -1,0 +1,11 @@
+# เจ้าของไฟล์ทั้งหมดใน repo
+*       @crystalcastle-team
+
+# เจ้าของไฟล์เฉพาะโฟลเดอร์ docs
+/docs/* @docs-team
+
+# เจ้าของไฟล์ .js
+*.js    @agents-team
+
+# เจ้าของไฟล์ .py
+*.py    @develop-team

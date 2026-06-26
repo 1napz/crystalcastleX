@@ -1,0 +1,15 @@
+# Ignore credentials
+service_account.json
+.env
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore virtual environments
+venv/
+env/
+.venv/
+
+# Ignore logs
+*.log

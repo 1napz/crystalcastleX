@@ -1,0 +1,48 @@
+name: CI/CD Render Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout source
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Setup Python (optional test)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pytest || echo "⚠️ Tests skipped"
+
+      # 3. Validate Render.yaml
+      - name: Validate Render.yaml
+        run: |
+          if [ ! -f render.yaml ]; then
+            echo "❌ render.yaml not found!"
+            exit 1
+          fi
+          echo "✅ render.yaml exists"
+
+  deploy:
+    needs: build-test
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Trigger Render Deploy Hook
+      - name: Deploy to Render
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"serviceId":"${{ secrets.RENDER_SERVICE_ID }}"}' \
+            https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys

@@ -1,0 +1,35 @@
+Here are the main ways to handle Vercel deployments (and the usual “gotchas”):
+
+## Deploy workflow (what to do)
+1. Push code to your linked Git repo (or trigger a manual deploy).
+2. Check the Vercel Dashboard → your project → **Deployments** for status/logs.
+3. If needed, **promote** a deployment (e.g., production vs preview), or set env vars and re-deploy.
+
+## When deployments fail
+- Open the failed deployment and review the **Build / Output logs** (the error is usually in build step, framework config, or missing env vars).
+- Common causes:
+  - Missing required environment variables (build-time vs runtime confusion).
+  - Wrong Node/package manager config (lockfile mismatch).
+  - Build command/runtime mismatch (Next.js/static output settings, etc.).
+  - TypeScript/lint errors if your build runs them.
+
+## Environment variables (critical)
+- Add secrets in **Project Settings → Environment Variables**.
+- Use the correct scope:
+  - Build-time vars vs runtime vars (some frameworks bake values during build).
+- Never rely on local `.env` for Vercel; upload via settings.
+
+## Managing “preview” vs “production”
+- Preview deployments happen for PRs/branches.
+- Production is typically the “main” branch (or explicit promotions).
+- If you want stable production behavior, ensure you test the same env vars your production uses.
+
+## Rollbacks / reverting
+- In Vercel: go to **Deployments** and choose a previous successful deployment to **restore/promote** (exact wording can differ by UI).
+- Keep an eye on whether the previous deployment depends on different env vars or secrets.
+
+## Clearing/deleting deployments
+- Deleting old deployments is usually safe but can remove history/log visibility.
+- If you’re trying to “fix” something, often re-deploying (not deleting) is better unless storage/cleanup is the goal.
+
+If you tell me what you mean by “handle” (deploy, rollback, deleting old deployments, env vars, or troubleshooting a failed build) and what framework you’re using (Next.js, etc.), I’ll give you exact steps.

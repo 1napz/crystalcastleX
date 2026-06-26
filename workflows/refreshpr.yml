@@ -1,0 +1,3 @@
+gh pr list --state open --repo 1napz/crystalcastle \
+  | awk '{print $1}' \
+  | xargs -n1 gh pr close --repo 1napz/crystalcastle
