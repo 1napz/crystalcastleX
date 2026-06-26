@@ -1,0 +1,31 @@
+# .github/workflows/health-check.yml
+name: Health Check API
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # ทุก 30 นาที
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check API health
+        id: api-check
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://crystalcastle-pi.vercel.app/api/health)
+          if [ $response -eq 200 ]; then
+            echo "✅ API is healthy"
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "❌ API returned $response"
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Send alert on failure
+        if: steps.api-check.outputs.status == 'unhealthy'
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"text":"🚨 Crystal Castle API is down!"}' \
+            ${{ secrets.SLACK_WEBHOOK }}
