@@ -1,0 +1,43 @@
+name: Deploy Dashboard to Vercel
+
+on:
+  push:
+    branches: [main]
+    paths: ['crystalcastle-dashboard/**']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy crystalcastle-dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        run: |
+          npx vercel \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} \
+            --prod \
+            --yes \
+            --cwd crystalcastle-dashboard # ชี้ไปที่โฟลเดอร์ dashboard
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }} # สร้าง project แยก
+
+      - name: Send Notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            MSG="✅ Dashboard Deploy Success: https://zyntro-media.art"
+          else
+            MSG="❌ Dashboard Deploy Failed"
+          fi
+
+          curl -X POST -H "Authorization: Bearer ${{ secrets.LINE_TOKEN }}" \
+               -F "message=$MSG" \
+               https://notify-api.line.me/api/notify
+
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
+               -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+               -d text="$MSG"
