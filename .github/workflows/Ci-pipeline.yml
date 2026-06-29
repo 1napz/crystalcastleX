@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened, labeled]
   push:
     branches:
-      - main
+      - main, dev, agent,
 
 jobs:
   build-and-test:
