@@ -1,147 +1,117 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 
-# ─── General ────────────────────────────────────────────────────────────────
 language: "th-TH"
-tone_instructions: "รีวิวสั้น กระชับ ตรงประเด็น ไม่ต้องอธิบายยืดยาว"
-focus: "balanced"
+tone_instructions: >
+  รีวิวสั้น กระชับ ตรงประเด็น
+  โฟกัส Security, Reliability, Correctness และ Performance
+  ไม่ต้องกล่าวถึง formatting หรือ style
 
-# ─── Reviews ────────────────────────────────────────────────────────────────
+focus: "security"
+
 reviews:
-  profile: "chill"
+  profile: "assertive"
   high_level_summary: true
-  high_level_summary_instructions: "สรุปการเปลี่ยนแปลงหลักเป็นข้อสั้นๆ ไม่เกิน 5 bullet"
-  sequence_diagrams: false
-  poem: false
-  collapse_walkthrough: true
   changed_files_summary: true
+  collapse_walkthrough: true
   estimate_code_review_effort: true
   suggested_labels: true
   auto_apply_labels: false
   suggested_reviewers: false
 
-  # Auto-review behavior
   auto_review:
     enabled: true
     auto_incremental_review: true
-    drafts: false                        # skip draft PRs
-    ignore_title_keywords:
-      - "wip"
-      - "WIP"
-      - "skip-review"
-      - "no-review"
-    base_branches:
-      - "main"
-      - "develop"
+    drafts: false
 
-  # Path-specific review instructions
-  path_instructions:
-    - path: "src/app/**"
-      instructions: |
-        Next.js 15 App Router — ตรวจ Server/Client Component boundary,
-        ห้ามใช้ useState/useEffect ใน Server Component,
-        ตรวจ metadata และ loading/error boundary ด้วย
-    - path: "src/components/**"
-      instructions: |
-        ตรวจ TypeScript type safety, props interface ครบหรือไม่,
-        และ accessibility (aria-*, alt text)
-    - path: "src/lib/supabase/**"
-      instructions: |
-        ตรวจ RLS policy ว่าไม่มี data leak,
-        ห้าม expose service_role key ฝั่ง client,
-        ตรวจ error handling ของ Supabase query
-    - path: "src/lib/groq/**"
-      instructions: |
-        ตรวจ prompt injection risk,
-        ตรวจว่า API key ไม่ถูก hardcode,
-        ตรวจ streaming error handling
+  review_instructions: |
+    รายงานเฉพาะประเด็นระดับ medium–high impact
+    เน้น:
+    - Security
+    - Reliability
+    - Correctness
+    - Performance
+    ข้ามเรื่อง formatting, lint และ style โดยสมบูรณ์
+    หากปัญหาสามารถแก้ไขอัตโนมัติผ่าน linter/formatter ไม่ต้องกล่าวถึง
+
+  review_settings:
+    minimum_severity: medium
+    report_minor_issues: false
+
+  path_reviews:
+    # ── GitHub Workflows ──
     - path: ".github/workflows/**"
       instructions: |
-        ตรวจ secret ที่ใช้ผ่าน ${{ secrets.* }} เท่านั้น,
-        ห้าม hardcode token หรือ API key,
-        ตรวจ permissions ให้ minimal principle
-    - path: "**/*.env*"
-      instructions: "ห้าม commit ค่า secret จริง — ต้องเป็น placeholder เท่านั้น"
+        ตรวจความปลอดภัย CI/CD อย่างเข้มงวด:
+        - permissions ต้องเป็น least privilege
+        - actions ต้อง pin SHA หรือใช้ trusted release
+        - ห้ามใช้ pull_request_target หากไม่มีการตรวจสอบที่เหมาะสม
+        - ห้ามส่งต่อ secret ผ่าน env โดยไม่จำเป็น
+        - แนะนำใช้ OIDC แทน token ที่มีอายุยาว
+        - ตรวจความเสี่ยงจาก artifact poisoning
 
-  # Exclude paths ที่ไม่ต้องรีวิว
-  path_filters:
-    - "!node_modules/**"
-    - "!.next/**"
-    - "!dist/**"
-    - "!out/**"
-    - "!coverage/**"
-    - "!**/*.lock"
-    - "!**/*.min.js"
-    - "!**/*.min.css"
+    # ── CODEOWNERS ──
+    - path: ".github/CODEOWNERS"
+      instructions: |
+        ตรวจสอบ:
+        - ความครอบคลุมของ critical paths (.github/workflows/**, src/lib/**, infra/**)
+        - ไม่มี wildcard ที่กว้างเกินไป (* ครอบคลุมทั้ง repo)
 
-  # Finishing touches
-  finishing_touches:
-    docstrings:
-      enabled: false
-    unit_tests:
-      enabled: false
-    simplify:
-      enabled: false
+    # ── Next.js Application ──
+    - path: "src/**"
+      instructions: |
+        ตรวจตามหลักความปลอดภัย Next.js 15:
+        - Server Actions validation & authorization
+        - Route Handlers authentication & input guard
+        - Cache behavior / revalidate / dynamic rendering — ป้องกันข้อมูลรั่วทาง SSR
+        - Server–Client component boundary ถูกต้อง
 
-  # Tools
-  tools:
-    eslint:
-      enabled: true
-    biome:
-      enabled: true
-    actionlint:
-      enabled: true
-    zizmor:
-      enabled: true
-    yamllint:
-      enabled: true
-    gitleaks:
-      enabled: true
-    trufflehog:
-      enabled: true
-    dotenvLint:
-      enabled: true
-    shellcheck:
-      enabled: true
-    markdownlint:
-      enabled: true
-    # ปิด tool ที่ไม่เกี่ยวกับ stack นี้
-    ruff:
-      enabled: false
-    phpstan:
-      enabled: false
-    phpmd:
-      enabled: false
-    phpcs:
-      enabled: false
-    golangci-lint:
-      enabled: false
-    rubocop:
-      enabled: false
-    swiftlint:
-      enabled: false
-    hadolint:
-      enabled: false
-    checkov:
-      enabled: false
-    tflint:
-      enabled: false
+    # ── Supabase ──
+    - path: "supabase/**"
+      instructions: |
+        ตรวจการตั้งค่าความปลอดภัย:
+        - เปิด RLS ทุกตารางที่เปิดให้เข้าถึง
+        - ตรวจสอบการใช้ auth.uid() อย่างถูกต้อง
+        - จำกัดสิทธิ anon ให้น้อยที่สุด
+        - service role ใช้เฉพาะฝั่ง server เท่านั้น
+        - มีการตรวจสอบ/validate ข้อมูลก่อนส่ง query
 
-# ─── Chat ───────────────────────────────────────────────────────────────────
-chat:
-  art: false
-  auto_reply: true
-  allow_non_org_members: false
+    # ── AI / Groq Integration ──
+    - path: "src/**/*ai*,src/**/*groq*,src/lib/llm/**"
+      instructions: |
+        ตรวจความปลอดภัยและความเสถียร:
+        - ป้องกัน prompt injection
+        - Output sanitization ก่อนนำไปใช้งาน
+        - จำกัด rate / timeout / retry logic ที่เหมาะสม
+        - ป้องกัน token exhaustion & hallucination impact
 
-# ─── Knowledge Base ─────────────────────────────────────────────────────────
+    # ── Dependencies ──
+    - path: "package.json"
+      instructions: |
+        ตรวจ:
+        - Dependency ที่ deprecated หรือมี CVE
+        - Version drift / หลายเวอร์ชันใน repo เดียว
+        - ไม่ดึงข้อมูลจาก registry ที่ไม่น่าเชื่อถือ
+
+    - path: "pnpm-lock.yaml"
+      instructions: |
+        ตรวจการเปลี่ยนแปลงที่ผิดปกติใน dependencies
+
+# ── Knowledge Base ──
 knowledge_base:
   web_search:
     enabled: true
   code_guidelines:
     enabled: true
-    filePatterns:
-      - "**/CLAUDE.md"
-      - "**/knowledge.md"
-      - "**/CONTRIBUTING.md"
-      - "**/.cursorrules"
-  learnings:
-    scope: "local"
+
+# ── Chat ──
+chat:
+  auto_reply: false
+
+# ── Security Scanners ──
+tools:
+  gitleaks:
+    enabled: true
+  trufflehog:
+    enabled: true
+  zizmor:
+    enabled: true

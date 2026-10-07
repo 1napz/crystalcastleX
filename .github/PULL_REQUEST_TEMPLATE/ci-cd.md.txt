@@ -1,0 +1,92 @@
+Here’s a **CI/CD PR template** tailored for workflow, pipeline, and Helm/Kubernetes changes, plus the updated config so contributors can select it directly.
+
+---
+
+### ⚙️ `.github/PULL_REQUEST_TEMPLATE/ci-cd.md`
+
+```markdown
+## ⚙️ CI/CD Summary
+- What pipeline/workflow does this PR modify?
+- Why is this change needed?
+
+## 🛠 Changes Introduced
+- [ ] GitHub Actions workflow
+- [ ] Helm chart update
+- [ ] Kubernetes CronJob/Deployment
+- [ ] Dockerfile/build process
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Pipeline runs successfully
+- [ ] Secrets/credentials handled securely
+- [ ] Helm/K8s manifests validated
+- [ ] Rollback strategy documented
+- [ ] CI/CD documentation updated
+
+## 🔍 Testing & Validation
+Steps to verify:
+1. …
+2. …
+Expected outcome:
+Logs/screenshots (if applicable):
+
+## 📂 Impacted Areas
+- Services/Modules affected:
+- Dependencies introduced/removed:
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+
+## ⚠️ Risk Assessment
+
+Risk Level:
+- [ ] Low
+- [ ] Medium
+- [ ] High
+
+Production Impact:
+- [ ] No production impact
+- [ ] Requires deployment
+- [ ] Requires migration
+- [ ] May cause downtime
+
+Rollback Available:
+- [ ] Yes
+- [ ] No
+```
+
+---
+
+### 📄 `.github/PULL_REQUEST_TEMPLATE/config.yml`
+
+```yaml
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: "Feature PR"
+    path: "PULL_REQUEST_TEMPLATE/feature.md"
+    description: "Use this for new features, enhancements, or major changes."
+  - name: "Bugfix PR"
+    path: "PULL_REQUEST_TEMPLATE/bugfix.md"
+    description: "Use this for bug fixes, patches, or regressions."
+  - name: "Docs PR"
+    path: "PULL_REQUEST_TEMPLATE/docs.md"
+    description: "Use this for documentation-only changes."
+  - name: "CI/CD PR"
+    path: "PULL_REQUEST_TEMPLATE/ci-cd.md"
+    description: "Use this for workflow, pipeline, or infra changes."
+  - name: "Default PR"
+    path: "PULL_REQUEST_TEMPLATE/default.md"
+    description: "General template for other changes (infra, refactor, misc)."
+```
+
+---
+
+### 🔑 Behavior
+- Contributors now see **five options**: Feature, Bugfix, Docs, CI/CD, and Default.  
+- This keeps PRs highly structured: devs use Feature/Bugfix, writers use Docs, infra engineers use CI/CD, and everything else falls under Default.  
+
+---
+
+Do you want me to also add a **Refactor PR template** (e.g., `refactor.md`) so code cleanups and restructuring don’t get mixed into feature PRs?

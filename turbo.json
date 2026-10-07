@@ -1,19 +1,64 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "ui": "tui",
+  "globalDependencies": [
+    "tsconfig.json",
+    "tsconfig.base.json",
+    ".eslintrc*",
+    "eslint.config.*",
+    "prettier.config.*",
+    ".prettierrc*",
+    "turbo.json"
+  ],
+  "globalEnv": ["NODE_ENV", "CI", "VERCEL", "TURBO_*"],
+  "globalPassThroughEnv": ["GITHUB_TOKEN", "NPM_TOKEN"],
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "out/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "out/**", "build/**"],
+      "env": ["NEXT_PUBLIC_*", "VITE_*", "PUBLIC_*", "APP_ENV"],
+      "inputs": ["src/**", "public/**", "index.html", "next.config.*", "vite.config.*", "tsconfig.json"],
+      "outputMode": "full"
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json"],
+      "outputMode": "errors-only"
     },
     "lint": {
-      "outputs": []
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "inputs": ["src/**", "*.ts", "*.tsx", ".eslintrc*", "eslint.config.*"],
+      "outputMode": "errors-only"
+    },
+    "format:check": {
+      "outputs": [],
+      "inputs": ["src/**", "*.{ts,tsx,js,jsx,json,md}"],
+      "outputMode": "errors-only"
     },
     "test": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**", "test-results/**"]
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**", "test-results/**"],
+      "inputs": ["src/**", "tests/**", "vitest.config.*", "jest.config.*", "tsconfig.json"],
+      "passThroughEnv": ["CI", "TEST_*"]
     },
     "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
       "cache": false
+    },
+    "deploy": {
+      "dependsOn": ["build", "typecheck", "lint", "test"],
+      "cache": false,
+      "concurrency": 1
     }
   }
 }

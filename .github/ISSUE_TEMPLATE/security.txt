@@ -1,0 +1,82 @@
+Here’s a **Security PR template** you can add, plus the updated config so contributors can select it directly.
+
+---
+
+### 🔒 `.github/PULL_REQUEST_TEMPLATE/security.md`
+
+```markdown
+## 🔒 Security Summary
+- What vulnerability or security issue does this PR address?
+- Why is this change critical?
+
+## 🛠 Changes Introduced
+- [ ] Dependency upgrade (list versions)
+- [ ] Secret management improvement
+- [ ] Authentication/authorization hardening
+- [ ] Encryption/compliance update
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Vulnerability reproduced and confirmed
+- [ ] Fix applied and validated
+- [ ] Security tests added/updated
+- [ ] Secrets stored securely (no plaintext)
+- [ ] Compliance requirements met (e.g., GDPR, HIPAA)
+- [ ] CI/CD pipeline passes
+
+## 🔍 Testing & Validation
+Steps to verify:
+1. …
+2. …
+Expected outcome:
+Logs/screenshots (if applicable):
+
+## 📂 Impacted Areas
+- Services/Modules affected:
+- Dependencies introduced/removed:
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+```
+
+---
+
+### 📄 `.github/PULL_REQUEST_TEMPLATE/config.yml`
+
+```yaml
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: "Feature PR"
+    path: "PULL_REQUEST_TEMPLATE/feature.md"
+    description: "Use this for new features, enhancements, or major changes."
+  - name: "Bugfix PR"
+    path: "PULL_REQUEST_TEMPLATE/bugfix.md"
+    description: "Use this for bug fixes, patches, or regressions."
+  - name: "Docs PR"
+    path: "PULL_REQUEST_TEMPLATE/docs.md"
+    description: "Use this for documentation-only changes."
+  - name: "CI/CD PR"
+    path: "PULL_REQUEST_TEMPLATE/ci-cd.md"
+    description: "Use this for workflow, pipeline, or infra changes."
+  - name: "Refactor PR"
+    path: "PULL_REQUEST_TEMPLATE/refactor.md"
+    description: "Use this for code cleanups, restructuring, or optimizations."
+  - name: "Security PR"
+    path: "PULL_REQUEST_TEMPLATE/security.md"
+    description: "Use this for vulnerability fixes, dependency upgrades, or hardening changes."
+  - name: "Default PR"
+    path: "PULL_REQUEST_TEMPLATE/default.md"
+    description: "General template for other changes (infra, misc)."
+```
+
+---
+
+### 🔑 Behavior
+- Contributors now see **seven options**: Feature, Bugfix, Docs, CI/CD, Refactor, Security, and Default.  
+- This ensures security-related PRs are tracked separately, with explicit checklists for compliance and vulnerability validation.  
+
+---
+
+Would you like me to also add a **Performance PR template** (e.g., `performance.md`) so optimizations and scalability improvements don’t get mixed into refactors?

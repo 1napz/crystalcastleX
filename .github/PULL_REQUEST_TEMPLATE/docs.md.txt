@@ -1,0 +1,66 @@
+Here’s a **Docs-specific PR template** you can add, plus the updated config so contributors see all four options in the dropdown.
+
+---
+
+### 📄 `.github/PULL_REQUEST_TEMPLATE/docs.md`
+
+```markdown
+## 📚 Documentation Summary
+- What part of the docs does this PR update?
+- Why is this change needed?
+
+## 🛠 Changes Introduced
+- [ ] README
+- [ ] API reference
+- [ ] Developer guide
+- [ ] User guide
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Grammar and clarity checked
+- [ ] Examples updated
+- [ ] Links verified
+- [ ] Diagrams/screenshots updated (if applicable)
+
+## 🔍 Validation
+- Steps to confirm docs render correctly:
+1. …
+2. …
+- Screenshots/logs (if applicable):
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+```
+
+---
+
+### 📄 `.github/PULL_REQUEST_TEMPLATE/config.yml`
+
+```yaml
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: "Feature PR"
+    path: "PULL_REQUEST_TEMPLATE/feature.md"
+    description: "Use this for new features, enhancements, or major changes."
+  - name: "Bugfix PR"
+    path: "PULL_REQUEST_TEMPLATE/bugfix.md"
+    description: "Use this for bug fixes, patches, or regressions."
+  - name: "Docs PR"
+    path: "PULL_REQUEST_TEMPLATE/docs.md"
+    description: "Use this for documentation-only changes."
+  - name: "Default PR"
+    path: "PULL_REQUEST_TEMPLATE/default.md"
+    description: "General template for other changes (infra, refactor, misc)."
+```
+
+---
+
+### ⚙️ Behavior
+- Contributors will now see **four options** in the PR template dropdown: Feature, Bugfix, Docs, and Default.  
+- This keeps PRs clean and focused: devs use Feature/Bugfix, writers use Docs, and everything else falls under Default.  
+
+---
+
+Would you like me to also add a **CI/CD PR template** (e.g., `ci-cd.md`) for workflow, pipeline, or Helm/Kubernetes changes, so infra updates don’t get mixed into feature/bugfix PRs?

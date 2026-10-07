@@ -1,15 +1,58 @@
 {
+  "$schema": "https://schema.vercel.app/configuration.json",
   "version": 2,
-  "builds": [
-    {
-      "src": "crystalcastle-dashboard/**",
-      "use": "@vercel/static"
-    }
-  ],
+  "projectId": "your-project-id-here",
+  "orgId": "your-org-id-here",
+  "name": "crystalcastlex",
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".vercel/output",
+  "installCommand": "npm ci",
+  "devCommand": "npm run dev",
+  "regions": ["sin1", "hkg1", "bom1"],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/$1",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization"
+      }
+    },
+    {
+      "src": "/docs/(.*)",
+      "dest": "/docs/$1"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/admin/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/crystalcastle-dashboard/$1"
+      "dest": "/$1"
     }
-  ]
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "@vercel/node@3",
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NODE_ENV": "production",
+    "TZ": "Asia/Bangkok"
+  },
+  "build": {
+    "env": {
+      "NODE_OPTIONS": "--max-old-space-size=4096"
+    }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "develop": false
+    }
+  }
 }

@@ -1,11 +1,22 @@
-# เจ้าของไฟล์ทั้งหมดใน repo
-*       @crystalcastle-team
+# 📋 ผู้รับผิดชอบ — CrystalCastleX
+# รูปแบบ: ไฟล์/ทาง  @ชื่อทีม/บุคคล
 
-# เจ้าของไฟล์เฉพาะโฟลเดอร์ docs
-/docs/* @docs-team
+# === รากโปรเจกต์ ===
+*  @zyntromedia
 
-# เจ้าของไฟล์ .js
-*.js    @agents-team
+# === Backend / Python ===
+/backend/         @zyntromedia/backend
+*.py              @zyntromedia/backend
 
-# เจ้าของไฟล์ .py
-*.py    @develop-team
+# === ระบบอัตโนมัติ / CI/CD ===
+.github/workflows/  @zyntromedia/devops
+dependabot.yml      @zyntromedia/devops
+
+# === เอกสาร ===
+docs/             @zyntromedia/docs
+*.md              @zyntromedia/docs
+README.md         @zyntromedia/docs
+
+# === การตั้งค่า ===
+*.yml             @zyntromedia/maintainers
+*.yaml            @zyntromedia/maintainers

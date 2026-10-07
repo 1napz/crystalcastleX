@@ -1,0 +1,230 @@
+📖 Deep Research on GitHub — Complete Guide
+ 
+🎯 เป้าหมาย
+ 
+อ่าน วิเคราะห์ และสังเคราะห์เอกสาร/โค้ด/บันทึกทั้งหมดใน Repository ได้อย่างเป็นระบบ ไม่พลาดจุดสำคัญ แม้มี 100+ ไฟล์
+ 
+ 
+ 
+🔍 ส่วนที่ 1 — ค้นหาแบบมีประสิทธิภาพ
+ 
+1.1 คำสั่งค้นหาพื้นฐาน (ในช่องค้นหา GitHub)
+ 
+plaintext  
+# ภายใน repo ปัจจุบัน
+repo:zyntromedia/crystalcastleX keyword
+
+# ค้นหาเฉพาะนามสกุลไฟล์
+repo:zyntromedia/crystalcastleX extension:md
+repo:zyntromedia/crystalcastleX extension:py
+repo:zyntromedia/crystalcastleX extension:yml
+
+# ค้นหาเฉพาะโฟลเดอร์
+repo:zyntromedia/crystalcastleX path:docs/
+repo:zyntromedia/crystalcastleX path:.github/workflows/
+
+# รวมเงื่อนไข
+repo:zyntromedia/crystalcastleX path:docs/ extension:md "architecture" OR "design"
+repo:zyntromedia/crystalcastleX extension:md "TODO" OR "FIXME" OR "NOTE"
+ 
+ 
+1.2 คำสั่งขั้นสูง
+ 
+คำสั่ง สิ่งที่ค้นพบ 
+ repo:... created:>2026-09-01  สร้างหลังวันที่ 
+ repo:... updated:>2026-09-01  อัปเดตล่าสุดหลังวันที่ 
+ repo:... author:username  เขียนโดยใคร 
+ repo:... stars:>10  มีดาวมากกว่า 
+ repo:... fork:true  เป็นสาขาแยก 
+ repo:... "keyword" in:file  คำอยู่ในเนื้อหาไฟล์ 
+ repo:... "keyword" in:path  คำอยู่ในชื่อไฟล์/ทาง 
+ 
+ 
+ 
+📂 ส่วนที่ 2 — โครงสร้างที่ต้องตรวจทุกส่วน
+ 
+เมื่อเจอ repo ใหม่ ให้ตรวจตามลำดับนี้:
+ 
+plaintext  
+📁 ราก (Root)
+├── README.md          ← บทนำ · ภาพรวม · วิธีใช้ ✅ อ่านก่อน
+├── LICENSE            ← สิทธิ์การใช้งาน
+├── CHANGELOG.md       ← ประวัติการเปลี่ยนแปลง
+├── CONTRIBUTING.md    ← กฎการพัฒนา
+├── CODEOWNERS         ← ผู้รับผิดชอบ
+├── .gitignore         ← ไฟล์ที่ไม่ถูกติดตาม
+│
+📁 docs/               ← เอกสารหลักทั้งหมด
+│   ├── architecture/  ← แผนผังระบบ · การออกแบบ
+│   ├── api/           ← คู่มือ API
+│   ├── guides/        ← คู่มือการใช้งาน
+│   ├── tutorials/     ← บทเรียน
+│   └── references/    ← ข้อมูลอ้างอิง
+│
+📁 .github/
+│   ├── workflows/     ← ระบบอัตโนมัติ CI/CD
+│   ├── ISSUE_TEMPLATE/ ← แบบฟอร์มปัญหา
+│   └── PULL_REQUEST_TEMPLATE.md
+│
+📁 src/ หรือ backend/ หรือ frontend/
+│   ├── main.py / index.js  ← จุดเริ่มต้น
+│   ├── core/config         ← การตั้งค่า
+│   ├── services/            ← ตรรกะหลัก
+│   └── tests/               ← พฤติกรรมที่คาดหวัง
+│
+📁 examples/ หรือ samples/  ← ตัวอย่างการใช้งาน
+📁 scripts/                 ← เครื่องมือช่วยพัฒนา
+ 
+ 
+✅ รายการตรวจสอบหลัก
+ 
+ README  — เข้าใจว่าโปรเจกต์ทำอะไร
+ docs/  ทั้งหมด — อ่านตามลำดับจากภาพรวมลงสู่รายละเอียด
+ CHANGELOG  — เห็นทิศทางการพัฒนา
+ CONTRIBUTING  — รู้กฎเกณฑ์
+ workflows/  — รู้วิธีตรวจสอบและเผยแพร่
+ tests/  — รู้พฤติกรรมที่ถูกต้อง
+ examples/  — เห็นการใช้งานจริง
+ 
+ 
+ 
+🧠 ส่วนที่ 3 — เทคนิคสังเคราะห์ข้อมูลจำนวนมาก
+ 
+3.1 อ่านเป็นชั้น ๆ (ไม่เปิดทีละไฟล์ 100 ครั้ง)
+ 
+ชั้นที่ 1 — ภาพรวม (10 นาที)
+ 
+- อ่าน  README  + ดูโครงสร้างโฟลเดอร์
+- เขียนประโยคอธิบายโปรเจกต์ 1–2 ประโยค
+- ระบุเทคโนโลยีหลัก: Python/Node/Go/...
+ 
+ชั้นที่ 2 — แผนที่เอกสาร (15 นาที)
+ 
+- ลิสต์ชื่อไฟล์ทั้งหมดใน  docs/ 
+- จัดกลุ่ม: สถาปัตยกรรม · คู่มือ · อ้างอิง · บันทึก
+- ทำดัชนี: ไฟล์ไหนอ่านก่อน-หลัง
+ 
+ชั้นที่ 3 — เนื้อหาเชิงลึก (ตามความสำคัญ)
+ 
+- อ่านเอกสารหลักก่อน → ต่อยอดดูรายละเอียด
+- ขีดเส้นใต้คำสำคัญ:  Architecture ,  Flow ,  Interface ,  Contract 
+- จดคำถาม: ส่วนไหนเชื่อมกับส่วนไหน? หายไปตรงไหน?
+ 
+3.2 สร้างดัชนีสำหรับอ้างอิง
+ 
+markdown  
+# ดัชนีเอกสาร — crystalcastleX
+
+## ความสำคัญสูง
+- [ ] README — ภาพรวมหลัก
+- [ ] docs/architecture/overview.md — แผนระบบ
+- [ ] CHANGELOG — ประวัติเวอร์ชัน
+- [ ] CONTRIBUTING — กฎการพัฒนา
+
+## ความสำคัญปานกลาง
+- [ ] docs/api/ — คู่มือจุดเชื่อมต่อ
+- [ ] .github/workflows/ — ระบบอัตโนมัติ
+- [ ] tests/ — พฤติกรรมที่คาดหวัง
+
+## ความสำคัญต่ำ / อ่านเมื่อต้องการ
+- [ ] docs/legacy/ — ระบบเก่า
+- [ ] examples/ — ตัวอย่างเฉพาะกรณี
+ 
+ 
+3.3 ใช้เครื่องมือช่วย
+ 
+bash  
+# ดึงรายการไฟล์ทั้งหมดลงไฟล์
+git ls-tree -r HEAD --name-only > file-list.txt
+
+# ค้นหาคำสำคัญทั่วทั้ง repo
+grep -r "keyword" --include="*.md" --include="*.py" .
+
+# นับจำนวนไฟล์
+find . -name "*.md" | wc -l
+
+# แสดงสรุปแต่ละไฟล์ (ใช้ในเครื่อง)
+for f in docs/*.md; do echo "=== $f ==="; head -20 "$f"; done
+ 
+ 
+ 
+ 
+📊 ส่วนที่ 4 — แมุมมองที่ต้องสังเกต
+ 
+4.1 ความสอดคล้องกัน
+ 
+เอกสารตรงกับโค้ดหรือไม่?
+README ตรงกับ  docs/  หรือไม่?
+CHANGELOG บอกสิ่งที่เกิดขึ้นจริงไหม?
+มีไฟล์ที่อ้างถึงแต่ไม่มีอยู่จริงไหม?
+ 
+4.2 หัวข้อที่มักกระจายกัน
+ 
+หัวข้อ ค้นหาคำ 
+สถาปัตยกรรม architecture, design, overview, flow 
+ความปลอดภัย security, auth, token, permission 
+การติดตั้ง install, setup, getting-started, quickstart 
+การปรับใช้ deploy, production, release, ci/cd 
+ปัญหาที่พบบ่อย faq, troubleshooting, known-issues 
+แผนอนาคต roadmap, todo, future, backlog 
+ 
+4.3 รูปแบบเอกสารที่ดี
+ 
+- ✅ มี YAML Frontmatter ชัดเจน
+- ✅ หัวข้อเรียงลำดับจากทั่วไปไปสู่เฉพาะ
+- ✅ มีลิงก์ข้ามไปยังเอกสารอื่น
+- ✅ ระบุเวอร์ชัน/วันที่อัปเดตล่าสุด
+- ✅ ตัวอย่างโค้ดทำงานได้จริง
+ 
+ 
+ 
+🚀 ส่วนที่ 5 — ขั้นตอนปฏิบัติจริงกับ repo ปัจจุบัน
+ 
+ขั้นที่ 1 — สำรวจ
+ 
+bash  
+# โคลนลงเครื่องถ้าจะอ่านเยอะ
+git clone https://github.com/zyntromedia/crystalcastleX.git
+cd crystalcastleX
+
+# ดูโครงสร้าง
+tree -L 3 -I '__pycache__|.git|node_modules'
+
+# นับไฟล์เอกสาร
+find . -name "*.md" | wc -l
+find . -path "./docs/*" -name "*.md" | sort
+ 
+ 
+ขั้นที่ 2 — จัดกลุ่ม
+ 
+- เอกสารหลัก:  README ,  CHANGELOG ,  CONTRIBUTING 
+- สถาปัตยกรรม:  docs/architecture/ 
+- คู่มือ:  docs/guides/ 
+- อ้างอิง:  docs/reference/ 
+- ระบบ:  .github/ ,  scripts/ 
+ 
+ขั้นที่ 3 — สร้างสรุป
+ 
+เขียนสรุปสั้น ๆ ทุกกลุ่ม:
+ 
+plaintext  
+📌 กลุ่ม: สถาปัตยกรรม
+- ไฟล์: 5 ฉบับ
+- ใจความหลัก: ระบบแบ่งเป็น 3 ชั้น — ...
+- จุดเชื่อมต่อ: FastAPI ↔ PostgreSQL ↔ Next.js
+- หัวข้อที่กล่าวถึง: Auth, Flow, Data Model
+- หัวข้อที่ขาด: Deployment, Monitoring
+ 
+ 
+ 
+ 
+✅ สรุป — 5 ขั้นตอนสำคัญ
+ 
+ขั้น การทำ เวลาประมาณ 
+1 อ่าน README + ดูโครงสร้าง 10 นาที 
+2 ลิสต์ไฟล์ทั้งหมด จัดกลุ่ม 15 นาที 
+3 อ่านตามลำดับความสำคัญ 30–60 นาที 
+4 ตรวจความสอดคล้องกัน 15 นาที 
+5 เขียนสรุป + ดัชนีอ้างอิง 15 นาที 
+ 
+รวม: ประมาณ 1.5–2 ชม. สำหรับ 100 ไฟล์

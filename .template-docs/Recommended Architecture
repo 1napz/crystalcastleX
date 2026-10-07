@@ -1,7 +1,7 @@
 🧱 Recommended Architecture
 
 .github/
-└── workflows/
+└── archive/workflows/  (inert)
     ├── ai-pr-summary.yml
     ├── release-notes.yml
     └── docs-memory.yml

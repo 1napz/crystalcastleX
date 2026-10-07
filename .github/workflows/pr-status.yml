@@ -1,30 +1,194 @@
 name: Generate PR Status Report
 
+# ========== เมื่อไหร่จะรัน ==========
 on:
+  # รันทุกครั้งที่มี PR เปิด/อัปเดต/มีซิงโครไนซ์ใหม่
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled, unlabeled, review_requested, review_request_removed]
+    branches: [main, develop, 'release/**']
+  
+  # ให้รันด้วยตัวเองได้จากหน้า Actions
   workflow_dispatch:
-  schedule:
-    - cron: '0 */6 * * *' # รันทุก 6 ชั่วโมง
+    inputs:
+      pr_number:
+        description: 'เลขที่ PR (ถ้าไม่ระบุจะรันทุก PR ที่เปิดอยู่)'
+        required: false
+        type: number
 
+# ========== Permissions ==========
 permissions:
-  contents: read
-  pull-requests: read
+  contents: read          # อ่านโค้ด
+  pull-requests: write    # แสดงความคิดเห็นใน PR
+  checks: read            # ดูผล CI
+  issues: read            # ดู Labels และข้อมูล Issue
 
+# ========== Jobs ==========
 jobs:
-  generate-pr-status:
+  generate-report:
+    name: 📋 สร้างรายงานสถานะ PR
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
+      # 1. Checkout โค้ด
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Fetch open PRs
+      # 2. ติดตั้ง Node.js (สำหรับรันสคริปต์)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. ติดตั้ง Dependencies (ถ้ามี)
+      - name: Install Dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          fi
+
+      # 4. ดึงข้อมูล PR และสร้างรายงาน
+      - name: 📊 ดึงข้อมูล & สร้างรายงาน
+        id: generate-report
+        uses: actions/github-script@v7
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p version/CrystalCastle/logs
-          gh pr list --state open --json number,title,state \
-            > version/CrystalCastle/logs/pr_status.json
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+        with:
+          script: |
+            const prNumber = process.env.PR_NUMBER 
+              ? parseInt(process.env.PR_NUMBER) 
+              : context.payload.pull_request?.number;
+            
+            if (!prNumber) {
+              core.setFailed('ไม่พบเลขที่ PR');
+              return;
+            }
 
-      - name: Append CI/CD fail counts
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            // ดึงผล CI Checks
+            const { data: checks } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: pr.head.sha,
+            });
+
+            // ดึง Reviews
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            // ดึง Files ที่เปลี่ยนแปลง
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            // ========== วิเคราะห์ผลลัพธ์ ==========
+            const ciChecks = checks.check_runs.filter(c => c.name !== 'Generate PR Status Report');
+            const ciPassed = ciChecks.every(c => c.conclusion === 'success');
+            const ciFailed = ciChecks.filter(c => c.conclusion === 'failure');
+            const ciPending = ciChecks.filter(c => c.status === 'in_progress' || c.status === 'queued');
+            
+            const approvedReviews = reviews.filter(r => r.state === 'APPROVED');
+            const changesRequested = reviews.filter(r => r.state === 'CHANGES_REQUESTED');
+            
+            const hasConflicts = pr.mergeable_state === 'dirty';
+            const labels = pr.labels.map(l => `\`${l.name}\``).join(', ') || 'ไม่มี';
+
+            // ========== สร้างรายงาน ==========
+            const report = `
+## 📋 PR Status Report — อัตโนมัติ
+
+### 📌 ข้อมูลพื้นฐาน
+| รายการ | ข้อมูล |
+|---|---|
+| **ชื่อ PR** | #${prNumber} — ${pr.title} |
+| **ผู้เปิด** | @${pr.user.login} |
+| **Branch** | \`${pr.head.ref}\` → \`${pr.base.ref}\` |
+| **Labels** | ${labels} |
+| **ไฟล์ที่เปลี่ยน** | ${files.length} ไฟล์ (+${pr.additions}/-${pr.deletions}) |
+| **เปิดเมื่อ** | ${new Date(pr.created_at).toLocaleString('th-TH')} |
+
+### ✅ สถานะ CI/CD
+${ciChecks.length === 0 ? '> ยังไม่มี CI Checks' : `
+- ✅ **ผ่าน:** ${ciChecks.length - ciFailed.length - ciPending.length}/${ciChecks.length}
+- ❌ **ล้มเหลว:** ${ciFailed.length}
+- ⏳ **กำลังรัน:** ${ciPending.length}
+${ciFailed.length > 0 ? `> ❌ CI ล้มเหลว: ${ciFailed.map(c => \`\`${c.name}\`\`).join(', ')}` : ''}
+`}
+
+### 👥 สถานะการรีวิว
+| สถานะ | จำนวน |
+|---|---|
+| ✅ อนุมัติแล้ว | ${approvedReviews.length} |
+| ⚠️ ขอแก้ไข | ${changesRequested.length} |
+| ⏳ รอรีวิว | ${pr.requested_reviewers?.length || 0} คน |
+
+### 🔀 สถานะการ Merge
+${hasConflicts 
+  ? '❌ **มีความขัดแย้ง** — กรุณา Resolve Conflict ก่อน' 
+  : pr.mergeable_state === 'clean' 
+    ? '✅ **พร้อม Merge** — ไม่มีความขัดแย้ง' 
+    : `⚠️ **สถานะ:** \`${pr.mergeable_state}\``
+}
+
+### 📌 Next Steps
+${[
+  !ciPassed && ciFailed.length > 0 ? '- [ ] แก้ไข CI ที่ล้มเหลว' : '',
+  changesRequested.length > 0 ? '- [ ] แก้ไขตามที่ Reviewer ขอ' : '',
+  approvedReviews.length === 0 ? '- [ ] รอการรีวิวจากทีม' : '',
+  hasConflicts ? '- [ ] Resolve Conflict' : '',
+].filter(Boolean).join('\n') || '✅ ทุกอย่างเรียบร้อย — รอ Merge! 🚀'}
+
+---
+> 🤖 รายงานนี้สร้างอัตโนมัติโดย Dola AI — รีเฟรชเมื่อมีการอัปเดต PR
+            `;
+
+            // ========== แสดงความคิดเห็นใน PR ==========
+            // ค้นหาความคิดเห็นเก่าของเราเพื่ออัปเดต
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.find(c => 
+              c.user.login === 'github-actions[bot]' && 
+              c.body.includes('📋 PR Status Report — อัตโนมัติ')
+            );
+
+            if (botComment) {
+              // อัปเดตความคิดเห็นเก่า
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: report,
+              });
+              core.info('✅ อัปเดตรายงานสถานะเรียบร้อย');
+            } else {
+              // สร้างความคิดเห็นใหม่
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: report,
+              });
+              core.info('✅ สร้างรายงานสถานะใหม่เรียบร้อย');
+            }
+
+            core.setOutput('status', ciPassed && !hasConflicts ? 'ready' : 'needs-attention');
+            core.setOutput('report', report);
+
+      # 5. สรุปผลใน Job Summary
+      - name: 📝 สรุปผล
         run: |
-          FAIL_COUNT=$(grep -r "❌" version/CrystalCastle
+          echo "### ✅ PR Status Report สร้างเรียบร้อย" >> $GITHUB_STEP_SUMMARY
+          echo "ดูรายงานในความคิดเห็นของ PR ครับ" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,71 @@
+name: Enhance & Archive Diagrams
+run-name: 🖼️ ปรับคุณภาพภาพสถาปัตยกรรม + บันทึก
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_path:
+        description: "ที่อยู่ไฟล์ภาพ (เช่น docs/architecture.png)"
+        required: true
+      sharpness:
+        description: "ระดับคมชัด (1.0-3.0)"
+        default: "1.8"
+        required: false
+      upscale:
+        description: "ขยายขนาด (1=ไม่ขยาย, 2=คูณ2, 4=คูณ4)"
+        default: "2"
+        required: false
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 ติดตั้ง Python & Pillow
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 📦 ติดตั้งไลบรารี
+        run: pip install pillow
+
+      - name: 🖼️ ปรับปรุงคุณภาพภาพ
+        env:
+          IMAGE_PATH: ${{ inputs.image_path }}
+          SHARPNESS: ${{ inputs.sharpness }}
+          UPSCALE: ${{ inputs.upscale }}
+        run: |
+          FILE_EXT="${IMAGE_PATH##*.}"
+          FILE_BASE="${IMAGE_PATH%.*}"
+          OUTPUT_PATH="${FILE_BASE}_enhanced.${FILE_EXT}"
+          
+          python scripts/image-enhance.py \
+            "$IMAGE_PATH" \
+            "$OUTPUT_PATH" \
+            "$SHARPNESS" \
+            "$UPSCALE"
+          
+          echo "ENHANCED_FILE=$OUTPUT_PATH" >> $GITHUB_ENV
+
+      - name: 📄 สร้างเอกสารสรุปสถาปัตยกรรม
+        run: |
+          python scripts/architecture-extract.py > docs/architecture-summary.md
+
+      - name: 📤 บันทึกผลลัพธ์
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add "${{ env.ENHANCED_FILE }}" docs/architecture-summary.md
+          
+          git commit -m "feat: add enhanced diagram + architecture summary
+
+          - Enhanced: ${{ inputs.image_path }} → ${{ env.ENHANCED_FILE }}
+          - Sharpness: ${{ inputs.sharpness }}x, Upscale: ${{ inputs.upscale }}x
+          - Generated: docs/architecture-summary.md
+
+          [skip ci]" || true
+          
+          git push || echo "⚠️ ไม่สามารถส่งได้ — ตรวจสอบสิทธิ์"

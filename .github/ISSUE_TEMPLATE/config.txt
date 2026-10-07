@@ -1,0 +1,145 @@
+Perfect — let’s add **Localization PR** and **Config PR** templates so contributors can handle i18n/l10n updates and environment/config-only changes cleanly.  
+
+---
+
+### 🌍 `.github/PULL_REQUEST_TEMPLATE/localization.md`
+
+```markdown
+## 🌍 Localization Summary
+- What language(s) or region(s) does this PR affect?
+- Why is this localization update needed?
+
+## 🛠 Changes Introduced
+- [ ] New translations added
+- [ ] Existing translations updated
+- [ ] Locale files reorganized
+- [ ] i18n framework/config changes
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Translations verified
+- [ ] No untranslated strings left
+- [ ] CI/CD pipeline passes
+- [ ] Documentation updated (if needed)
+
+## 🔍 Testing & Validation
+Steps to verify:
+1. …
+2. …
+Expected outcome:
+Screenshots/logs (if applicable):
+
+## 📂 Impacted Areas
+- Languages/locales affected:
+- Dependencies introduced/removed:
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+```
+
+---
+
+### ⚙️ `.github/PULL_REQUEST_TEMPLATE/config.md`
+
+```markdown
+## ⚙️ Config Summary
+- What configuration does this PR update?
+- Why is this change necessary?
+
+## 🛠 Changes Introduced
+- [ ] Environment variables
+- [ ] Application settings
+- [ ] Helm/K8s values
+- [ ] Build/deployment configs
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Config changes documented
+- [ ] Secrets handled securely
+- [ ] CI/CD pipeline passes
+- [ ] No functional changes introduced
+
+## 🔍 Testing & Validation
+Steps to verify:
+1. …
+2. …
+Expected outcome:
+Logs/screenshots (if applicable):
+
+## 📂 Impacted Areas
+- Services/Modules affected:
+- Dependencies introduced/removed:
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+```
+
+---
+
+### 📄 Updated `.github/PULL_REQUEST_TEMPLATE/config.yml`
+
+```yaml
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: "Feature PR"
+    path: "PULL_REQUEST_TEMPLATE/feature.md"
+    description: "Use this for new features, enhancements, or major changes."
+  - name: "Bugfix PR"
+    path: "PULL_REQUEST_TEMPLATE/bugfix.md"
+    description: "Use this for bug fixes, patches, or regressions."
+  - name: "Docs PR"
+    path: "PULL_REQUEST_TEMPLATE/docs.md"
+    description: "Use this for documentation-only changes."
+  - name: "CI/CD PR"
+    path: "PULL_REQUEST_TEMPLATE/ci-cd.md"
+    description: "Use this for workflow, pipeline, or infra changes."
+  - name: "Refactor PR"
+    path: "PULL_REQUEST_TEMPLATE/refactor.md"
+    description: "Use this for code cleanups, restructuring, or optimizations."
+  - name: "Security PR"
+    path: "PULL_REQUEST_TEMPLATE/security.md"
+    description: "Use this for vulnerability fixes, dependency upgrades, or hardening changes."
+  - name: "Performance PR"
+    path: "PULL_REQUEST_TEMPLATE/performance.md"
+    description: "Use this for optimizations, scalability, or efficiency improvements."
+  - name: "Test PR"
+    path: "PULL_REQUEST_TEMPLATE/test.md"
+    description: "Use this for unit, integration, or end-to-end test changes."
+  - name: "Chore PR"
+    path: "PULL_REQUEST_TEMPLATE/chore.md"
+    description: "Use this for maintenance tasks, dependency bumps, or config tweaks."
+  - name: "Style PR"
+    path: "PULL_REQUEST_TEMPLATE/style.md"
+    description: "Use this for cosmetic changes like linting, formatting, or UI polish."
+  - name: "Release PR"
+    path: "PULL_REQUEST_TEMPLATE/release.md"
+    description: "Use this for version bumps, changelogs, and deployment notes."
+  - name: "Hotfix PR"
+    path: "PULL_REQUEST_TEMPLATE/hotfix.md"
+    description: "Use this for urgent production fixes outside normal release cycles."
+  - name: "Dependency PR"
+    path: "PULL_REQUEST_TEMPLATE/dependency.md"
+    description: "Use this for library/framework upgrades, additions, or removals."
+  - name: "Localization PR"
+    path: "PULL_REQUEST_TEMPLATE/localization.md"
+    description: "Use this for i18n/l10n changes and translation updates."
+  - name: "Config PR"
+    path: "PULL_REQUEST_TEMPLATE/config.md"
+    description: "Use this for environment or configuration-only changes."
+  - name: "Default PR"
+    path: "PULL_REQUEST_TEMPLATE/default.md"
+    description: "General template for other changes (infra, misc)."
+```
+
+---
+
+### 🔑 Behavior
+- Contributors now see **sixteen options**: Feature, Bugfix, Docs, CI/CD, Refactor, Security, Performance, Test, Chore, Style, Release, Hotfix, Dependency, Localization, Config, and Default.  
+- This ensures even specialized PRs (translations, config tweaks) are tracked separately, keeping reviews clean and focused.  
+
+---
+
+Would you like me to also add a **Prototype/Experimental PR template** (e.g., `prototype.md`) for early-stage or experimental work that isn’t production-ready?

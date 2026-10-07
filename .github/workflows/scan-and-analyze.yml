@@ -1,0 +1,19 @@
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Git for Long Paths
+        run: |
+          git config --global core.longpaths true
+          git config --global core.protectNTFS false
+
+      - name: Checkout with Sparse Checkout (skip problematic paths)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            /*
+            !docs/knowledge/howtos.md
+            # หรือถ้าต้องการ checkout ทั้งหมด ให้ใช้:
+            # sparse-checkout-cone-mode: false
+

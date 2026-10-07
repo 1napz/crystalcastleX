@@ -1,0 +1,70 @@
+name: 🔔 Notify Dispatch
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+  issues:
+    types: [opened, labeled]
+  workflow_run:
+    types: [completed]
+    workflows: ["CI"]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      
+      - name: Install
+        working-directory: ./notify_system
+        run: npm ci
+      
+      - name: Build event payload
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event) }}
+        run: |
+          PAYLOAD=$(echo "$GITHUB_EVENT" | node -e "
+            const e = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+            let priority = 'info';
+            let title, message, source;
+            
+            if (e.pull_request) {
+              source = 'github/pr';
+              title = 'PR ' + e.action + ': ' + e.pull_request.title;
+              message = 'by @' + e.pull_request.user.login;
+              if (e.action === 'closed') priority = e.pull_request.merged_at ? 'success' : 'warning';
+            } else if (e.issue) {
+              source = 'github/issue';
+              title = 'Issue ' + e.action + ': ' + e.issue.title;
+              message = 'by @' + e.issue.user.login;
+            } else {
+              source = 'github/other';
+              title = 'GitHub Event: ' + e.action;
+              message = e.repository?.full_name || 'crystalcastleX';
+            }
+            
+            console.log(JSON.stringify({
+              source, priority, title, message,
+              link: e.pull_request?.html_url || e.issue?.html_url || e.repository?.html_url,
+              actor: e.sender?.login,
+              repository: e.repository?.full_name
+            }));
+          ")
+           DELIM=$(uuidgen)
+          {
+            echo "PAYLOAD<<$DELIM"
+            echo "$PAYLOAD"
+            echo "$DELIM"
+          } >> "$GITHUB_ENV"
+      
+      - name: Dispatch
+        working-directory: ./notify_system
+        env:
+          NOTIFY_SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          NOTIFY_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+        run: node src/index.js "$PAYLOAD"

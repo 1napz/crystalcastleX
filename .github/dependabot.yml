@@ -1,44 +1,83 @@
 version: 2
+
 updates:
-  # Root Next.js project
-    - package-ecosystem: "npm"
-    directory: "/"
+  # 🐍 Python — Backend
+  - package-ecosystem: "pip"
+    directory: "/backend"
+    target-branch: "main"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "03:00"
-      timezone: "Asia/Bangkok"
-    open-pull-requests-limit: 5
+      time: "09:00"
+    open-pull-requests-limit: 3
+    cooldown:
+      after-update: "2d"
     labels:
-            - "dependencies"
-            - "nextjs"
-    groups:
-      nextjs:
-        patterns:
-                    - "next"
-                    - "react*"
-                    - "@types/react*"
-      dev-deps:
-        dependency-type: "development"
-        update-types: ["patch", "minor"]
+      - "dependencies"
+      - "backend"
+    assignees:
+      - "@zyntromedia"
     commit-message:
-      prefix: "chore"
+      prefix: "chore(deps:backend)"
       include: "scope"
+    groups:
+      core:
+        patterns:
+          - "fastapi"
+          - "uvicorn"
+          - "pydantic"
+      dev:
+        dependency-type: "development"
+        patterns:
+          - "pytest*"
+          - "ruff"
 
-  # Docker
-    - package-ecosystem: "docker"
-    directory: "/"
+  # 📦 npm — Frontend
+  - package-ecosystem: "npm"
+    directory: "/frontend"  # ✅ ปรับ path ให้ตรงกับโปรเจกต์จริง
+    target-branch: "main"
     schedule:
       interval: "weekly"
-      timezone: "Asia/Bangkok"
-    labels: ["dependencies", "docker"]
-
-  # GitHub Actions
-    - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      timezone: "Asia/Bangkok"
-    labels: ["dependencies", "ci"]
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    cooldown:
+      after-update: "2d"
+    labels:
+      - "dependencies"
+      - "frontend"
+    assignees:
+      - "@zyntromedia"
     commit-message:
-      prefix: "ci"
+      prefix: "chore(deps:frontend)"
+      include: "scope"
+    groups:
+      production:
+        dependency-type: "production"
+        patterns:
+          - "react"
+          - "react-dom"
+          - "vite"
+      dev:
+        dependency-type: "development"
+        patterns:
+          - "eslint"
+          - "prettier"
+          - "typescript"
+    # 🔐 Registry + Token
+    registries:
+      - type: "npm-registry"
+        url: "https://registry.npmjs.org"
+        token: "${{ secrets.NPM_TOKEN }}"
+
+  # 📦 GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "main"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "ci"
+    assignees:
+      - "@zyntromedia"

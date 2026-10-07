@@ -2,7 +2,7 @@ name: CrystalCastle Notify System
 
 on:
   schedule:
-    - cron: "0 9 * * *"   # Daily scan เวลา 9 โมงเช้า
+    - cron: "0 9 * * *"  # Daily scan เวลา 9 โมงเช้า
   workflow_dispatch:
 
 jobs:
@@ -19,10 +19,13 @@ jobs:
         run: bash scripts/notify.sh
 
       - name: Push Notification (LINE/Slack)
-        uses: some/notify-action@v1
+        uses: slackapi/slack-github-action@v1
         with:
-          message: |
-            [CrystalCastle Noti] 🚨
+          channel-id: "slack"
+          slack-message: |
+            [CrystalCastle Noti] 🔔
             Security Scan พบ API Key หมดอายุ
             โปรด Rotate ภายใน 24 ชม.
-          channel: "slack"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

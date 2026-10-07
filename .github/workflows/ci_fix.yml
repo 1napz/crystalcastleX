@@ -1,0 +1,43 @@
+name: CI Pipeline
+run-name: "🧪 Build & Test"
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+defaults:
+  run:
+    working-directory: backend  # ✅ ทำงานที่โฟลเดอร์ backend
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build & Test
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # ❌ ลบส่วน Setup Node.js ออกทั้งหมด — ไม่ใช่ Node!
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"  # หรือ 3.13 ตามที่ใช้
+          cache: "pip"             # ✅ แคช Python แทน Node
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools
+          pip install -r requirements.txt
+
+      - name: ✅ Run tests
+        run: |
+          python -m pytest tests/ -v --cov=. --cov-report=term-missing
+
+      - name: 🔍 Lint / Code quality
+        run: |
+          pip install ruff
+          ruff check .

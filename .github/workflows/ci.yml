@@ -5,10 +5,21 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+# ใน .github/workflows/ci.yml
+defaults:
+  run:
+    working-directory: backend  # ✅ ตรงกับโครงสร้างจริง
 
 jobs:
   validate-and-build:
     runs-on: ubuntu-latest
+- name: ติดตั้ง
+  run: |
+    python3 -m pip install --upgrade pip
+    python3 -m pip install -r requirements.txt
+
+- name: ทดสอบ
+  run: python3 -m pytest tests/ -v
 
     steps:
     - name: Checkout Repository

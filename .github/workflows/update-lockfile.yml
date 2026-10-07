@@ -1,0 +1,26 @@
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      # ✅ ถ้าไม่มี lockfile ให้สร้างก่อน
+      - name: Ensure lockfile exists
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "⚠️ ไม่พบ package-lock.json — กำลังสร้าง..."
+            npm install --package-lock-only
+          fi
+
+      # ✅ แล้วค่อยใช้ npm ci ปกติ
+      - name: Install dependencies
+        run: npm ci
+ 
+      - name: Run tests
+        run: npm test

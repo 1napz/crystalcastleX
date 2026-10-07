@@ -1,0 +1,93 @@
+Here’s a **Style PR template** for cosmetic changes like linting, formatting, or UI polish, plus the updated config so contributors can select it directly.
+
+---
+
+### 🎨 `.github/PULL_REQUEST_TEMPLATE/style.md`
+
+```markdown
+## 🎨 Style Summary
+- What stylistic or cosmetic changes does this PR introduce?
+- Why are these changes necessary (e.g., readability, consistency, UI polish)?
+
+## 🛠 Changes Introduced
+- [ ] Code formatting/linting
+- [ ] Naming convention updates
+- [ ] UI/UX polish
+- [ ] CSS/Styling adjustments
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Code builds locally
+- [ ] No functional changes introduced
+- [ ] Linting passes
+- [ ] Documentation updated (if needed)
+- [ ] CI/CD pipeline passes
+
+## 🔍 Testing & Validation
+Steps to verify:
+1. …
+2. …
+Expected outcome:
+Screenshots/logs (if applicable):
+
+## 📂 Impacted Areas
+- Files/modules affected:
+- Dependencies introduced/removed:
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+```
+
+---
+
+### 📄 `.github/PULL_REQUEST_TEMPLATE/config.yml`
+
+```yaml
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: "Feature PR"
+    path: "PULL_REQUEST_TEMPLATE/feature.md"
+    description: "Use this for new features, enhancements, or major changes."
+  - name: "Bugfix PR"
+    path: "PULL_REQUEST_TEMPLATE/bugfix.md"
+    description: "Use this for bug fixes, patches, or regressions."
+  - name: "Docs PR"
+    path: "PULL_REQUEST_TEMPLATE/docs.md"
+    description: "Use this for documentation-only changes."
+  - name: "CI/CD PR"
+    path: "PULL_REQUEST_TEMPLATE/ci-cd.md"
+    description: "Use this for workflow, pipeline, or infra changes."
+  - name: "Refactor PR"
+    path: "PULL_REQUEST_TEMPLATE/refactor.md"
+    description: "Use this for code cleanups, restructuring, or optimizations."
+  - name: "Security PR"
+    path: "PULL_REQUEST_TEMPLATE/security.md"
+    description: "Use this for vulnerability fixes, dependency upgrades, or hardening changes."
+  - name: "Performance PR"
+    path: "PULL_REQUEST_TEMPLATE/performance.md"
+    description: "Use this for optimizations, scalability, or efficiency improvements."
+  - name: "Test PR"
+    path: "PULL_REQUEST_TEMPLATE/test.md"
+    description: "Use this for unit, integration, or end-to-end test changes."
+  - name: "Chore PR"
+    path: "PULL_REQUEST_TEMPLATE/chore.md"
+    description: "Use this for maintenance tasks, dependency bumps, or config tweaks."
+  - name: "Style PR"
+    path: "PULL_REQUEST_TEMPLATE/style.md"
+    description: "Use this for cosmetic changes like linting, formatting, or UI polish."
+  - name: "Default PR"
+    path: "PULL_REQUEST_TEMPLATE/default.md"
+    description: "General template for other changes (infra, misc)."
+```
+
+---
+
+### 🔑 Behavior
+- Contributors now see **eleven options**: Feature, Bugfix, Docs, CI/CD, Refactor, Security, Performance, Test, Chore, Style, and Default.  
+- This ensures purely cosmetic/style changes are tracked separately, avoiding clutter in functional PR reviews.  
+
+---
+
+Would you like me to also add a **Release PR template** (e.g., `release.md`) for version bumps, changelogs, and deployment notes? That way, release management PRs are standardized too.

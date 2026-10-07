@@ -2,38 +2,99 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit",
+    "source.removeUnusedImports": "explicit"
   },
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,
+  "files.encoding": "utf8",
+  "files.autoSave": "onFocusChange",
 
+  // ── Shell Script ──────────────────────────────────────
   "[shellscript]": {
-    "editor.defaultFormatter": "foxundermoon.shell-format"
+    "editor.defaultFormatter": "foxundermoon.shell-format",
+    "editor.formatOnSave": true
   },
   "shellcheck.enable": true,
   "shellcheck.run": "onType",
+  "shellcheck.useWorkspaceRootAsCwd": true,
 
+  // ── YAML ───────────────────────────────────────────────
   "[yaml]": {
-    "editor.defaultFormatter": "redhat.vscode-yaml"
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
   },
   "yaml.validate": true,
   "yaml.hover": true,
+  "yaml.complete": true,
+  "yaml.format.printWidth": 120,
 
+  // ── Markdown ───────────────────────────────────────────
   "[markdown]": {
-    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+    "editor.formatOnSave": true,
+    "editor.wordWrap": "on",
+    "editor.lineLength": 80
+  },
+  "markdown.validate.enabled": true,
+  "markdownlint.config": {
+    "default": true,
+    "MD013": false,
+    "MD033": false
   },
 
+  // ── Dockerfile ──────────────────────────────────────────
   "[dockerfile]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker",
+    "editor.formatOnSave": true
+  },
+
+  // ── Python ─────────────────────────────────────────────
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.diagnosticMode": "workspace",
+
+  // ── TypeScript / JavaScript ────────────────────────────
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
   },
 
   "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.tsserver.maxTsServerMemory": 4096,
 
+  // ── Git ────────────────────────────────────────────────
   "gitlens.codeLens.enabled": false,
   "gitlens.currentLine.enabled": false,
+  "gitlens.hovers.enabled": true,
+  "git.autofetch": true,
+  "git.confirmSync": false,
 
+  // ── การสะกดคำ ───────────────────────────────────────────
   "cSpell.words": [
     "coderabbit",
     "crystalcastle",
@@ -41,6 +102,38 @@
     "netlify",
     "openapi",
     "precommit",
-    "tailwindcss"
-  ]
+    "tailwindcss",
+    "fastapi",
+    "pydantic",
+    "sqlmodel",
+    "workflow",
+    "workflows",
+    "devsecops",
+    "zyntro",
+    "zyntroai"
+  ],
+  "cSpell.language": "en,th",
+  "cSpell.diagnosticLevel": "Information",
+  "cSpell.ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    ".venv/**",
+    "*.lock"
+  ],
+
+  // ── ประสิทธิภาพ & ความปลอดภัย ──────────────────────────
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.git/**": true,
+    "**/__pycache__/**": true
+  }
 }

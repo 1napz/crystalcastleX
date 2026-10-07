@@ -1,0 +1,89 @@
+Here’s a **Chore PR template** to capture housekeeping tasks like dependency bumps, config tweaks, or repo maintenance, plus the updated config so contributors can select it directly.
+
+---
+
+### 🧾 `.github/PULL_REQUEST_TEMPLATE/chore.md`
+
+```markdown
+## 🧾 Chore Summary
+- What maintenance or housekeeping task does this PR perform?
+- Why is this change necessary?
+
+## 🛠 Changes Introduced
+- [ ] Dependency bump
+- [ ] Config update
+- [ ] Build script tweak
+- [ ] Repo cleanup
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Code builds locally
+- [ ] CI/CD pipeline passes
+- [ ] No functional changes introduced
+- [ ] Documentation updated (if needed)
+
+## 🔍 Testing & Validation
+Steps to verify:
+1. …
+2. …
+Expected outcome:
+Logs/screenshots (if applicable):
+
+## 📂 Impacted Areas
+- Services/Modules affected:
+- Dependencies introduced/removed:
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+```
+
+---
+
+### 📄 `.github/PULL_REQUEST_TEMPLATE/config.yml`
+
+```yaml
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: "Feature PR"
+    path: "PULL_REQUEST_TEMPLATE/feature.md"
+    description: "Use this for new features, enhancements, or major changes."
+  - name: "Bugfix PR"
+    path: "PULL_REQUEST_TEMPLATE/bugfix.md"
+    description: "Use this for bug fixes, patches, or regressions."
+  - name: "Docs PR"
+    path: "PULL_REQUEST_TEMPLATE/docs.md"
+    description: "Use this for documentation-only changes."
+  - name: "CI/CD PR"
+    path: "PULL_REQUEST_TEMPLATE/ci-cd.md"
+    description: "Use this for workflow, pipeline, or infra changes."
+  - name: "Refactor PR"
+    path: "PULL_REQUEST_TEMPLATE/refactor.md"
+    description: "Use this for code cleanups, restructuring, or optimizations."
+  - name: "Security PR"
+    path: "PULL_REQUEST_TEMPLATE/security.md"
+    description: "Use this for vulnerability fixes, dependency upgrades, or hardening changes."
+  - name: "Performance PR"
+    path: "PULL_REQUEST_TEMPLATE/performance.md"
+    description: "Use this for optimizations, scalability, or efficiency improvements."
+  - name: "Test PR"
+    path: "PULL_REQUEST_TEMPLATE/test.md"
+    description: "Use this for unit, integration, or end-to-end test changes."
+  - name: "Chore PR"
+    path: "PULL_REQUEST_TEMPLATE/chore.md"
+    description: "Use this for maintenance tasks, dependency bumps, or config tweaks."
+  - name: "Default PR"
+    path: "PULL_REQUEST_TEMPLATE/default.md"
+    description: "General template for other changes (infra, misc)."
+```
+
+---
+
+### 🔑 Behavior
+- Contributors now see **ten options**: Feature, Bugfix, Docs, CI/CD, Refactor, Security, Performance, Test, Chore, and Default.  
+- This ensures even small housekeeping PRs are tracked separately, keeping reviews clean and focused.  
+
+---
+
+Would you like me to also add a **Style PR template** (e.g., `style.md`) for purely cosmetic changes like linting, formatting, or UI polish?

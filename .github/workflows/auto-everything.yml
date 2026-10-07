@@ -1,0 +1,24 @@
+name: Auto Everything
+on:
+  push:
+    branches: [main, develop, dev, pure-agent-dev, master]
+
+jobs:
+  # เรียกใช้ workflow อื่นแทนการเขียนซ้ำ
+  call-compress:
+    uses: ./.github/workflows/auto-compress.yml
+    secrets: inherit
+
+  call-build:
+    needs: call-compress
+    uses: ./.github/workflows/build-all-platforms.yml
+    with:
+      version: ${{ github.run_number }}
+    secrets: inherit
+
+  call-release:
+    needs: call-build
+    if: github.ref_type == 'tag'
+    uses: ./.github/workflows/auto-release.yml
+    secrets: inherit
+

@@ -1,0 +1,27 @@
+[flake8]
+# รูปแบบพื้นฐาน
+max-line-length = 120
+indent-size = 4
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    env,
+    build,
+    dist,
+    *.pyc,
+    .github
+ignore =
+    # W503: line break before binary operator (ขัดแย้งกับ Black)
+    W503,
+    # W504: line break after binary operator
+    W504,
+    # E203: whitespace before ':' (ขัดแย้งกับ Black)
+    E203,
+    # E501: line too long — จัดการด้วย formatter
+    E501,
+max-complexity = 12
+count = True
+show-source = True
+statistics = True

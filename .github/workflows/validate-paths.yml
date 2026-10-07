@@ -1,0 +1,106 @@
+name: 🛡️ Validate Paths & Structure
+run-name: Path Check • ${{ github.event_name }} • ${{ github.ref_name }}
+
+on:
+  push:
+    branches: [ main, chore/restructure-repo, zyntromedia-patch-3 ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  validate-paths:
+    name: 🔍 Validate File & Directory Paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🧹 Scan for invalid directories
+        run: |
+          set -euo pipefail
+          echo "🔍 Scanning for directories with file extensions..."
+
+          # Find directories ending with common extensions
+          BAD_DIRS=$(find . -type d \( -name "*.md" -o -name "*.yml" -o -name "*.yaml" -o -name "*.json" \) 2>/dev/null | grep -vE "^./(\.git|node_modules)/")
+
+          if [ -n "$BAD_DIRS" ]; then
+            echo "::error::❌ Invalid directories found — cannot end in .md/.yml/.json"
+            echo "$BAD_DIRS"
+            echo ""
+            echo "💡 Fix: Use 'git mv' to rename or restructure these paths"
+            exit 1
+          else
+            echo "✅ No directories with file extensions found"
+          fi
+
+      - name: ⚔️ Check for name conflicts (file vs directory)
+        run: |
+          set -euo pipefail
+          echo "⚔️ Checking for file/directory name conflicts..."
+
+          CONFLICT_FOUND=0
+
+          # Check specific known conflict candidate
+          for base in docs/knowledge/howtotos docs/knowledge/how-tos; do
+            f="${base}.md"
+            d="${base}"
+            if [ -f "$f" ] && [ -d "$d" ]; then
+              echo "::error::❌ CONFLICT: $f exists as FILE AND $d exists as DIRECTORY"
+              CONFLICT_FOUND=1
+            fi
+          done
+
+          # General scan: any path where both .md file and bare dir exist
+          while IFS= read -r -d '' dir; do
+            dirname="${dir%.md}"
+            if [ -f "${dirname}.md" ] && [ -d "$dirname" ]; then
+              echo "::error::❌ CONFLICT: ${dirname}.md (file) vs ${dirname}/ (directory)"
+              CONFLICT_FOUND=1
+            fi
+          done < <(find . -type d -name "*.md" -print0 2>/dev/null | grep -zZvE "(\.git|node_modules)")
+
+          if [ $CONFLICT_FOUND -eq 1 ]; then
+            echo ""
+            echo "💡 Fix: Remove one side — use 'git mv' to consolidate"
+            exit 1
+          else
+            echo "✅ No file/directory naming conflicts detected"
+          fi
+
+      - name: 📁 Verify top-level structure
+        run: |
+          set -euo pipefail
+          echo "📁 Verifying required top-level directories..."
+
+          MISSING=0
+          for dir in frontend backend development; do
+            if [ -d "$dir" ]; then
+              echo "  ✅ $dir/"
+            else
+              echo "  ⚠️  $dir/ — not found"
+              MISSING=1
+            fi
+          done
+
+          if [ $MISSING -eq 1 ]; then
+            echo "⚠️ Some top-level folders missing — confirm this is intended"
+          else
+            echo "✅ All top-level folders present"
+          fi
+
+      - name: 📋 Summary
+        run: |
+          echo ""
+          echo "🎉 All path validation checks passed!"
+          echo "🚀 Proceeding to checkout & build..."

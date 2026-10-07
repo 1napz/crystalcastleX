@@ -1,9 +1,0 @@
-node_modules
-.next/cache
-*.log
-tmp/
-tests/
-coverage/
-docs/
-.env.local
-.env.development

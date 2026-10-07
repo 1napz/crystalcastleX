@@ -1,0 +1,96 @@
+Here’s a **Release PR template** to standardize version bumps, changelogs, and deployment notes, plus the updated config so contributors can select it directly.
+
+---
+
+### 📦 `.github/PULL_REQUEST_TEMPLATE/release.md`
+
+```markdown
+## 📦 Release Summary
+- What version is being released?
+- Why is this release important?
+
+## 🛠 Changes Introduced
+- [ ] Version bump
+- [ ] Changelog updates
+- [ ] Release notes
+- [ ] Deployment scripts
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Version updated in all relevant files (package.json, pyproject.toml, Helm chart, etc.)
+- [ ] Changelog/release notes written
+- [ ] CI/CD pipeline passes
+- [ ] Artifacts built and validated
+- [ ] Deployment tested
+
+## 🔍 Testing & Validation
+Steps to verify:
+1. …
+2. …
+Expected outcome:
+Logs/screenshots (if applicable):
+
+## 📂 Impacted Areas
+- Services/Modules affected:
+- Dependencies introduced/removed:
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+```
+
+---
+
+### 📄 `.github/PULL_REQUEST_TEMPLATE/config.yml`
+
+```yaml
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: "Feature PR"
+    path: "PULL_REQUEST_TEMPLATE/feature.md"
+    description: "Use this for new features, enhancements, or major changes."
+  - name: "Bugfix PR"
+    path: "PULL_REQUEST_TEMPLATE/bugfix.md"
+    description: "Use this for bug fixes, patches, or regressions."
+  - name: "Docs PR"
+    path: "PULL_REQUEST_TEMPLATE/docs.md"
+    description: "Use this for documentation-only changes."
+  - name: "CI/CD PR"
+    path: "PULL_REQUEST_TEMPLATE/ci-cd.md"
+    description: "Use this for workflow, pipeline, or infra changes."
+  - name: "Refactor PR"
+    path: "PULL_REQUEST_TEMPLATE/refactor.md"
+    description: "Use this for code cleanups, restructuring, or optimizations."
+  - name: "Security PR"
+    path: "PULL_REQUEST_TEMPLATE/security.md"
+    description: "Use this for vulnerability fixes, dependency upgrades, or hardening changes."
+  - name: "Performance PR"
+    path: "PULL_REQUEST_TEMPLATE/performance.md"
+    description: "Use this for optimizations, scalability, or efficiency improvements."
+  - name: "Test PR"
+    path: "PULL_REQUEST_TEMPLATE/test.md"
+    description: "Use this for unit, integration, or end-to-end test changes."
+  - name: "Chore PR"
+    path: "PULL_REQUEST_TEMPLATE/chore.md"
+    description: "Use this for maintenance tasks, dependency bumps, or config tweaks."
+  - name: "Style PR"
+    path: "PULL_REQUEST_TEMPLATE/style.md"
+    description: "Use this for cosmetic changes like linting, formatting, or UI polish."
+  - name: "Release PR"
+    path: "PULL_REQUEST_TEMPLATE/release.md"
+    description: "Use this for version bumps, changelogs, and deployment notes."
+  - name: "Default PR"
+    path: "PULL_REQUEST_TEMPLATE/default.md"
+    description: "General template for other changes (infra, misc)."
+```
+
+---
+
+### 🔑 Behavior
+- Contributors now see **twelve options**: Feature, Bugfix, Docs, CI/CD, Refactor, Security, Performance, Test, Chore, Style, Release, and Default.  
+- This ensures release management PRs are standardized, with explicit versioning and deployment validation steps.  
+
+---
+
+Would you like me to also add a **Hotfix PR template** (e.g., `hotfix.md`) for urgent production fixes that bypass normal release cycles?

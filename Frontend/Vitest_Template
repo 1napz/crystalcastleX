@@ -1,0 +1,336 @@
+ได้เลยครับ ✅ สร้าง เทมเพลต Vitest ฉบับสมบูรณ์ — คัดลอกวางใช้ได้ทันทีครบทุกไฟล์ 🧪⚡
+ 
+ 
+ 
+🧪 Vitest — เทมเพลตฉบับสมบูรณ์สำหรับ ZyntroAI
+ 
+โครงสร้างที่จะได้:
+ 
+plaintext  
+frontend/
+├── vitest.config.ts          ⚙️ ตั้งค่าหลัก
+├── package.json              ✅ เพิ่มสคริปต์
+├── tsconfig.json             ✅ ปรับให้รองรับ
+└── src/
+    ├── test/
+    │   ├── setup.ts          🧬 ก่อนรันทดสอบ
+    │   └── utils.ts          🛠️ เครื่องมือช่วยทดสอบ
+    ├── utils/
+    │   └── format.test.ts    📋 ตัวอย่างทดสอบฟังก์ชัน
+    └── components/
+        └── SearchBar.test.tsx 🧩 ตัวอย่างทดสอบคอมโพเนนต์
+ 
+ 
+ 
+ 
+1️⃣  vitest.config.ts  — ไฟล์ตั้งค่าหลัก
+ 
+typescript  
+/**
+ * ⚙️ Vitest Configuration — ZyntroAI
+ * https://vitest.dev/config/
+ */
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@components': path.resolve(__dirname, './src/components')
+    }
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['node_modules', 'dist'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
+      reportsDirectory: './coverage',
+      exclude: [
+        'node_modules/',
+        'src/**/*.d.ts',
+        'src/main.tsx',
+        'src/vite-env.d.ts'
+      ],
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 65
+      }
+    }
+  }
+})
+ 
+ 
+ 
+ 
+2️⃣  package.json  — ส่วนสคริปต์ & แพ็กเกจ
+ 
+json  
+{
+  "name": "zyntroai-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch"
+  },
+  "dependencies": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "@vitest/ui": "^2.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/user-event": "^14.5.0",
+    "jsdom": "^25.0.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.0"
+  }
+}
+ 
+ 
+ 
+ 
+3️⃣  tsconfig.json  — ปรับรองรับ Vitest
+ 
+json  
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@components/*": ["./src/components/*"]
+    },
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
+  },
+  "include": ["src"]
+}
+ 
+ 
+ 
+ 
+4️⃣  src/test/setup.ts  — ก่อนรันทดสอบทุกครั้ง
+ 
+typescript  
+/**
+ * 🧬 Global Test Setup — รันก่อนทุกชุดทดสอบ
+ */
+import '@testing-library/jest-dom/vitest'
+import { cleanup } from '@testing-library/react'
+import { afterEach } from 'vitest'
+
+// ล้างค่าหลังแต่ละทดสอบเสร็จ
+afterEach(() => {
+  cleanup()
+})
+ 
+ 
+ 
+ 
+5️⃣  src/test/utils.ts  — เครื่องมือช่วยทดสอบ
+ 
+typescript  
+/**
+ * 🛠️ Test Helpers — ฟังก์ชันช่วยเขียนทดสอบ
+ */
+import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
+// ค้นหาและตรวจสอบข้อความปรากฏ
+export const expectText = async (text: string) => {
+  await waitFor(() => {
+    expect(screen.getByText(text)).toBeInTheDocument()
+  })
+}
+
+// กดปุ่มตามข้อความ
+export const clickButton = async (label: string) => {
+  const btn = screen.getByRole('button', { name: new RegExp(label, 'i') })
+  await userEvent.click(btn)
+}
+
+// พิมพ์ในช่องป้อนข้อมูล
+export const typeInput = async (label: string, value: string) => {
+  const input = screen.getByLabelText(new RegExp(label, 'i'))
+  await userEvent.type(input, value)
+}
+ 
+ 
+ 
+ 
+6️⃣ ตัวอย่างทดสอบฟังก์ชัน  src/utils/format.test.ts 
+ 
+typescript  
+/**
+ * 📋 Unit Test — ตัวอย่างฟังก์ชัน
+ */
+import { describe, test, expect } from 'vitest'
+import { formatDate, formatNumber, truncate } from './format'
+
+describe('📅 formatDate', () => {
+  test('แปลงวันที่เป็นรูปแบบไทย', () => {
+    expect(formatDate('2026-10-04')).toBe('04 ต.ค. 2026')
+  })
+
+  test('จัดการค่าว่าง', () => {
+    expect(formatDate('')).toBe('-')
+    expect(formatDate(null)).toBe('-')
+    expect(formatDate(undefined)).toBe('-')
+  })
+})
+
+describe('🔢 formatNumber', () => {
+  test('ใส่จุลภาคตามหลักพัน', () => {
+    expect(formatNumber(1234567)).toBe('1,234,567')
+  })
+
+  test('ทศนิยม 2 ตำแหน่ง', () => {
+    expect(formatNumber(1234.56)).toBe('1,234.56')
+  })
+})
+
+describe('✂️ truncate', () => {
+  test่ตัดข้อความยาวเกิน', () => {
+    expect(truncate('สวัสดีชาวโลก', 6)).toBe('สวัสดี...')
+  })
+
+  test('ไม่ตัดถ้าสั้นกว่าหรือเท่ากับ', () => {
+    expect(truncate('สวัสดี', 5)).toBe('สวัสดี')
+  })
+})
+ 
+ 
+ 
+ 
+7️⃣ ตัวอย่างทดสอบคอมโพเนนต์  src/components/SearchBar.test.tsx 
+ 
+tsx  
+/**
+ * 🧩 Component Test — SearchBar
+ */
+import { describe, test, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import SearchBar from './SearchBar'
+
+describe('🔍 SearchBar', () => {
+  const mockOnSearch = vi.fn()
+
+  beforeEach(() => {
+    mockOnSearch.mockClear()
+  })
+
+  test('แสดงช่องค้นหาและปุ่ม', () => {
+    render(<SearchBar onSearch={mockOnSearch} />)
+    
+    expect(screen.getByPlaceholderText(/ค้นหา/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ค้นหา/i })).toBeInTheDocument()
+  })
+
+  test('ปุ่มปิดตอนว่าง', () => {
+    render(<SearchBar onSearch={mockOnSearch} disabled />)
+    expect(screen.getByRole('button', { name: /ค้นหา/i })).toBeDisabled()
+  })
+
+  test('เรียก onSearch เมื่อกดส่ง', async () => {
+    const user = userEvent.setup()
+    render(<SearchBar onSearch={mockOnSearch} />)
+    
+    await user.type(screen.getByPlaceholderText(/ค้นหา/i), 'ZyntroAI')
+    await user.click(screen.getByRole('button', { name: /ค้นหา/i }))
+    
+    expect(mockOnSearch).toHaveBeenCalledTimes(1)
+    expect(mockOnSearch).toHaveBeenCalledWith('ZyntroAI')
+  })
+
+  test('เรียกเมื่อกด Enter', async () => {
+    const user = userEvent.setup()
+    render(<SearchBar onSearch={mockOnSearch} />)
+    
+    await user.type(screen.getByPlaceholderText(/ค้นหา/i), 'ทดสอบ{Enter}')
+    
+    expect(mockOnSearch).toHaveBeenCalledWith('ทดสอบ')
+  })
+})
+ 
+ 
+ 
+ 
+✅ ติดตั้ง & เริ่มใช้งาน
+ 
+bash  
+# 1. เข้าโฟลเดอร์
+cd frontend
+
+# 2. ติดตั้งทุกอย่าง
+npm install
+
+# 3. รันทดสอบ
+npm test           # โหมดเฝ้าดู — พัฒนา
+npm run test:run   # รันครั้งเดียว — CI
+npm run test:ui    # เปิดหน้าจอสวยๆ
+npm run test:coverage  # ดูความครอบคลุม
+ 
+ 
+ 
+ 
+🤖 เพิ่มใน CI  .github/workflows/ci.yml 
+ 
+yaml  
+jobs:
+  test-frontend:
+    name: ⚡ Vitest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - working-directory: frontend
+        run: npm ci
+      - working-directory: frontend
+        run: npm run test:run
+      - working-directory: frontend
+        run: npm run lint
+ 
+ 
+ 
+ 
+ต้องการสร้าง เทมเพลตสำหรับคอมโพเนนต์ประเภทอื่น (เช่น ปุ่ม, ฟอร์ม, การ์ด) หรือ เพิ่มกฎความครอบคลุมโค้ด ใน CI ไหมครับ? 🧪✨

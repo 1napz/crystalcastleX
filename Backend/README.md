@@ -13,7 +13,7 @@ npm install @nestjs/throttler zod
 📂 โครงสร้างไฟล์
 - api/ → เก็บ API routes เช่น upload, caption, video
 - lib/ → Utilities และ Supabase client
-- workflows/ → Automation scripts (CI/CD, governance)
+- archive/workflows/ → Archived automation scripts (inert; see archive/workflows/ARCHIVE-MANIFEST.md)
 - services/ → Business logic และ service layer
 - models/ → Data models และ schema definitions
 - tests/ → Unit/integration tests สำหรับ backend
@@ -42,7 +42,7 @@ npm install @nestjs/throttler zod
 📂 Folder Structure
 - api/ → API routes (upload, caption, video)
 - lib/ → Utilities and Supabase client
-- workflows/ → Automation scripts (CI/CD, governance)
+- archive/workflows/ → Archived automation scripts (inert; see archive/workflows/ARCHIVE-MANIFEST.md)
 - services/ → Business logic and service layer
 - models/ → Data models and schema definitions
 - tests/ → Unit/integration tests for backend

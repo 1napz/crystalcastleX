@@ -6,7 +6,7 @@
 - Refactored **FAL → Magic Hour async fallback chain** for video generation  
 - Added bilingual auto-comment reminders for reviewers in `.coderabbit.yaml`  
 - Improved docstring coverage to **82%** (above 80% threshold)  
-- Enhanced governance flow documentation (`workflows/GovernanceFlow.md`)  
+- Enhanced governance flow documentation (`archive/workflows/GovernanceFlow.md`)  
 
 ---
 
@@ -21,9 +21,9 @@
 
 ## 📚 Docs / เอกสาร
 - Added bilingual docstrings to `generate-videos.js` functions  
-- Updated reviewer checklist in `workflows/ReviewerChecklist.md`  
+- Updated reviewer checklist in `archive/workflows/ReviewerChecklist.md`  
 - Expanded onboarding guide (`workflows/Onboarding.md`) with Copilot CLI setup  
-- Governance flow diagram (`workflows/GovernanceFlow.md`) now bilingual ASCII chart  
+- Governance flow diagram (`archive/workflows/GovernanceFlow.md`) now bilingual ASCII chart  
 
 ---
 
@@ -48,5 +48,5 @@
 
 ## 🌐 Next Steps / ขั้นตอนถัดไป
 - Contributors follow onboarding guide (`workflows/Onboarding.md`)  
-- Reviewers enforce governance flow (`workflows/GovernanceFlow.md`)  
+- Reviewers enforce governance flow (`archive/workflows/GovernanceFlow.md`)  
 - CI/CD workflows auto-check technical compliance before deploy

@@ -1,0 +1,102 @@
+Excellent — let’s add a **Dependency PR template** for library/framework upgrades, plus expand the config so contributors can select it alongside all the others.  
+
+---
+
+### 📦 `.github/PULL_REQUEST_TEMPLATE/dependency.md`
+
+```markdown
+## 📦 Dependency Summary
+- Which dependency is being updated/added/removed?
+- Why is this change necessary (e.g., security, compatibility, performance)?
+
+## 🛠 Changes Introduced
+- [ ] Library/framework upgrade
+- [ ] Dependency removal
+- [ ] New dependency added
+- [ ] Version pinning
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Dependency version verified
+- [ ] No breaking changes introduced
+- [ ] Security advisories checked
+- [ ] CI/CD pipeline passes
+- [ ] Documentation updated (if needed)
+
+## 🔍 Testing & Validation
+Steps to verify:
+1. …
+2. …
+Expected outcome:
+Logs/screenshots (if applicable):
+
+## 📂 Impacted Areas
+- Services/Modules affected:
+- Dependencies introduced/removed:
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+```
+
+---
+
+### 📄 `.github/PULL_REQUEST_TEMPLATE/config.yml`
+
+```yaml
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: "Feature PR"
+    path: "PULL_REQUEST_TEMPLATE/feature.md"
+    description: "Use this for new features, enhancements, or major changes."
+  - name: "Bugfix PR"
+    path: "PULL_REQUEST_TEMPLATE/bugfix.md"
+    description: "Use this for bug fixes, patches, or regressions."
+  - name: "Docs PR"
+    path: "PULL_REQUEST_TEMPLATE/docs.md"
+    description: "Use this for documentation-only changes."
+  - name: "CI/CD PR"
+    path: "PULL_REQUEST_TEMPLATE/ci-cd.md"
+    description: "Use this for workflow, pipeline, or infra changes."
+  - name: "Refactor PR"
+    path: "PULL_REQUEST_TEMPLATE/refactor.md"
+    description: "Use this for code cleanups, restructuring, or optimizations."
+  - name: "Security PR"
+    path: "PULL_REQUEST_TEMPLATE/security.md"
+    description: "Use this for vulnerability fixes, dependency upgrades, or hardening changes."
+  - name: "Performance PR"
+    path: "PULL_REQUEST_TEMPLATE/performance.md"
+    description: "Use this for optimizations, scalability, or efficiency improvements."
+  - name: "Test PR"
+    path: "PULL_REQUEST_TEMPLATE/test.md"
+    description: "Use this for unit, integration, or end-to-end test changes."
+  - name: "Chore PR"
+    path: "PULL_REQUEST_TEMPLATE/chore.md"
+    description: "Use this for maintenance tasks, dependency bumps, or config tweaks."
+  - name: "Style PR"
+    path: "PULL_REQUEST_TEMPLATE/style.md"
+    description: "Use this for cosmetic changes like linting, formatting, or UI polish."
+  - name: "Release PR"
+    path: "PULL_REQUEST_TEMPLATE/release.md"
+    description: "Use this for version bumps, changelogs, and deployment notes."
+  - name: "Hotfix PR"
+    path: "PULL_REQUEST_TEMPLATE/hotfix.md"
+    description: "Use this for urgent production fixes outside normal release cycles."
+  - name: "Dependency PR"
+    path: "PULL_REQUEST_TEMPLATE/dependency.md"
+    description: "Use this for library/framework upgrades, additions, or removals."
+  - name: "Default PR"
+    path: "PULL_REQUEST_TEMPLATE/default.md"
+    description: "General template for other changes (infra, misc)."
+```
+
+---
+
+### 🔑 Behavior
+- Contributors now see **fourteen options**: Feature, Bugfix, Docs, CI/CD, Refactor, Security, Performance, Test, Chore, Style, Release, Hotfix, Dependency, and Default.  
+- This ensures dependency management PRs are tracked separately, with explicit checks for breaking changes and security advisories.  
+
+---
+
+👉 Since you said “dependency and more,” do you want me to also add **Localization PR** (for i18n/l10n changes) and **Config PR** (for environment/config-only updates)? Those are common categories that often get overlooked but help keep PRs clean.

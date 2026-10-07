@@ -1,107 +1,34 @@
-📑 CHANGELOG.md (CrystalCastle)
+## [1.4.12](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.11...v1.4.12) (2026-10-03)
 
-docs/changelog/
- ├── 2026-Q2.md
- ├── 2026-Q3.md
- └── releases/
+## [1.4.11](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.10...v1.4.11) (2026-10-02)
 
-`markdown
-## Versioning Strategy
+## [1.4.10](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.9...v1.4.10) (2026-10-02)
 
-CrystalCastle follows Semantic Versioning:
+## [1.4.9](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.8...v1.4.9) (2026-10-02)
 
-- MAJOR → breaking changes
-- MINOR → new features
-- PATCH → fixes and documentation updates
+## [1.4.8](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.7...v1.4.8) (2026-10-02)
 
-CHANGELOG (CrystalCastle)
+## [1.4.7](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.6...v1.4.7) (2026-10-02)
 
-บันทึกการเปลี่ยนแปลง (CrystalCastle)
+## [1.4.6](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.5...v1.4.6) (2026-10-02)
 
----
+## [1.4.5](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.4...v1.4.5) (2026-10-02)
 
-📅 2026-05-08 – README Update
+## [1.4.4](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.3...v1.4.4) (2026-10-02)
 
-✨ Added / เพิ่ม
-- Features section ครบถ้วน (CI/CD, reviewer cockpit, governance, audit trail, bilingual docs)
-- Badges (CI/CD, CodeQL, Vercel, Privacy, Security)
-- Environment variables example (VERCELTOKEN, GITHUBTOKEN)
-- Project structure tree diagram
-- Contributor workflow step-by-step (Fork → Branch → PR → Merge → Revert → Audit trail)
-- Governance section bilingual + ASCII diagram
-- Audit trail logs flow diagram bilingual
-- Reviewer actions flow diagram bilingual
-- Quick links ไปยัง reviewer pack (notes, rules, checklist, flow, index, audit, actions)
+## [1.4.3](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.2...v1.4.3) (2026-10-02)
 
-🛠️ Changed / เปลี่ยนแปลง
-- README เดิมมีเพียง basic CI/CD mention → README ใหม่มี governance + audit trail + reviewer cockpit integration
-- เพิ่ม bilingual (TH/EN) ทุก section → README เดิมไม่มี bilingual
-- เพิ่ม ASCII diagrams (governance, audit trail, reviewer actions) → README เดิมไม่มี visual
-- เพิ่ม transparency (audit trail consistency, reviewer cockpit decision flow) → README เดิมไม่ชัดเจน
+## [1.4.2](https://github.com/zyntromedia/crystalcastleX/compare/v1.4.1...v1.4.2) (2026-09-30)
 
-🗑️ Removed / ลบ
-- ไม่มี section ที่ถูกลบ แต่ปรับปรุงจาก README เดิมที่ไม่ครบถ้วน
 
----
+### Bug Fixes
 
-📊 Diff Summary (Old vs New README)
-| Aspect / ด้าน           | Old README (ก่อนหน้า)                          | New README (ล่าสุด)                                                                 |
-|--------------------------|------------------------------------------------|-------------------------------------------------------------------------------------|
-| Features                 | Basic CI/CD mention                            | Full list: CI/CD, reviewer cockpit, governance, audit trail, bilingual docs          |
-| Governance Flow          | ไม่มี diagram                                  | มี ASCII diagram bilingual (merge → revert → audit trail → reviewer cockpit)        |
-| Audit Trail              | ไม่ระบุ                                        | ระบุ log bilingual, severity matrix, reviewer actions, diff table, checklist        |
-| Reviewer Docs            | ไม่ลิงก์                                       | ลิงก์ครบ: notes, rules, checklist, flow, index, audit, actions                      |
-| Contributor Workflow     | ไม่ชัดเจน                                      | มี step-by-step (fork → branch → PR → merge → revert → audit trail)                 |
-| Bilingual Support        | ไม่มี                                           | ครบ bilingual (TH/EN) ทุก section                                                   |
-| Visuals (ASCII Diagram)  | ไม่มี                                           | มีหลาย diagram: governance, audit trail, reviewer actions, diff table flow          |
-| Transparency             | ต่ำ                                            | สูง → audit trail consistency, reviewer cockpit decision flow                       |
+* **ci:** repair over-NAME_MAX paths that broke every checkout ([#9](https://github.com/zyntromedia/crystalcastleX/issues/9)) ([661306f](https://github.com/zyntromedia/crystalcastleX/commit/661306f0c0a407bb8211b0484182c179cdbe6216))
 
----
+## [1.4.1](https://github.com/zyntromedia/crystalcastleX/compare/bf54cfc440b653027c66e611b386a39a4baba75e...v1.4.1) (2026-09-30)
 
-📌 Notes / หมายเหตุ
-- README ล่าสุดทำให้ CrystalCastle มี onboarding ง่ายขึ้น, governance enforce ได้จริง, audit trail โปร่งใส
-- Reviewer cockpit ใช้งานได้ทันทีด้วย reviewer pack + audit trail docs
-`
 
----
+### Bug Fixes
 
-✅ ผลลัพธ์: ตอนนี้คุณมี CHANGELOG.md bilingual ที่สรุปการเปลี่ยนแปลง README ล่าสุด → reviewer cockpit จะเห็น history ของการอัปเดต README ได้ชัดเจน  
+* **ci:** unblock checkout — repair over-NAME_MAX paths + archive inert workflows/ ([#10](https://github.com/zyntromedia/crystalcastleX/issues/10)) ([bf54cfc](https://github.com/zyntromedia/crystalcastleX/commit/bf54cfc440b653027c66e611b386a39a4baba75e)), closes [#9](https://github.com/zyntromedia/crystalcastleX/issues/9) [#9](https://github.com/zyntromedia/crystalcastleX/issues/9) [#8](https://github.com/zyntromedia/crystalcastleX/issues/8) [#9](https://github.com/zyntromedia/crystalcastleX/issues/9)
 
-## [Unreleased]
-
-### 📚 Documentation
-- **CONTRIBUTING.md**
-  - Added **Reviewer Checklist** section:
-    - Schema validation (JSON files)
-    - CI/CD pipeline checks
-    - Dashboard logic review
-    - UI layout validation
-    - Documentation accuracy (bilingual consistency)
-    - Business KPI alignment
-  - Added **Governance Summary** section:
-    - Reviewer workflow (validation + clarity)
-    - Maintainer governance (approval, refactor, security escalation, final merge)
-  - Improved transparency and alignment with CrystalCastle’s governance flow.
-
-Related:
-- PR #12
-- Commit: abc1234
-
-## Impact
-
-- Improved contributor onboarding
-- Increased governance transparency
-- Reduced reviewer ambiguity
-
-## AI Governance
-
-AI-assisted documentation updates must still be reviewed by maintainers before merge.
-
-@coderabbit update 
-# CHANGELOG
-
-## Latest Updates
-
-- feat: add AI video rendering pipeline (a1b2c3)
-- fix: resolve Vercel deploy timeout (d4e5f6)
-- docs: update architecture diagram (g7h8i9)

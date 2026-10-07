@@ -37,10 +37,25 @@ jobs:
             // -------------------------
             // ⚙️ AREA
             // -------------------------
-            if (title.match(/\bai\b|\bmodel\b|\bllm\b/)) labels.add("area:ai");
-            if (title.match(/\bvideo\b|\brender\b/)) labels.add("area:video");
-            if (title.match(/\bci\b|\bworkflow\b|\bgithub action\b/)) labels.add("area:ci");
-            if (title.match(/\binfra\b|\bsupabase\b|\bdeploy\b/)) labels.add("area:infra");
+            
+            if (title.match(/\bai\b|\bmodel\b|\bllm\b|\brag\b|\bprompt\b/))labels.add("area:ai");
+            if (title.match(/\bfrontend\b|\breact\b|\bvite\b|\bui\b|\bux\b|\bcomponent\b|\bpage\b/))labels.add("area:frontend");
+            if (title.match(/\bbackend\b|\bfastapi\b|\bserver\b|\bservice\b/))labels.add("area:backend");
+            if (title.match(/\bapi\b|\bendpoint\b|\brest\b/))labels.add("area:api");
+            if (title.match(/\bdb\b|\bdatabase\b|\bpostgres\b|\bsql\b/))labels.add("area:database");
+            if (title.match(/\bauth\b|\blogin\b|\bjwt\b|\boauth\b/))labels.add("area:auth");
+            if (title.match(/\bpayment\b|\bstripe\b|\bbilling\b/))labels.add("area:payments");
+            if (title.match(/\bstorage\b|\bs3\b|\bupload\b|\bfile\b/))labels.add("area:storage");
+            if (title.match(/\bsupabase\b/))labels.add("area:supabase");
+            if (title.match(/\bgraphql\b/))labels.add("area:graphql");
+            if (title.match(/\bk8s\b|\bkubernetes\b|\bhelm\b/))labels.add("area:kubernetes");
+            if (title.match(/\bdocker\b|\bcontainer\b/))labels.add("area:docker");
+            if (title.match(/\bmonitoring\b|\bprometheus\b|\bgrafana\b/))labels.add("area:monitoring");
+            if (title.match(/\banalytics\b|\btracking\b|\btelemetry\b/))labels.add("area:analytics");
+            if (title.match(/\bui\b|\bux\b|\bdesign\b|\bfigma\b/))labels.add("area:ui-ux");
+            if (title.match(/\bvideo\b|\brender\b/))labels.add("area:video");
+            if (title.match(/\bci\b|\bworkflow\b|\bgithub actions?\b/))labels.add("area:ci");
+            if (title.match(/\binfra\b|\bdeploy\b|\bterraform\b/))labels.add("area:infra");
 
             // -------------------------
             // 📚 DOC
@@ -66,6 +81,20 @@ jobs:
               "area:infra":     { color: "e4e669", description: "Infrastructure / Supabase" },
               "documentation":  { color: "0075ca", description: "Improvements or additions to docs" },
               "security":       { color: "d73a4a", description: "Security related" },
+              "area:frontend":  { color: "1d76db", description: "Frontend application"},
+              "area:backend":   { color: "5319e7", description: "Backend services"},
+              "area:api":       { color: "0e8a16", description: "API related"},
+              "area:database":  { color: "006b75", description: "Database related"},
+              "area:auth":      { color: "d876e3", description: "Authentication and authorization"},
+              "area:payments":  { color: "fbca04", description: "Payments and billing"},
+              "area:storage":   { color: "bfdadc", description: "File and object storage"},
+              "area:supabase":  { color: "3ecf8e", description: "Supabase related"},
+              "area:graphql":   { color: "e10098", description: "GraphQL related"},
+              "area:kubernetes":{ color: "326ce5", description: "Kubernetes related"},
+              "area:docker": {color: "2496ed", description: "Docker related"},
+              "area:monitoring": { color: "f97316",description: "Monitoring and observability"},
+              "area:analytics": {  color: "7c3aed",  description: "Analytics and telemetry"},
+              "area:ui-ux": {  color: "ec4899",  description: "UI and UX design"},
             };
 
             const existingLabels = await github.rest.issues.listLabelsForRepo({

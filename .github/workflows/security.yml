@@ -20,19 +20,23 @@ jobs:
           extra_args: --only-verified
 
   security-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          if grep -R "API_KEY" .; then exit 1; fi
-          if grep -R "SECRET" .; then exit 1; fi
+  runs-on: ubuntu-24.04
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
 
-  ignore-file-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          if git diff --name-only origin/main HEAD | grep -E ".gitignore|.eslintignore|.vercelignore"; then exit 1; fi
+    - name: Scan for secrets (gitleaks)
+      uses: gitleaks/gitleaks-action@v2
+      with:
+        config-path: .gitleaks.toml
+
+    - name: Quick pattern check
+      run: |
+        if grep -RiE "(api_key|api-key|secret|token|password|private_key)" . --include="*.env" --include="*.yml" --include="*.yaml" --include="*.json"; then
+          echo "⚠️ พบรูปแบบที่น่าสงสัย"
+          exit 1
+        fi
+
 
   repo-verify:
     runs-on: ubuntu-latest

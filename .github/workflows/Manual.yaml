@@ -1,72 +1,95 @@
 name: 🧪 Manual Playwright Test
+run-name: Playwright | ${{ github.event.inputs.browser || 'all browsers' }} | ${{ github.event.inputs.debug == 'true' && '🔴 Debug' || '🟢 Standard' }}
 
 on:
   workflow_dispatch:
     inputs:
       test_command:
-        description: "Playwright command"
+        description: "Playwright command (e.g. npx playwright test tests/login.spec.ts)"
         required: true
         default: "npx playwright test"
       browser:
-        description: "Browser"
+        description: "Target browser project"
         required: false
         type: choice
+        default: 'all'
         options:
+          - all
           - chromium
           - firefox
           - webkit
       debug:
-        description: "Run in debug mode"
+        description: "Enable debug mode (--debug)"
         required: false
         type: boolean
+        default: false
 
   push:
     branches: [ main ]
 
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 1 * * *'  # Daily at 01:00 UTC
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  NODE_ENV: ci
+  NPM_CONFIG_FETCH_RETRIES: 3
+  NPM_CONFIG_PREFER_OFFLINE: true
 
 jobs:
   test:
+    name: ▶️ Run Playwright Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      - name: 📥 Checkout code
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: 'npm'
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
-      - name: 🎭 Install Playwright browsers
+      - name: 🎭 Install Playwright browsers & system dependencies
         run: npx playwright install --with-deps
 
-      - name: 🚀 Run Playwright tests
+      - name: 🚀 Execute tests
+        shell: bash
         run: |
           CMD="${{ github.event.inputs.test_command }}"
 
-          if [ "${{ github.event.inputs.browser }}" != "" ]; then
-            CMD="$CMD --project=${{ github.event.inputs.browser }}"
+          BROWSER="${{ github.event.inputs.browser }}"
+          if [[ -n "$BROWSER" && "$BROWSER" != "all" ]]; then
+            CMD="$CMD --project=$BROWSER"
           fi
 
           if [ "${{ github.event.inputs.debug }}" = "true" ]; then
             CMD="$CMD --debug"
           fi
 
-          echo "Running: $CMD"
-          eval $CMD
+          echo "▶️ Running: $CMD"
+          exec $CMD
 
-      - name: 📤 Upload test report
+      - name: 📤 Upload HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ github.run_id }}
           path: playwright-report/
-          retention-days: 7
+          retention-days: 14
+          overwrite: true
+
+      - name: 📋 Summary
+        if: always()
+        run: |
+          echo "### Playwright Test Run Complete ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- **Browser:** ${{ github.event.inputs.browser || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Debug Mode:** ${{ github.event.inputs.debug == 'true' && 'Enabled 🔴' || 'Disabled 🟢' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Report:** [Download Artifact](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY

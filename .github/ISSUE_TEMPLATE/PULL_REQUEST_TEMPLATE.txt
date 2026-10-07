@@ -1,0 +1,41 @@
+## 📌 Summary
+- Briefly describe the purpose of this PR.
+- Link to related issue(s) or discussion.
+
+## 🛠 Changes Introduced
+- [ ] Feature
+- [ ] Bug Fix
+- [ ] Refactor
+- [ ] Documentation
+- [ ] CI/CD / Infra
+
+List the main changes:
+- …
+
+## ✅ Checklist
+- [ ] Code builds locally
+- [ ] Tests added/updated
+- [ ] Documentation updated
+- [ ] Helm/K8s manifests validated
+- [ ] GitOps compliance checked
+
+## 🔍 Testing & Validation
+- Steps to reproduce/test:
+1. …
+2. …
+- Expected outcome:
+- Screenshots/logs (if applicable):
+
+## 📂 Impacted Areas
+- Services/Modules affected:
+- Dependencies introduced/removed:
+
+## 📊 Governance & RACI
+- **Responsible:** Author
+- **Accountable:** Maintainer
+- **Consulted:** Reviewer(s)
+- **Informed:** Team/Stakeholders
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:

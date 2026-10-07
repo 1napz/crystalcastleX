@@ -1,4 +1,3 @@
-yaml
 name: Auto Changelog & Quality Gate
 
 on:
@@ -11,7 +10,7 @@ on:
       - 'README.md'
       - 'CHANGELOG.md'
 
-# 🎯 FIX 1: ปลดล็อกสิทธิ์ระดับสูงสุดให้ Runner สามารถเขียนไฟล์และบันทึกประวัติกลับเข้า Repo ได้
+# 🎯 FIX 1: ปลดล็อกสิทธิ์ระดับสุดให้ Runner สามารถเขียนไฟล์และบันทึกประวัติกลับเข้า Repo ได้
 permissions:
   contents: write
   pull-requests: write
@@ -39,15 +38,15 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # 🎯 FIX 3: รันระบบแชนจ์ล็อกอัตโนมัติ พร้อมดักคอห้ามไม่ให้ทริกเกอร์บิลด์ซ้ำซ้อนด้วย [skip ci]
+      # 🎯 FIX 3: รับระบบแชงล็อกอัตโนมัติ พร้อมดักคอมมิทไม่ให้ทริกเกอร์ปิดกั้นซ้ำซ้อนด้วย [skip ci]
       - name: Generate and Commit Changelog
         run: |
           echo "🚀 Generating updated changelog..."
           # (สคริปต์รันตัวเจนของคุณ เช่น npm run changelog หรือ custom script)
-          
+
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          
+
           if [ -n "$(git status --porcelain CHANGELOG.md package.json)" ]; then
             git add CHANGELOG.md package.json
             git commit -m "chore: automated release updates v1.1.0 [skip ci]"

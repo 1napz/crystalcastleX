@@ -1,0 +1,133 @@
+name: 🤖 AI Automation — PR Review + Changelog + Summary
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Part 1: AI PR Code Review (from ai-pr-review.yml)
+  # ──────────────────────────────────────────────
+  pr-review:
+    name: 🔍 AI PR Review
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Get PR Diff
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} > pr-diff.txt
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🤖 Run AI Review
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node review.js
+
+  # ──────────────────────────────────────────────
+  # Part 2: AI Commit Summary (from ai-commit.yml)
+  # ──────────────────────────────────────────────
+  summarize:
+    name: 📝 AI Commit Summary
+    runs-on: ubuntu-24.04
+    outputs:
+      ready: ${{ steps.check-files.outputs.ready }}
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Need HEAD~1 for comparison
+
+      - name: 🔍 Generate Diff & Log
+        run: |
+          git log -1 --pretty=%B > commit.txt
+          git diff HEAD~1 HEAD > diff.txt || git diff HEAD~0 HEAD > diff.txt
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 🤖 Generate AI Context
+        run: python scripts/generate_commit_context.py
+
+      - name: ✅ Validate Outputs
+        id: check-files
+        run: |
+          if [ -f commit.txt ] && [ -f diff.txt ]; then
+            echo "ready=true" >> $GITHUB_OUTPUT
+            echo "✅ Output files generated"
+          else
+            echo "ready=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Missing output files"
+          fi
+
+      - name: 📤 Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-commit-context
+          retention-days: 7
+          path: |
+            commit.txt
+            diff.txt
+
+  # ──────────────────────────────────────────────
+  # Part 3: Auto-Update Changelog (from ai-changelog.yml)
+  # ──────────────────────────────────────────────
+  changelog:
+    name: 📋 Update Changelog
+    needs: summarize
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: 📥 Full Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for changelog generation
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🤖 Generate Changelog
+        run: node scripts/generate-changelog.js
+
+      - name: 📝 Commit & Push
+        run: |
+          git config user.name "ai-doc-bot"
+          git config user.email "bot@crystalcastle.dev"
+
+          git add docs/CHANGELOG.md
+
+          if git diff --staged --quiet; then
+            echo "ℹ️ No changes to CHANGELOG.md — skipping commit"
+          else
+            git commit -m "docs: auto-update changelog"
+            git push
+            echo "✅ Changelog pushed"
+          fi

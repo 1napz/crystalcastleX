@@ -1,4 +1,4 @@
-name: Move Files to Frontend/Backend/Development
+name: 🏗️ Restructure Project Folders
 
 on:
   push:
@@ -8,40 +8,86 @@ on:
 jobs:
   restructure:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
+    timeout-minutes: 5
 
-      - name: Create folders
+    permissions:
+      contents: write # Required to push changes
+
+    steps:
+      - name: 📥 Checkout full repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📂 Create target directories
         run: |
           mkdir -p frontend backend development
 
-      - name: Move frontend files
+      - name: 🚚 Move frontend assets
         run: |
-          mv index.html frontend/ || true
-          mv product.html frontend/ || true
-          mv artifacts.html frontend/ || true
-          mv style.css frontend/ || true
-          mv product.js frontend/ || true
+          files=(
+            "index.html"
+            "product.html"
+            "artifacts.html"
+            "style.css"
+            "product.js"
+          )
+          for f in "${files[@]}"; do
+            if [ -e "$f" ]; then
+              echo "Moving frontend/$f"
+              mv "$f" frontend/
+            else
+              echo "⚠️ Not found: $f — skipping"
+            fi
+          done
 
-      - name: Move backend files
+      - name: 🚚 Move backend modules
         run: |
-          mv api/ backend/ || true
-          mv lib/ backend/ || true
-          mv services/ backend/ || true
-          mv models/ backend/ || true
-          mv tests/ backend/ || true
+          dirs=(
+            "api"
+            "lib"
+            "services"
+            "models"
+            "tests"
+          )
+          for d in "${dirs[@]}"; do
+            if [ -d "$d" ]; then
+              echo "Moving backend/$d"
+              mv "$d" backend/
+            else
+              echo "⚠️ Not found: $d/ — skipping"
+            fi
+          done
 
-      - name: Move development docs
+      - name: 📋 Move development docs
         run: |
-          mv docs/ development/ || true
-          mv roadmap.md development/ || true
-          mv governance.md development/ || true
+          items=(
+            "docs"
+            "roadmap.md"
+            "governance.md"
+          )
+          for item in "${items[@]}"; do
+            if [ -e "$item" ]; then
+              echo "Moving development/$item"
+              mv "$item" development/
+            else
+              echo "⚠️ Not found: $item — skipping"
+            fi
+          done
 
-      - name: Commit changes
+      - name: ✍️ Commit & push reorganization
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add .
-          git commit -m "chore: move files into frontend/backend/development folders" || echo "No changes to commit"
+          
+          if git diff --staged --quiet; then
+            echo "✅ No changes to commit — structure already matches"
+            exit 0
+          fi
+          
+          git commit -m "chore: reorganize → frontend/backend/development"
           git push origin main
+          echo "🚀 Restructure changes pushed successfully"

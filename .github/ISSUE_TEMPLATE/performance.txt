@@ -1,0 +1,85 @@
+Here’s a **Performance PR template** to capture optimizations and scalability improvements, plus the updated config so contributors can select it directly.
+
+---
+
+### ⚡ `.github/PULL_REQUEST_TEMPLATE/performance.md`
+
+```markdown
+## ⚡ Performance Summary
+- What performance issue or bottleneck does this PR address?
+- Why is this optimization important (e.g., scalability, latency, throughput)?
+
+## 🛠 Changes Introduced
+- [ ] Algorithm optimization
+- [ ] Query/database tuning
+- [ ] Caching improvement
+- [ ] Reduced memory usage
+- [ ] Parallelization/concurrency
+- [ ] Other (specify)
+
+## ✅ Checklist
+- [ ] Benchmarks added/updated
+- [ ] Performance tests pass
+- [ ] No functional changes introduced
+- [ ] Documentation updated (if needed)
+- [ ] CI/CD pipeline passes
+
+## 🔍 Testing & Validation
+Steps to verify:
+1. …
+2. …
+Expected outcome:
+Benchmark results/logs (attach screenshots if applicable):
+
+## 📂 Impacted Areas
+- Services/Modules affected:
+- Dependencies introduced/removed:
+
+## 📎 Additional Notes
+- Known limitations:
+- Future improvements:
+```
+
+---
+
+### 📄 `.github/PULL_REQUEST_TEMPLATE/config.yml`
+
+```yaml
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: "Feature PR"
+    path: "PULL_REQUEST_TEMPLATE/feature.md"
+    description: "Use this for new features, enhancements, or major changes."
+  - name: "Bugfix PR"
+    path: "PULL_REQUEST_TEMPLATE/bugfix.md"
+    description: "Use this for bug fixes, patches, or regressions."
+  - name: "Docs PR"
+    path: "PULL_REQUEST_TEMPLATE/docs.md"
+    description: "Use this for documentation-only changes."
+  - name: "CI/CD PR"
+    path: "PULL_REQUEST_TEMPLATE/ci-cd.md"
+    description: "Use this for workflow, pipeline, or infra changes."
+  - name: "Refactor PR"
+    path: "PULL_REQUEST_TEMPLATE/refactor.md"
+    description: "Use this for code cleanups, restructuring, or optimizations."
+  - name: "Security PR"
+    path: "PULL_REQUEST_TEMPLATE/security.md"
+    description: "Use this for vulnerability fixes, dependency upgrades, or hardening changes."
+  - name: "Performance PR"
+    path: "PULL_REQUEST_TEMPLATE/performance.md"
+    description: "Use this for optimizations, scalability, or efficiency improvements."
+  - name: "Default PR"
+    path: "PULL_REQUEST_TEMPLATE/default.md"
+    description: "General template for other changes (infra, misc)."
+```
+
+---
+
+### 🔑 Behavior
+- Contributors now see **eight options**: Feature, Bugfix, Docs, CI/CD, Refactor, Security, Performance, and Default.  
+- This ensures performance-focused PRs are tracked separately, with explicit benchmarks and validation steps.  
+
+---
+
+Would you like me to also add a **Test PR template** (e.g., `test.md`) so contributors can document unit/integration test additions or updates without mixing them into feature/bugfix PRs?
